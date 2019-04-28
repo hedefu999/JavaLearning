@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd" >
+<configuration>
+  
+  <!--使用两种方式配置properties-->
+  <properties resource="jdbc.properties">
+    <property name="db.driver" value="com.mysql.jdbc.Driver"/>
+    <property name="db.url" value="jdbc:mysql://localhost:3306/ssmr"/>
+    <!--由于优先级较低，被properties文件中的同名配置覆盖-->
+    <property name="db.username" value="hedefu"/>
+  </properties>
+  
+  <settings>
+    <setting name="logImpl" value="STDOUT_LOGGING"/>
+    
+    <setting name="cacheEnabled" value="true"/>
+    <setting name="autoMappingBehavior" value="PARTIAL"/>
+    <setting name="mapUnderscoreToCamelCase" value="true"/>
+    <setting name="defaultEnumTypeHandler" value="org.apache.ibatis.type.EnumTypeHandler"/>
+    <setting name="logPrefix" value="hedefu -："/>
+    <setting name="callSettersOnNulls" value="true"/>
+  </settings>
+  
+  <typeAliases>
+    <!--类型别名：在mapper.xml中直接使用别名-->
+    <!--<typeAlias type="com.hedefu.mybatis.model.Role" alias="role"/>-->
+    <package name="com.hedefu.mybatis.model"/>
+    <package name="com.hedefu.mybatis.qto"/>
+  </typeAliases>
+  
+  <!--<objectFactory type="com.hedefu.mybatis.objectFactory.MyObjectFactory">-->
+    <!--<property name="propStr" value="hedefu"/>-->
+  <!--</objectFactory>-->
+  
+  <environments default="dev">
+    <!--TODO 切换环境-->
+    <environment id="dev">
+      <transactionManager type="com.hedefu.mybatis.transaction.MyTransactionFactory"/>
+      <!--采用mybatis内部提供的连接池方式-->
+      <dataSource type="POOLED">
+        <property name="driver" value="${db.driver}"/>
+        <property name="url" value="${db.url}"/>
+        <property name="username" value="${db.username}"/>
+        <property name="password" value="${db.password}"/>
+      </dataSource>
+    </environment>
+  </environments>
+  
+  <!--<databaseIdProvider type="DB_VENDOR">-->
+    <!--<property name="Oracle" value="oracle"/>-->
+    <!--<property name="MySQL" value="mysql"/>-->
+    <!--<property name="DB2" value="db2"/>-->
+  <!--</databaseIdProvider>-->
+  
+  <!--<databaseIdProvider type="com.hedefu.mybatis.databaseProvider.MyDatabaseIdProvider">-->
+    <!--<property name="author" value="hedefu"/>-->
+  <!--</databaseIdProvider>-->
+  
+  <mappers>
+    <!--<mapper resource="mapper/TestBlobMapper.xml"/>-->
+    <!--<mapper url="file:/Users/hedefu/Documents/WorkSpace/IDEA/JavaSSMR/mybatis/src/main/resources/mapper/RoleMapper.xml"/>-->
+    <!--<mapper class="com.hedefu.mybatis.mapper.TestUserMapper"/>-->
+    <!--<mapper class="com.hedefu.mybatis.mapper.UserInfoMapper"/>-->
+    
+    <!--直接规范地设置mapper.xml存储路径-->
+    <package name="com.hedefu.mybatis.mapper"/>
+  </mappers>
+  
+</configuration>

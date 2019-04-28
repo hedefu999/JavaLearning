@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hedefu.mybatis.mapper.TestUserMapper">
+  
+  <resultMap id="TestUserMap" type="testUser">
+    <result property="id" column="id" />
+    <!-- 启用typeHandler的一种方式-->
+    <result property="name" column="name" jdbcType="VARCHAR" javaType="string"
+            typeHandler="com.hedefu.mybatis.typeHandler.MyTypeHandler"/>
+    <result property="age" column="age"/>
+    <result property="type" column="type" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+    <result property="sex" column="sex" typeHandler="com.hedefu.mybatis.typeHandler.SexEnumTypeHandler"/>
+  </resultMap>
+  
+  <insert id="insertTestUser" parameterType="testUser">
+    insert into test_user(name,type,age,sex)
+    <trim prefix="values(" suffix=")" suffixOverrides=",">
+      #{name},#{type,jdbcType=VARCHAR, typeHandler=org.apache.ibatis.type.EnumTypeHandler},#{age},#{sex,jdbcType=VARCHAR, typeHandler=com.hedefu.mybatis.typeHandler.SexEnumTypeHandler}
+    </trim>
+  </insert>
+  
+  <select id="getTestUserById" resultMap="TestUserMap">
+    select *
+    from test_user
+    where id = #{id}
+  </select>
+  
+  <select id="getTestUserByName" resultMap="TestUserMap" databaseId="mysql">
+    select * from test_user
+    where name = #{name}
+  </select>
+  
+  <!--<select id="getTestUserByName" resultType="testUser">-->
+    <!--select id as id, name, type type, age, sex sex-->
+    <!--from test_user-->
+    <!--where name = #{name, jdbcType=VARCHAR, javaType=string}-->
+  <!--</select>-->
+  
+  <!-- 不声明jdbcType将会出错的情况-使用自定义TypeHandler -->
+  <select id="getUserTypeByName" resultType="string">
+    select type
+    from test_user
+    <!-- 在指定typeHandler的情况下必须同时指明jdbcType,否则报 Error setting non null for parameter #1 with JdbcType null  -->
+    <!-- parameterType不会对此产生影响 -->
+    where name = #{name,jdbcType=VARCHAR,typeHandler=com.hedefu.mybatis.typeHandler.MyTypeHandler}
+  </select>
+  
+  
+</mapper>

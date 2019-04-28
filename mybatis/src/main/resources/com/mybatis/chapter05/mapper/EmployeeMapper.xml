@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.chapter05.mapper.EmployeeMapper">
+  
+  <resultMap id="asso_workcard_tasks_result_map" type="employee">
+    <id column="id" property="id" jdbcType="INTEGER"/>
+    <result column="name" property="name" jdbcType="VARCHAR"/>
+    <result column="sex" property="sex" jdbcType="INTEGER"/>
+    <result column="birthday" property="birthday" jdbcType="DATE"/>
+    
+    <!--association、discriminator中的column都是指当前type的数据库字段
+      此处指出的id将传递给select中的方法，多个参数用逗号分隔-->
+    <!--select采用namespace+SQLid的方式定位-->
+    <association property="workCard" column="id"
+                 select="com.mybatis.chapter05.mapper.WorkCardMapper.getWorkCardByEmpId"/>
+    <!--fetchType分为eager/lazy-->
+    <collection property="taskList" column="id" fetchType="lazy" ofType="task"
+                select="com.mybatis.chapter05.mapper.EmployeeTaskMapper.getEmpTaskByEmpId"/>
+    
+    <!--<discriminator javaType="int" column="sex" jdbcType="INTEGER">-->
+      <!--<case value="-1" resultMap="female_healthform_map"/>-->
+      <!--<case value="1" resultMap="male_healthform_map"/>-->
+    <!--</discriminator>-->
+                
+  </resultMap>
+  
+  <!--带有继承关系的类使用,extends表示在父resultMap之上继续添加属性-->
+  <resultMap id="female_healthform_map" type="femaleEmployee"
+             extends="asso_workcard_tasks_result_map">
+    <association property="femaleHealthForm" column="id"
+                 select="com.mybatis.chapter05.mapper.FemaleHealthFormMapper.getFemaleHealthFormByEmpId"/>
+  </resultMap>
+  
+  <resultMap id="male_healthform_map" type="maleEmployee"
+             extends="asso_workcard_tasks_result_map">
+    <association property="maleHealthForm" column="id"
+                 select="com.mybatis.chapter05.mapper.MaleHealthFormMapper.getMaleHealthFormByEmpId"/>
+  </resultMap>
+  
+  
+  
+  
+  <select id="getEmployeeById" resultMap="asso_workcard_tasks_result_map">
+    select * from employee where id = #{id}
+  </select>
+  
+</mapper>

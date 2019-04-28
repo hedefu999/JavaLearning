@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hedefu.mybatis.mapper.UserInfoMapper">
+  
+  <resultMap id="constructor_result_map" type="UserInfo">
+    <!--jdbcType的定义位于 org.apache.ibatis.type.JdbcType-->
+    <!--javaType时定义位于 org.apache.ibatis.type.TypeAliasRegistry-->
+    <constructor>
+      <!--添加name属性配置反而出错：Failed to find a constructor in 'com.hedefu.mybatis.model.UserInfo' by arg names
+      [id, userName, age, signDesc, birth, balance, createTime, updateTime]-->
+      <idArg column="id" javaType="_int"/>
+      <arg column="user_name" javaType="string"/>
+      <arg column="age" javaType="int"/>
+      <arg column="sign_desc" javaType="string"/>
+      <arg column="birth" javaType="java.time.LocalDate"/>
+      <arg column="balance" javaType="bigdecimal"/>
+      <arg column="create_time" javaType="java.time.LocalDateTime"/>
+      <arg column="update_time" javaType="java.time.LocalDateTime"/>
+    </constructor>
+  </resultMap>
+  
+  <resultMap id="base_result_map" type="UserInfo">
+    <id column="id" property="id" jdbcType="INTEGER" javaType="_int"/>
+    <result column="user_name" property="userName" jdbcType="VARCHAR" javaType="string"/>
+    <result column="age" property="age" jdbcType="INTEGER" javaType="int"/>
+    <result column="sign_desc" property="signDesc" jdbcType="VARCHAR" javaType="string"/>
+    <result column="birth" property="birth" jdbcType="DATE"/>
+    <result column="balance" property="balance" jdbcType="DECIMAL" javaType="bigdecimal"/>
+    <!--mybatis只定义了DATE TIME TIMESTAMP 枚举-->
+    <!--这三种时间的JdbcType对应的JavaType是java.sql.Date，java.sql.Timestamp-->
+    <!--这可以在TypeHandlerRegistry中查看-->
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+  </resultMap>
+  
+  <!--直接使用固定的表别名显得很突兀，这才是科学的方式-->
+  <sql id="base_column">
+    ${tablename}.user_name, ${tablename}.age, ${tablename}.sign_desc, ${tablename}.birth, ${tablename}.balance, ${tablename}.create_time, ${tablename}.update_time
+  </sql>
+  <select id="getByComplicatedResultMap" resultMap="base_result_map" parameterType="UserInfoQto">
+    select * from user_info where user_name = #{name} and age = #{age}
+  </select>
+  
+  <select id="getUserInfoByQueryMap" parameterType="map" resultType="userInfo">
+    select * from user_info
+    <where>
+      user_name = #{userName} and age = #{age}
+    </where>
+  </select>
+  <select id="getUserInfoByQto" resultType="userInfo" parameterType="com.hedefu.mybatis.qto.UserInfoQto">
+    select
+      <include refid="base_column">
+        <property name="tablename" value="ui"/>
+      </include>
+    from user_info as ui where user_name = #{name} and age = #{age}
+  </select>
+  <select id="getByRowBounds" resultType="com.hedefu.mybatis.model.UserInfo">
+    select * from user_info where age = #{age}
+  </select>
+  
+  <insert id="insertUserInfo" useGeneratedKeys="true" keyProperty="id">
+    insert into user_info(user_name, age, sign_desc, birth, balance, create_time, update_time)
+    VALUES (
+            #{userName},#{age},#{signDesc},#{birth},#{balance},#{createTime},#{updateTime}
+    )
+  </insert>
+  <insert id="insertUserInfoWithCustomizedKeyGenRule">
+    <!--order表示selectKey与SQL语句的执行次序，此处表示先计算出主键-->
+    <selectKey keyProperty="id" resultType="int" order="BEFORE">
+      select if(max(id) = null,1,max(id)+3) from user_info
+    </selectKey>
+    insert into user_info(id,user_name, age, sign_desc, birth, balance, create_time, update_time)
+    VALUES (
+    #{id}, #{userName},#{age},#{signDesc},#{birth},#{balance},#{createTime},#{updateTime}
+    )
+  </insert>
+
+
+</mapper>

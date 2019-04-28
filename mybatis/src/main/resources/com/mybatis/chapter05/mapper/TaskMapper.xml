@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.chapter05.mapper.TaskMapper">
+  
+  <select id="getTaskById" parameterType="int" resultType="task" >
+    select id, title, content from task where id= #{id}
+  </select>
+
+</mapper>

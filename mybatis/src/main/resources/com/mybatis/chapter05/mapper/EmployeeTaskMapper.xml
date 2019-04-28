@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.chapter05.mapper.EmployeeTaskMapper">
+  
+  <resultMap id="asso_result_map" type="employeeTask">
+    <id column="id" property="id"/>
+    <result column="emp_id" property="empId"/>
+    <result column="task_name" property="taskName"/>
+    <association property="task" column="task_id"
+                 select="com.mybatis.chapter05.mapper.TaskMapper.getTaskById"/>
+  </resultMap>
+
+  <!--注意使用上面定义的resultMap，而不是resultType-->
+  <select id="getEmpTaskByEmpId" resultMap="asso_result_map">
+    select * from employee_task where emp_id = #{empId}
+  </select>
+  
+</mapper>
