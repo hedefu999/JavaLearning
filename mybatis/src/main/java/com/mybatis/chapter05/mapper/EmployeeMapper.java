@@ -4,4 +4,5 @@ import com.mybatis.chapter05.model.Employee;
 
 public interface EmployeeMapper {
     Employee getEmployeeById(Integer id);
+    Employee getEmployeeInfoById(Integer id);
 }

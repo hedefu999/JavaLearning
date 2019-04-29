@@ -14,13 +14,13 @@
     <association property="workCard" column="id"
                  select="com.mybatis.chapter05.mapper.WorkCardMapper.getWorkCardByEmpId"/>
     <!--fetchType分为eager/lazy-->
-    <collection property="taskList" column="id" fetchType="lazy" ofType="task"
+    <collection property="taskList" column="id"
                 select="com.mybatis.chapter05.mapper.EmployeeTaskMapper.getEmpTaskByEmpId"/>
     
-    <!--<discriminator javaType="int" column="sex" jdbcType="INTEGER">-->
-      <!--<case value="-1" resultMap="female_healthform_map"/>-->
-      <!--<case value="1" resultMap="male_healthform_map"/>-->
-    <!--</discriminator>-->
+    <discriminator javaType="int" column="sex" jdbcType="INTEGER">
+      <case value="-1" resultMap="female_healthform_map"/>
+      <case value="1" resultMap="male_healthform_map"/>
+    </discriminator>
                 
   </resultMap>
   
@@ -39,9 +39,74 @@
   
   
   
+  <!--第二种避免N+1问题的级联方式,多表关联，需要重命名column，很麻烦-->
+  <resultMap id="allinone" type="employee">
+    <id column="emp_id" property="id" jdbcType="INTEGER"/>
+    <result column="emp_name" property="name" jdbcType="VARCHAR"/>
+    <result column="emp_sex" property="sex" jdbcType="INTEGER"/>
+    <result column="emp_birthday" property="birthday" jdbcType="DATE"/>
+    <association property="workCard" column="id" javaType="workCard">
+      <id column="wc_id" property="id"/>
+      <result column="wc_emp_id" property="empId"/>
+      <result column="wc_real_name" property="realName"/>
+      <result column="wc_department" property="department"/>
+    </association>
+    <collection property="taskList" ofType="employeeTask" column="id">
+      <id column="et_id" property="id"/>
+      <result column="et_emp_id" property="empId"/>
+      <result column="et_task_name" property="taskName"/>
+      <association property="task" javaType="task" column="task_id">
+        <id column="tk_id" property="id"/>
+        <result column="tk_title" property="title"/>
+        <result column="tk_content" property="content"/>
+      </association>
+    </collection>
+    <discriminator javaType="int" column="emp_sex" jdbcType="INTEGER">
+      <case value="-1" resultMap="female_healthform_map2"/>
+      <case value="1" resultMap="male_healthform_map2"/>
+    </discriminator>
+  </resultMap>
+  
+  <resultMap id="female_healthform_map2" type="femaleEmployee" extends="allinone">
+    <association property="femaleHealthForm" column="id" javaType="femaleHealthForm">
+      <id column="hf_id" property="id"/>
+      <result column="hf_heart" property="heart"/>
+      <result column="hf_uterus" property="uterus"/>
+    </association>
+  </resultMap>
+  
+  <resultMap id="male_healthform_map2" type="maleEmployee" extends="allinone">
+    <association property="maleHealthForm" column="id" javaType="maleHealthForm">
+      <id column="hf_id" property="id"/>
+      <result column="hf_heart" property="heart"/>
+      <result column="hf_prostate" property="prostate"/>
+    </association>
+  </resultMap>
   
   <select id="getEmployeeById" resultMap="asso_workcard_tasks_result_map">
     select * from employee where id = #{id}
+  </select>
+  
+  <select id="getEmployeeInfoById" resultMap="allinone">
+    select
+      emp.id emp_id,emp.name emp_real_name,emp.sex emp_sex,emp.birthday emp_birthday,
+      wc.id wc_id,wc.emp_id wc_emp_id,wc.real_name wc_real_name,wc.department wc_department,
+      if(emp.sex=-1,fh.id,mh.id) as hf_id,
+      if(emp.sex=-1,fh.emp_id,mh.emp_id) as hf_emp_id,
+      if(emp.sex=-1,fh.heart,mh.heart) as hf_heart,
+      <!--prostate 前列腺 +1，uterus 卵巢 -1; 不建议作为对应关系处理-->
+      <!-- if(emp.sex=1,mh.prostate,fh.uterus) as -->
+      mh.prostate as hf_prostate,
+      fh.uterus as hf_uterus,
+      et.id et_id,et.emp_id et_emp_id,et.task_id et_task_id,et.task_name et_task_name,
+      tk.id tk_id,tk.title tk_title,tk.content tk_content
+    from employee emp
+    left join work_card wc on emp.id = wc.emp_id
+    left join employee_task et on emp.id = et.emp_id
+    left join task tk on et.task_id = tk.id
+    left join male_health_form mh on emp.id = mh.emp_id
+    left join female_health_form fh on emp.id = fh.emp_id
+    where emp.id = #{id}
   </select>
   
 </mapper>
