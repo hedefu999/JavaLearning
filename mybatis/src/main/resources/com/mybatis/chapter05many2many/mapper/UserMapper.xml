@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.chapter05many2many.mapper.UserMapper">
+  <resultMap id="user_roles_map" type="user">
+    <id property="id" column="id"/>
+    <result property="name" column="name"/>
+    <collection property="roles" column="id" ofType="role">
+      <id column="role_id" property="id"/>
+      <result column="role_name" property="name"/>
+    </collection>
+  </resultMap>
+  
+  <select id="getUserRoles" resultMap="user_roles_map">
+    select ue.id id,ue.name name,ro.id role_id,ro.name role_name
+    from user ue left join user_role_map ur on ue.id = ur.user_id
+    left join role ro on ur.role_id = ro.id
+    where ue.id = #{userId}
+  </select>
+  
+  <select id="getUsersByRoleId" resultType="user">
+    select * from user_role_map ur left join user ue on ur.user_id = ue.id
+    where ur.role_id = #{roleId}
+  </select>
+</mapper>
