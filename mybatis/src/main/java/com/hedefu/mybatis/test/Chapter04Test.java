@@ -1,5 +1,6 @@
 package com.hedefu.mybatis.test;
 
+import com.google.common.collect.Lists;
 import com.hedefu.mybatis.enums.SexEnum;
 import com.hedefu.mybatis.enums.TestUserTypeEnum;
 import com.hedefu.mybatis.mapper.RoleMapper;
@@ -14,9 +15,11 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 public class Chapter04Test {
     //构建SqlSessionFactory

@@ -90,6 +90,12 @@
       </foreach>
     </if>
   </select>
-  
+
+  <select id="getRoles4Plugin" resultType="com.hedefu.mybatis.model.Role">
+    select <include refid="converted_column_list"/>
+    from role
+    where id > #{fromIndex}
+  </select>
+
 
 </mapper>

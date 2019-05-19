@@ -28,6 +28,26 @@
     <package name="com.hedefu.mybatis.qto"/>
   </typeAliases>
   
+  <plugins>
+<!--    <plugin interceptor="com.mybatis.chapter08.SimplePlugin">-->
+<!--      <property name="dbType" value="mysql"/>-->
+<!--    </plugin>-->
+    <plugin interceptor="com.mybatis.chapter08.PagePlugin">
+      <property name="default.pageSize" value="3"/>
+      <property name="default.pageIndex" value="1"/>
+      <property name="default.activeStatus" value="true"/>
+      <property name="default.checkPageIndex" value="true"/>
+      <property name="default.cleanOrderby" value="true"/>
+    </plugin>
+<!--    <plugin interceptor="com.mybatis.chapter08.PagePlugin2">-->
+<!--      <property name="default.page" value="1" />-->
+<!--      <property name="default.pageSize" value="3" />-->
+<!--      <property name="default.useFlag" value="true" />-->
+<!--      <property name="default.checkFlag" value="true" />-->
+<!--      <property name="default.cleanOrderBy" value="true" />-->
+<!--    </plugin>-->
+  </plugins>
+  
   <!--<objectFactory type="com.hedefu.mybatis.objectFactory.MyObjectFactory">-->
     <!--<property name="propStr" value="hedefu"/>-->
   <!--</objectFactory>-->

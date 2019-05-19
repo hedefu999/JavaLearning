@@ -1,6 +1,7 @@
 package com.hedefu.mybatis.mapper;
 
 import com.hedefu.mybatis.model.Role;
+import com.mybatis.chapter08.PageParam;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -22,5 +23,7 @@ public interface RoleMapper {
     @Select("select id,role_name as roleName,note from role where id = #{id}")
     Role queryRoleWithAnno(Long id);
     //@Param不加会提示names找不到
-    List<Role> findRoles(@Param("names") List<String> names);
+    List<Role> findRoles(@Param("pageParam")PageParam pageParam, @Param("names") List<String> names);
+
+    List<Role> getRoles4Plugin(@Param("pageParam")PageParam pageParam,@Param("fromIndex")int fromIndex);
 }
