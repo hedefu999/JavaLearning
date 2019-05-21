@@ -3,10 +3,17 @@ package com.mybatis.chapter08;
 import com.google.common.collect.Lists;
 import com.hedefu.mybatis.mapper.RoleMapper;
 import com.hedefu.mybatis.model.Role;
+import com.mybatis.utils.JDBCUtils;
+import com.mybatis.utils.PropertiesUtils;
 import com.mybatis.utils.SqlSessionFactoryUtils;
+import com.mysql.jdbc.Driver;
 import org.junit.Test;
 
-import java.util.List;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.*;
 
 public class Chapter08Test {
     @Test
@@ -20,8 +27,6 @@ public class Chapter08Test {
                 "accoutant"
         ));
         System.out.println(roleList);
-        //Role role = roleMapper.queryWithConvertedColumn(1L);
-        //System.out.println(role);
     }
     @Test
     public void testPagePlugin2(){
@@ -30,10 +35,34 @@ public class Chapter08Test {
         List<Role> roles = roleMapper.getRoles4Plugin(pageParam,2);
         System.out.println(roles);
     }
+
     @Test
-    public void test0(){
-        String sql = "select * from aaa orer by time";
-        int index = sql.indexOf("order by");
-        System.out.println(sql.substring(0,index));
+    public void testGenericJDBCQuery()throws Exception{
+        String jdbcConfig = "/jdbc.properties";
+        String sql = "select * from role where role_name = ? and id > ?";
+        ResultSet resultSet = JDBCUtils.executeQuery(jdbcConfig,sql,"principal",1);
+        while (resultSet.next()){
+            System.out.println(resultSet.getString("id"));
+        }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
