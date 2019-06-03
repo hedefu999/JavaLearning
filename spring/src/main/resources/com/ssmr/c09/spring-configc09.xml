@@ -2,20 +2,23 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-    <!-- TODO   实测未执行这两个bean中的方法-->
+
     <bean id="beanPostProcessor" class="com.ssmr.c09.BeanPostProcessorImpl"/>
     <bean id="disposableBean" class="com.ssmr.c09.DisposableBeanImpl"/>
+<!--    <bean id="beanPostProcessor" class="com.ssmr.c09.beanpostprocessor.MyBeanPostProcessor"/>-->
 
     <bean id="juiceSource" class="com.ssmr.c09.JuiceSource" scope="prototype">
         <property name="name" value="abc"/>
         <property name="size" value="12"/>
         <property name="sugar" value="true"/>
     </bean>
-
     <bean id="juiceMaker" class="com.ssmr.c09.JuiceMaker2" init-method="init" destroy-method="destroy">
         <property name="source" ref="juiceSource"/>
         <property name="beverageShop" value="shop"/>
     </bean>
+
+    <bean id="beanServiceImpl" class="com.ssmr.c09.beanpostprocessor.BeanServiceImpl"/>
+
 
 
 </beans>

@@ -13,6 +13,7 @@
     <module>web</module>
     <module>spring</module>
     <module>common</module>
+    <module>designpattern</module>
   </modules>
   <properties>
     <spring.version>5.1.4.RELEASE</spring.version>
@@ -62,6 +63,12 @@
       </dependency>
 
       <dependency>
+        <groupId>commons-dbcp</groupId>
+        <artifactId>commons-dbcp</artifactId>
+        <version>1.4</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.mybatis</groupId>
         <artifactId>mybatis</artifactId>
         <version>3.4.6</version>
@@ -87,7 +94,7 @@
 
     </dependencies>
   </dependencyManagement>
-  
+
   <build>
     <plugins>
       <plugin>

@@ -7,6 +7,12 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
  * 从打印出的日志可见，BeanPostProcessor针对所有bean，任何Bean的创建动作都会有接口内的两个方法执行
+ * 对于声明多个bean的BeanPostProcessor接口方法调用顺序
+ * A.before
+ * B.before
+ * ...
+ * A.post
+ * B.post
  */
 public class BeanPostProcessorImpl implements BeanPostProcessor {
     @Override

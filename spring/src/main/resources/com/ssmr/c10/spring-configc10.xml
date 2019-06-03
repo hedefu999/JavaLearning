@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util.xsd">
+
+<!--三种注入方式-->
+  <!--    构造器注入-->
+  <bean id="role" class="com.ssmr.c10.xmlInject.Role">
+    <constructor-arg index="0" name="code" value="12"/>
+    <constructor-arg index="1" name="name" value="jack"/>
+    <!--    setter注入-->
+    <property name="name" value="lucy"/>
+  </bean>
+  <!--接口注入，通过JNDI获取数据库资源-->
+
+<!--装配复杂带有集合字段的Bean-->
+  <!--  集合中是简单类型  -->
+  <bean id="complexAssemble" class="com.ssmr.c10.xmlInject.ComplexAssemble">
+    <property name="name" value="complex"/>
+    <property name="list">
+      <list>
+        <value>A</value>
+        <value>B</value>
+        <value>C</value>
+      </list>
+    </property>
+    <property name="array">
+      <array>
+        <value>A</value>
+        <value>B</value>
+      </array>
+    </property>
+    <property name="set">
+      <set>
+        <value>A</value>
+      </set>
+    </property>
+    <property name="props">
+      <props>
+        <prop key="A">AA</prop>
+      </props>
+    </property>
+    <property name="map">
+      <map>
+        <entry key="1" value="AA"/>
+        <entry key="2" value="BB"/>
+      </map>
+    </property>
+  </bean>
+  <!--集合中是对象-->
+  <bean id="role1" class="com.ssmr.c10.xmlInject.Role">
+    <property name="code" value="12"/>
+    <property name="name" value="programmer"/>
+  </bean>
+  <bean id="role2" class="com.ssmr.c10.xmlInject.Role">
+    <property name="code" value="13"/>
+    <property name="name" value="designer"/>
+  </bean>
+  <bean id="user1" class="com.ssmr.c10.xmlInject.User">
+    <property name="id" value="12"/>
+    <property name="name" value="jack"/>
+  </bean>
+  <bean id="user2" class="com.ssmr.c10.xmlInject.User">
+    <property name="id" value="13"/>
+    <property name="name" value="lucy"/>
+  </bean>
+  <bean id="userRoleAssemble" class="com.ssmr.c10.xmlInject.UserRoleAssemble">
+    <property name="map">
+      <map>
+        <entry key-ref="role1" value-ref="user1"/>
+        <entry key-ref="role2" value-ref="user2"/>
+      </map>
+    </property>
+    <property name="roleList">
+      <list>
+        <ref bean="role1"/>
+        <ref bean="role2"/>
+      </list>
+    </property>
+    <property name="roleSet">
+      <set>
+        <ref bean="role1"/>
+        <ref bean="role2"/>
+      </set>
+    </property>
+  </bean>
+<!-- 通过命名空间注册Bean -->
+<!--  命名空间 c 表示 constructor，p 表示 property-->
+  <bean id="role3" class="com.ssmr.c10.xmlInject.Role" c:_0="14" c:_1="teacher"/>
+  <bean id="role4" class="com.ssmr.c10.xmlInject.Role" p:code="15" p:name="saler"/>
+  <bean id="user3" class="com.ssmr.c10.xmlInject.User" p:id="14" p:name="daniel"/>
+  <util:list id="util_roleList">
+    <ref bean="role3"/>
+    <ref bean="role4"/>
+  </util:list>
+  <util:map id="util_roleUserMap">
+    <entry key-ref="role3" value-ref="user3"/>
+  </util:map>
+  <util:set id="util_roleSet">
+    <ref bean="role3"/>
+    <!--恶意使用不符合的类型如user3填充到此处，IDEA不会检测出错误-->
+    <ref bean="role4"/>
+  </util:set>
+  <!--命名空间的方式会自动识别Bean的字段名-->
+  <bean id="userRoleAssemble2" class="com.ssmr.c10.xmlInject.UserRoleAssemble"
+        p:roleList-ref="util_roleList" p:map-ref="util_roleUserMap" p:roleSet-ref="util_roleSet"/>
+</beans>
