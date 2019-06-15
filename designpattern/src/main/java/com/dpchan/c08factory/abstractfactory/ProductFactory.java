@@ -1,0 +1,27 @@
+package com.dpchan.c08factory.abstractfactory;
+
+import com.dpchan.c08factory.ConcreteProduct1;
+import com.dpchan.c08factory.ConcreteProduct2;
+import com.dpchan.c08factory.Product;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class ProductFactory {
+    private static final Map<String, Product> productMap = new HashMap();
+
+    public static synchronized  Product createProduct(String type) throws Exception{
+        Product product =null;
+        if(productMap.containsKey(type)){
+            product = productMap.get(type);
+        }else{
+            if(type.equals("Product1")){
+                product = new ConcreteProduct1();
+            }else{
+                product = new ConcreteProduct2();
+            }
+            productMap.put(type,product);
+        }
+        return product;
+    }
+}
