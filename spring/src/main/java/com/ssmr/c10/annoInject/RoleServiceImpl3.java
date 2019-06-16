@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 public class RoleServiceImpl3 implements RoleService {
   @Override
   public void printRoleInfo(Role role) {
-    System.out.println(role.getCode());
+    System.out.println(role.getRoleName());
   }
 }
