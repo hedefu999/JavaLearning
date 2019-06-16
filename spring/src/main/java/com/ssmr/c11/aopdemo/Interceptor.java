@@ -1,4 +1,4 @@
-package com.ssmr.c11;
+package com.ssmr.c11.aopdemo;
 
 public interface Interceptor {
   void before(Object obj);
