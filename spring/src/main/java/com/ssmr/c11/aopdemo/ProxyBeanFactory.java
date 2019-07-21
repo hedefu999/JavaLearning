@@ -16,7 +16,7 @@ public class ProxyBeanFactory {
    * > 执行Bean方法时，无论是否产生异常，都会执行after方法
    * > 执行Bean方法时，如果不产生异常，则执行afterReturning方法，如果发生异常，则执行afterThrowing方法
    * （上述约定也是SpringAOP的约定）
-   * @param obj
+   * @param obj  传入接口的实现类可以返回interface代理
    * @param interceptor
    * @param <T>
    * @return

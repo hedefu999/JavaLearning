@@ -25,9 +25,10 @@ public class ProxyBeanUtil2 implements InvocationHandler{
     boolean exceptionFlag = false;
     //此处不可以使用proxy去执行，会造成死循环
     interceptor.before(obj);
+    Object retObj = null;
     try {
       System.out.print("执行bean方法: ");
-      Object retObj = method.invoke(obj,args);//不可method.invoke(proxy,args);
+      retObj = method.invoke(obj,args);//不可method.invoke(proxy,args);
       System.out.println(retObj == obj);//false
 //      System.out.println(retObj.hashCode());//retObj为null ！
     }catch (Exception e){
@@ -43,6 +44,6 @@ public class ProxyBeanUtil2 implements InvocationHandler{
     }else {
       interceptor.afterReturning(obj);
     }
-    return obj;
+    return retObj;
   }
 }
