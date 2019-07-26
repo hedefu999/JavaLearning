@@ -1,4 +1,4 @@
-package com.ssmr.c11.aopdemo;
+package com.ssmr.c11.a_aopprimary;
 
 public class ProxyBeanFactory {
   /**

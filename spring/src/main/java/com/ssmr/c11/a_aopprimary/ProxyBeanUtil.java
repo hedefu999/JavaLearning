@@ -1,4 +1,4 @@
-package com.ssmr.c11.aopdemo;
+package com.ssmr.c11.a_aopprimary;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+    <bean id="roleService" class="com.ssmr.c11.c_xmlaop.RoleServiceImpl"/>
+
+    <bean id="xmlAspect" class="com.ssmr.c11.c_xmlaop.XmlAspect"/>
+    <aop:config>
+        <!--定义切面aspect-->
+        <aop:aspect ref="xmlAspect">
+            <!--定义通知adice-->
+            <aop:pointcut id="noArgsPointCut"
+                          expression="execution(* com.ssmr.c11.c_xmlaop.RoleServiceImpl.printRole(..))"/>
+            <!--配置两个版本的before-->
+            <aop:before method="before" pointcut-ref="noArgsPointCut"/>
+            <aop:before method="before2" pointcut="execution(* com.ssmr.c11.c_xmlaop.RoleServiceImpl.printRole(..)) and args(role)"/>
+            <aop:after method="after" pointcut-ref="noArgsPointCut"/>
+            <!--<aop:around method=""-->
+            <aop:after-returning method="afterReturning" pointcut-ref="noArgsPointCut"/>
+            <aop:around method="around" pointcut-ref="noArgsPointCut"/>
+        </aop:aspect>
+    </aop:config>
+
+    <!--配置第二种带有入参的切面-->
+    <bean id="xmlAspect2" class="com.ssmr.c11.c_xmlaop.XmlAspect2"/>
+    <aop:config>
+        <aop:aspect ref="xmlAspect2">
+            <!--args中的参数名称是依据后面引用的方法method来判断的，所以一开始配置ars(**),里面填啥都会飘红-->
+            <aop:pointcut id="roleArgPointCut" expression="execution(* com.ssmr.c11.c_xmlaop.RoleService.printRole2(..)) and args(role)"/>
+            <!--这个切点不可以配成V  ..表示任意入参 -->
+            <!--<aop:pointcut id="roleArgPointCut" expression="execution(* com.ssmr.c11.c_xmlaopop.RoleService.printRole2(role))"/>-->
+            <aop:before method="before" pointcut-ref="roleArgPointCut"/>
+            <aop:after method="after" pointcut-ref="roleArgPointCut"/>
+            <!--可以自动忽略掉jointPoint入参-->
+            <aop:around method="around" pointcut-ref="roleArgPointCut"/>
+        </aop:aspect>
+    </aop:config>
+
+    <!--演示aop 的注解捕获和参数修改 的功能-->
+    <bean id="xmlAspect3" class="com.ssmr.c11.c_xmlaop.XmlAspect3"/>
+    <aop:config>
+        <aop:aspect ref="xmlAspect3">
+            <aop:around method="around" pointcut="execution(* com.ssmr.c11.c_xmlaop.RoleService.printRole3(..)) and args(role) and @annotation(annoAop)"/>
+        </aop:aspect>
+    </aop:config>
+
+    <bean id="xmlAspect4" class="com.ssmr.c11.c_xmlaop.XmlAspect4"/>
+    <aop:config>
+        <!--在多切面的情况下，可以在aop:aspect里使用order属性-->
+        <aop:aspect ref="xmlAspect4">
+            <!--“RoleServiceImpl+” 号，表示只要是自身及其子类都可以添加新的方法-->
+            <aop:declare-parents types-matching="com.ssmr.c11.c_xmlaop.RoleServiceImpl"
+                                 implement-interface="com.ssmr.c11.b_annotationaop.RoleVerifier"
+                                 default-impl="com.ssmr.c11.b_annotationaop.RoleVerifierImpl"/>
+            <aop:around method="cycleAdice" pointcut="execution(* com.ssmr.c11.c_xmlaop.RoleService.printRole4(..)) and args(role)"/>
+        </aop:aspect>
+    </aop:config>
+
+</beans>

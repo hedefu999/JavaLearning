@@ -1,4 +1,4 @@
-package com.ssmr.c11.aopdemo;
+package com.ssmr.c11.a_aopprimary;
 
 import com.ssmr.c11.Role;
 
@@ -9,7 +9,9 @@ public class Client {
 
     //通过getBean方法保存了被代理对象、拦截器和参数
     RoleService proxy = ProxyBeanFactory.getBean(roleService,interceptor);
-    Role role = new Role();role.setId(12);role.setName("jack");
+    Role role = new Role();
+    role.setId(12);
+    role.setName("jack");
     System.out.println(proxy.printRole(role));
 
     System.out.printf("\n测试afterthrowing方法\n\n");

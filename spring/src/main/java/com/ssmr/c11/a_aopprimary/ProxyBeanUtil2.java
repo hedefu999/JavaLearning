@@ -1,4 +1,4 @@
-package com.ssmr.c11.aopdemo;
+package com.ssmr.c11.a_aopprimary;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -20,6 +20,7 @@ public class ProxyBeanUtil2 implements InvocationHandler{
     return proxy;
   }
 
+  //SpringAOP Introduction - 引入，在现有类里添加自定义的类和方法
   @Override
   public Object invoke(Object proxy, Method method, Object[] args){
     boolean exceptionFlag = false;

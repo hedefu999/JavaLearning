@@ -1,4 +1,4 @@
-package com.ssmr.c11.springaopdemo;
+package com.ssmr.c11.b_annotationaop;
 
 import com.ssmr.c11.Role;
 

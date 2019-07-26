@@ -1,7 +1,7 @@
-package com.ssmr.c11.aopdemo;
-//SpringAOP - Aspect
+package com.ssmr.c11.a_aopprimary;
+//SpringAOP - Aspect 切面
 public class RoleInterceptor implements Interceptor {
-  //SpringAOP - before Adice
+  //SpringAOP - before Adice 通知，切面里的方法
   @Override
   public void before(Object obj) {
     System.out.println("before:"+obj.getClass().getSimpleName());
