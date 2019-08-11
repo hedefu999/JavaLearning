@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd" >
+<configuration>
+  
+  <settings>
+    <setting name="logImpl" value="STDOUT_LOGGING"/>
+    <setting name="cacheEnabled" value="true"/>
+    <setting name="autoMappingBehavior" value="PARTIAL"/>
+    <setting name="mapUnderscoreToCamelCase" value="true"/>
+    <setting name="defaultEnumTypeHandler" value="org.apache.ibatis.type.EnumTypeHandler"/>
+    <setting name="logPrefix" value="hedefu -："/>
+    <setting name="callSettersOnNulls" value="true"/>
+  </settings>
+  
+  <typeAliases>
+
+  </typeAliases>
+  
+  <!--数据源配置在使用Mybatis-Spring后可忽略-->
+  <!--<environments default="dev">-->
+    <!--<environment id="dev">-->
+      <!--<transactionManager type="com.hedefu.mybatis.transaction.MyTransactionFactory"/>-->
+      <!--<dataSource type="POOLED">-->
+        <!--<property name="driver" value="${db.driver}"/>-->
+        <!--<property name="url" value="${db.url}"/>-->
+        <!--<property name="username" value="${db.username}"/>-->
+        <!--<property name="password" value="${db.password}"/>-->
+      <!--</dataSource>-->
+    <!--</environment>-->
+  <!--</environments>-->
+
+  <!--Mybatis-Spring中的SqlSessionFactoryBean的mappLocations接管此处配置-->
+  <!--<mappers>-->
+    <!--&lt;!&ndash;直接规范地设置mapper.xml存储路径&ndash;&gt;-->
+    <!--<package name="com.hedefu.mybatis.mapper"/>-->
+  <!--</mappers>-->
+  
+</configuration>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssmr.c12.RoleMapper">
+    <resultMap id="base_result_map" type="com.ssmr.c12.Role">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+    </resultMap>
+    <insert id="saveRole">
+        insert into role(name, age, note)
+        <trim prefix="values(" suffix=")" suffixOverrides=",">
+            #{name},#{age},#{note}
+        </trim>
+    </insert>
+    <insert id="saveEntireRole">
+        insert into role(name, age, note)
+        <trim prefix="values(" suffix=")" suffixOverrides=",">
+            #{name},#{age},#{note}
+        </trim>
+    </insert>
+
+    <select id="getRole" resultMap="base_result_map">
+    select * from role
+    where id = #{roleId}
+  </select>
+</mapper>

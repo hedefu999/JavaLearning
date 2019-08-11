@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>jdbc.properties</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${db.driver}"/>
+        <property name="url" value="${db.url}"/>
+        <property name="username" value="${db.username}"/>
+        <property name="password" value="${db.password}"/>
+    </bean>
+    <bean id="exceptionTranslator" class="org.mybatis.spring.MyBatisExceptionTranslator">
+        <constructor-arg name="dataSource" ref="dataSource"/>
+        <constructor-arg name="exceptionTranslatorLazyInit" value="true"/>
+    </bean>
+
+
+    <!--DefaultSqlSessionFactory 与 SqlSessionFactoryBean有什么不同？-->
+
+    <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mapperLocations" value="classpath:com/ssmr/c12/sqlmap/*.xml"/>
+        <!--mybatis-spring的Configuration可以完全替换掉配置文件，下面两个property就是可相互替换的-->
+        <property name="configLocation" value="classpath:com/ssmr/c12/mybatis-config.xml"/>
+        <!--两个都用会中毒：Property 'configuration' and 'configLocation' can not specified with together-->
+        <!--<property name="configuration">-->
+            <!--<bean class="org.apache.ibatis.session.Configuration">-->
+                <!--<property name="defaultFetchSize" value="20"/>-->
+                <!--<property name="cacheEnabled" value="true"/>-->
+            <!--</bean>-->
+        <!--</property>-->
+    </bean>
+
+    <!--不使用SqlSessionFactoryBean，尝试生成一个SqlSessionFactory注入到SqlSessionTemplate中，失败-->
+    <bean id="transactionFactory" class="org.mybatis.spring.transaction.SpringManagedTransactionFactory"/>
+    <bean id="environment" class="org.apache.ibatis.mapping.Environment">
+        <constructor-arg name="id" value="mysql"/>
+        <constructor-arg name="dataSource" ref="dataSource"/>
+        <constructor-arg name="transactionFactory" ref="transactionFactory"/>
+    </bean>
+    <bean id="configuration" class="org.apache.ibatis.session.Configuration">
+        <property name="environment" ref="environment"/>
+    </bean>
+    <bean id="sqlSessionFactory" class="org.apache.ibatis.session.defaults.DefaultSqlSessionFactory">
+        <constructor-arg name="configuration" ref="configuration"/>
+    </bean>
+
+
+    <!--在spring-mybatis的配置中，sqlSessionTemplate配置是可以省略的-->
+    <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+        <!--org.apache.ibatis.session.SqlSessionFactory类型的参数，
+            传入的却是org.mybatis.spring.SqlSessionFactoryBean-->
+        <!-- ref to  https://www.cnblogs.com/zienzir/p/9109773.html
+        Spring不会最终创建FactoryBean本身，而是创建getObject返回的类型的实例
+        -->
+        <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactoryBean"/>
+        <!--枚举field的配置看起来像字符串-->
+        <constructor-arg name="executorType" value="BATCH"/>
+        <constructor-arg name="exceptionTranslator" ref="exceptionTranslator"/>
+    </bean>
+
+    <!--MapperFactoryBean可以配置Mapper接口的注入，一次只能配一个，不如MapperScannerConfirurer方便-->
+    <!--<bean id="roleMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">-->
+        <!--<property name="mapperInterface" value="com.ssmr.c12.RoleMapper"/>-->
+        <!--&lt;!&ndash;SqlSessionTemplate是把SqlSessionFactory包了一层，两个都声明则只会启用SqlSessionTemplate&ndash;&gt;-->
+        <!--<property name="sqlSessionFactory" ref="sqlSessionFactoryBean"/>-->
+        <!--&lt;!&ndash;<property name="sqlSessionTemplate" ref="sqlSessionTemplate"/>&ndash;&gt;-->
+    <!--</bean>-->
+
+    <!--与MapperScannerConfigurer同包下还有一个ClassPathMapperScanner，用途待研究-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--多个用,分隔-->
+        <property name="basePackage" value="com.ssmr.c12"/>
+        <!--同样的sqlSessionTemplateBeanName会覆盖sqlSessionFactoryBeanName-->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryBean"/>
+
+        <!--下面是两种Mapper标记方法，可以用于优化包管理-->
+        <!--标记注解：配置为@Repository，则Mapper接口需要加上此注解-->
+        <property name="annotationClass" value="org.springframework.stereotype.Repository"/>
+        <!--实现了制定标记接口就被认为是Mapper-->
+        <!--<property name="markerInterface" value="com.xxx.xxx.service.MapperMarkInterface"/>-->
+    </bean>
+
+
+</beans>
