@@ -25,6 +25,8 @@ import java.util.Properties;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = SpringMybatisConfig.class)
+//declared on class com.ssmr.txpractice.TxTester, attribute 'value' and its alias 'locations' are declared with values of [{...}] and [{+++}], but only one is permitted
+//@ContextConfiguration(value = "...",locations = "+++")
 public class TxTester {
     private static final Logger log = LoggerFactory.getLogger("TxTester");
     @Test  //测试读取配置文件

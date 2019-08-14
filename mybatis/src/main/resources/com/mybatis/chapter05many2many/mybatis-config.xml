@@ -19,7 +19,6 @@
   </typeAliases>
   
   <environments default="dev">
-    <!--TODO 切换环境-->
     <environment id="dev">
       <transactionManager type="com.hedefu.mybatis.transaction.MyTransactionFactory"/>
       <!--采用mybatis内部提供的连接池方式-->

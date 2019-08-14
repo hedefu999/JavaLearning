@@ -18,7 +18,6 @@ import java.util.Properties;
 @EnableTransactionManagement
 public class TransacManageConfig implements TransactionManagementConfigurer {
     private DataSource dataSource = null;
-    //TODO 尝试将数据源改成Druid
     @Bean(name = "dataSource")
     public DataSource initDataSource(){
         if (dataSource != null){

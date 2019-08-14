@@ -1,8 +1,8 @@
 package com.mybatis.chapter08;
 
 import com.google.common.collect.Lists;
-import com.hedefu.mybatis.mapper.RoleMapper;
-import com.hedefu.mybatis.model.Role;
+import com.mytest.mybatis.mapper.RoleMapper;
+import com.mytest.mybatis.model.Role;
 import com.mybatis.utils.JDBCUtils;
 import com.mybatis.utils.PropertiesUtils;
 import com.mybatis.utils.SqlSessionFactoryUtils;

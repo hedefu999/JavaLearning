@@ -11,7 +11,8 @@ public class RoleAspect3 {
   /**
    * 注解 @DeclareParents value的含义是对RoleService接口进行增强，引入新的方法
    * defaultImpl表示引入的增强的默认实现类
-   * “+” 号，表示只要是自身及其子类都可以添加新的方法
+   * “+” 号，表示只要是自身及其子类都可以添加新的方法,这里将RoleServiceImpl作为了父类
+   * ref to https://www.cnblogs.com/xxdsan/p/6496332.html
    */
   @DeclareParents(value = "com.ssmr.c11.b_annotationaop.RoleServiceImpl+", defaultImpl = RoleVerifierImpl.class)
   public RoleVerifier roleVerifier;

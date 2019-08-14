@@ -1,7 +1,7 @@
 package com.mybatis.utils;
 
-import com.hedefu.mybatis.model.Role;
-import com.hedefu.mybatis.mapper.RoleMapper;
+import com.mytest.mybatis.model.Role;
+import com.mytest.mybatis.mapper.RoleMapper;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Environment;
