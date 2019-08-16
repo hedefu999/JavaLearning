@@ -15,6 +15,7 @@
     <module>common</module>
     <module>designpattern</module>
     <module>effectivejava</module>
+    <module>redis</module>
   </modules>
   <properties>
   </properties>

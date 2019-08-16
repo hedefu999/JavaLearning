@@ -23,9 +23,9 @@
   
   <typeAliases>
     <!--类型别名：在mapper.xml中直接使用别名-->
-    <!--<typeAlias type="com.hedefu.mybatis.model.Role" alias="role"/>-->
-    <package name="com.hedefu.mybatis.model"/>
-    <package name="com.hedefu.mybatis.qto"/>
+    <!--<typeAlias type="com.mytest.mybatis.model.Role" alias="role"/>-->
+    <package name="com.mytest.mybatis.model"/>
+    <package name="com.mytest.mybatis.qto"/>
   </typeAliases>
   
   <plugins>
@@ -48,13 +48,13 @@
 <!--    </plugin>-->
   </plugins>
   
-  <!--<objectFactory type="com.hedefu.mybatis.objectFactory.MyObjectFactory">-->
+  <!--<objectFactory type="com.mytest.mybatis.objectFactory.MyObjectFactory">-->
     <!--<property name="propStr" value="hedefu"/>-->
   <!--</objectFactory>-->
   
   <environments default="dev">
     <environment id="dev">
-      <transactionManager type="com.hedefu.mybatis.transaction.MyTransactionFactory"/>
+      <transactionManager type="com.mytest.mybatis.transaction.MyTransactionFactory"/>
       <!--采用mybatis内部提供的连接池方式-->
       <dataSource type="POOLED">
         <property name="driver" value="${db.driver}"/>
@@ -71,18 +71,18 @@
     <!--<property name="DB2" value="db2"/>-->
   <!--</databaseIdProvider>-->
   
-  <!--<databaseIdProvider type="com.hedefu.mybatis.databaseProvider.MyDatabaseIdProvider">-->
+  <!--<databaseIdProvider type="com.mytest.mybatis.databaseProvider.MyDatabaseIdProvider">-->
     <!--<property name="author" value="hedefu"/>-->
   <!--</databaseIdProvider>-->
   
   <mappers>
     <!--<mapper resource="mapper/TestBlobMapper.xml"/>-->
     <!--<mapper url="file:/Users/hedefu/Documents/WorkSpace/IDEA/JavaSSMR/mybatis/src/main/resources/mapper/RoleMapper.xml"/>-->
-    <!--<mapper class="com.hedefu.mybatis.mapper.TestUserMapper"/>-->
-    <!--<mapper class="com.hedefu.mybatis.mapper.UserInfoMapper"/>-->
+    <!--<mapper class="com.mytest.mybatis.mapper.TestUserMapper"/>-->
+    <!--<mapper class="com.mytest.mybatis.mapper.UserInfoMapper"/>-->
     
     <!--直接规范地设置mapper.xml存储路径-->
-    <package name="com.hedefu.mybatis.mapper"/>
+    <package name="com.mytest.mybatis.mapper"/>
   </mappers>
   
 </configuration>

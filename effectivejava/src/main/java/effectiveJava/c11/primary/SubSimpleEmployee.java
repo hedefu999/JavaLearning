@@ -1,8 +1,6 @@
-package com.effectivejava.c11.primary;
+package effectiveJava.c11.primary;
 
 import lombok.Data;
-
-import java.io.Serializable;
 
 @Data
 public class SubSimpleEmployee extends SimpleEmployee {

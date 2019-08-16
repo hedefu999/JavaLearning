@@ -1,7 +1,36 @@
-<!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
+<?xml version="1.0" encoding="UTF-8" ?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    <!--springIOC-->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:javalearning-servlet.xml</param-value>
+    </context-param>
 
-<web-app>
-  <display-name>Archetype Created Web Application</display-name>
+    <!--listener-->
+    <listener>
+        <!--ContextLoaderListener实现了ServletContextListener，ServletContextListener可以在整个web工程前后加入自定义代码，所以可以在web工程前后操作IoC容器-->
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <!--dispatcherServlet-->
+    <servlet>
+        <!--spring会根据servlet-name配置去/WEB-INF/下找到配置文件servletName-servlet.xml载入web工程中-->
+        <servlet-name>javalearning</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:javalearning-servlet.xml</param-value>
+        </init-param>
+        <!--配置Dispathcer在服务器启动时就初始化-->
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>javalearning</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+
+
 </web-app>

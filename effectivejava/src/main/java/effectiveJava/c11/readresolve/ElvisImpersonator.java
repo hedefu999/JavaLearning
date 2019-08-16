@@ -1,4 +1,4 @@
-package com.effectivejava.c11.readresolve;
+package effectiveJava.c11.readresolve;
 
 public class ElvisImpersonator {
   private static final byte[] serializedForm = new byte[]{

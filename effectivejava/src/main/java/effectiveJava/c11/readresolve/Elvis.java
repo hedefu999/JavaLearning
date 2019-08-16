@@ -1,4 +1,4 @@
-package com.effectivejava.c11.readresolve;
+package effectiveJava.c11.readresolve;
 
 import java.io.Serializable;
 import java.util.Arrays;

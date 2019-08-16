@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hedefu.mybatis.mapper.TestBlobMapper">
-  <resultMap id="base_result_map" type="com.hedefu.mybatis.model.TestBlob">
+<mapper namespace="com.mytest.mybatis.mapper.TestBlobMapper">
+  <resultMap id="base_result_map" type="com.mytest.mybatis.model.TestBlob">
     <id column="id" property="id" jdbcType="INTEGER"/>
     <result column="content" property="content" jdbcType="BLOB" javaType="string"/>
     <!--mybatis自带的BlobTypeHandler是将BLOB转为byte[]-->
@@ -12,7 +12,7 @@
     select * from blob_table where id = #{id}
   </select>
   
-  <insert id="insertBlobFile" parameterType="com.hedefu.mybatis.model.TestBlob">
+  <insert id="insertBlobFile" parameterType="com.mytest.mybatis.model.TestBlob">
     insert into blob_table(content) values(#{content, jdbcType=BLOB})
   </insert>
   

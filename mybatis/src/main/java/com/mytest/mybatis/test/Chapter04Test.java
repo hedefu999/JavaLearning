@@ -47,7 +47,7 @@ public class Chapter04Test {
             //sqlSession采用门面模式，实际执行SQL发送的是底层的Executor
             sqlSession = sessionFactory.openSession();
             //发送SQL方式1 - 使用SqlSession
-            Role role = sqlSession.selectOne("com.hedefu.mybatis.mybatis.RoleMapper.queryRole",1L);
+            Role role = sqlSession.selectOne("com.mytest.mybatis.mybatis.RoleMapper.queryRole",1L);
             //发送SQL方式2 - 使用Mapper接口(主流)
                 //MapperProxyFactory里表明这是JDK动态代理创建了接口的代理
             RoleMapper roleMapper = sqlSession.getMapper(RoleMapper.class);

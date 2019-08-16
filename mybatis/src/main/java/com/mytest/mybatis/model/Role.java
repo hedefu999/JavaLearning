@@ -6,7 +6,7 @@ public class Role {
     private final String note;
 
     //使用建造者模式后缺少全参数构造器，mybatis进行对象映射时报
-    // No constructor found in com.hedefu.mybatis.Role matching [java.lang.Long, java.lang.String, java.lang.String]
+    // No constructor found in com.mytest.mybatis.Role matching [java.lang.Long, java.lang.String, java.lang.String]
     public Role(Long id, String roleName, String note) {
         this.id = id;
         this.roleName = roleName;

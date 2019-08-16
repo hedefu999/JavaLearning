@@ -19,7 +19,7 @@
   <!--数据源配置在使用Mybatis-Spring后可忽略-->
   <!--<environments default="dev">-->
     <!--<environment id="dev">-->
-      <!--<transactionManager type="com.hedefu.mybatis.transaction.MyTransactionFactory"/>-->
+      <!--<transactionManager type="com.mytest.mybatis.transaction.MyTransactionFactory"/>-->
       <!--<dataSource type="POOLED">-->
         <!--<property name="driver" value="${db.driver}"/>-->
         <!--<property name="url" value="${db.url}"/>-->

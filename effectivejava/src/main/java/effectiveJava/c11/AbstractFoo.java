@@ -1,4 +1,4 @@
-package com.effectivejava.c11;
+package effectiveJava.c11;
 
 import java.util.concurrent.atomic.AtomicReference;
 

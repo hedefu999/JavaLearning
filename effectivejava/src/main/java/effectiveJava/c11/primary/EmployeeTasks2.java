@@ -1,4 +1,4 @@
-package com.effectivejava.c11.primary;
+package effectiveJava.c11.primary;
 
 import lombok.Data;
 

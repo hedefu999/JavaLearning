@@ -1,4 +1,4 @@
-package com.effectivejava.c11.readobject;
+package effectiveJava.c11.readobject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

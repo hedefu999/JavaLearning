@@ -20,7 +20,7 @@
   
   <environments default="dev">
     <environment id="dev">
-      <transactionManager type="com.hedefu.mybatis.transaction.MyTransactionFactory"/>
+      <transactionManager type="com.mytest.mybatis.transaction.MyTransactionFactory"/>
       <!--采用mybatis内部提供的连接池方式-->
       <dataSource type="POOLED">
         <property name="driver" value="${db.driver}"/>

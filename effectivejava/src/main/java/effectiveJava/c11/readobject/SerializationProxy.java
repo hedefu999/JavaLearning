@@ -1,7 +1,6 @@
-package com.effectivejava.c11.readobject;
+package effectiveJava.c11.readobject;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.EnumSet;
 
 public class SerializationProxy<E extends Enum<E>> implements Serializable {

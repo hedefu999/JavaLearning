@@ -1,4 +1,4 @@
-package com.effectivejava.c11.primary;
+package effectiveJava.c11.primary;
 
 import org.junit.Test;
 
@@ -66,7 +66,7 @@ public class SerializeTest {
   @Test
   public void deserializeSimEmp(){
     //在反序列化时才添加serialVersionUID，可以发现 JVM自动生成的UID与IDEA生成的不一致
-    //com.effectivejava.c11.primary.SimpleEmployee; local class incompatible:
+    //effectiveJava.c11.primary.SimpleEmployee; local class incompatible:
     // stream classdesc serialVersionUID = 4193275551286636731, local class serialVersionUID = -3187784505501326206
     //此时对象的各字段为空
     //反序列化到另一个包里的SimpleEmployee会报ClassCastException

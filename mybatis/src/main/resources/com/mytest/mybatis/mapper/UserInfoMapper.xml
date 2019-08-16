@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hedefu.mybatis.mapper.UserInfoMapper">
+<mapper namespace="com.mytest.mybatis.mapper.UserInfoMapper">
   
   <resultMap id="constructor_result_map" type="UserInfo">
     <!--jdbcType的定义位于 org.apache.ibatis.type.JdbcType-->
     <!--javaType时定义位于 org.apache.ibatis.type.TypeAliasRegistry-->
     <constructor>
-      <!--添加name属性配置反而出错：Failed to find a constructor in 'com.hedefu.mybatis.model.UserInfo' by arg names
+      <!--添加name属性配置反而出错：Failed to find a constructor in 'com.mytest.mybatis.model.UserInfo' by arg names
       [id, userName, age, signDesc, birth, balance, createTime, updateTime]-->
       <idArg column="id" javaType="_int"/>
       <arg column="user_name" javaType="string"/>
@@ -47,14 +47,14 @@
       user_name = #{userName} and age = #{age}
     </where>
   </select>
-  <select id="getUserInfoByQto" resultType="userInfo" parameterType="com.hedefu.mybatis.qto.UserInfoQto">
+  <select id="getUserInfoByQto" resultType="userInfo" parameterType="com.mytest.mybatis.qto.UserInfoQto">
     select
       <include refid="base_column">
         <property name="tablename" value="ui"/>
       </include>
     from user_info as ui where user_name = #{name} and age = #{age}
   </select>
-  <select id="getByRowBounds" resultType="com.hedefu.mybatis.model.UserInfo">
+  <select id="getByRowBounds" resultType="com.mytest.mybatis.model.UserInfo">
     select * from user_info where age = #{age}
   </select>
   
