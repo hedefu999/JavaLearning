@@ -17,6 +17,14 @@
         <property name="poolConfig" ref="poolConfig"/>
     </bean>
 
+    <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
+        <constructor-arg name="host" value="localhost"/>
+        <constructor-arg name="port" value="6379"/>
+        <constructor-arg name="password" value="hedefu999"/>
+        <constructor-arg name="poolConfig" ref="poolConfig"/>
+        <constructor-arg name="timeout" value="3000"/>
+    </bean>
+
     <!--todo P491 - Spring-data-redis中提供的RedisSerializer接口的实现类的用途-->
     <bean id="jdkSerializationRedisSerializer"
           class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"/>
