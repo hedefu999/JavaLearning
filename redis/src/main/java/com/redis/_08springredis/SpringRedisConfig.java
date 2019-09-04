@@ -1,6 +1,5 @@
 package com.redis._08springredis;
 
-import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,17 +70,17 @@ public class SpringRedisConfig {
     @Bean
     public RedisTemplate redisTemplate(@Autowired RedisConnectionFactory redisConnFactory){
         // 自定Redis序列化器
-        RedisSerializer jdkSerializationRedisSerializer = new JdkSerializationRedisSerializer();
-        RedisSerializer stringRedisSerializer = new StringRedisSerializer();
+        RedisSerializer jdkSerializer = new JdkSerializationRedisSerializer();
+        RedisSerializer stringSerializer = new StringRedisSerializer();
         RedisSerializer fastJsonSerializer = new GenericFastJsonRedisSerializer();
         // 定义RedisTemplate，并设置连接工程
         RedisTemplate redisTemplate = new RedisTemplate();
         redisTemplate.setConnectionFactory(redisConnFactory);
         // 设置序列化器
         //redisTemplate.setDefaultSerializer(fastJsonSerializer);
-        redisTemplate.setKeySerializer(fastJsonSerializer);
+        redisTemplate.setKeySerializer(stringSerializer);
         redisTemplate.setValueSerializer(fastJsonSerializer);
-        redisTemplate.setHashKeySerializer(stringRedisSerializer);
+        redisTemplate.setHashKeySerializer(stringSerializer);
         redisTemplate.setHashValueSerializer(fastJsonSerializer);
         return redisTemplate;
     }
@@ -90,10 +89,10 @@ public class SpringRedisConfig {
      * @param redisConnFactory
      * @return
      */
-    @Bean
+    @Bean("redisCacheManager")
     public CacheManager redisCacheManager(@Autowired RedisConnectionFactory redisConnFactory){
         RedisCacheConfiguration redisCacheConfig =
-                RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(2));
+                RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(10));
         RedisCacheManager redisCacheManager = RedisCacheManager
                 .builder(RedisCacheWriter.nonLockingRedisCacheWriter(redisConnFactory))
                 .cacheDefaults(redisCacheConfig).build();

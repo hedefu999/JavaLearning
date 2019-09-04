@@ -14,8 +14,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {SpringMybatisConfig.class})
 @ComponentScan("com.redis._08springredis")
-public class UserDAOTest {
-    private final Logger log = LoggerFactory.getLogger(UserDAOTest.class);
+public class TestUserDAO {
+    private final Logger log = LoggerFactory.getLogger(TestUserDAO.class);
     private User user = null;
     @Autowired
     private UserRepo userRepo;

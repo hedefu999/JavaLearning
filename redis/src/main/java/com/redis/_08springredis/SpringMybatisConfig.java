@@ -26,7 +26,7 @@ import java.util.Properties;
  */
 public class SpringMybatisConfig {
     @Bean("dataSource")
-    public DataSource dataSource(){
+    public static DataSource dataSource(){
         Properties props = new Properties();
         props.setProperty("driverClassName","com.mysql.jdbc.Driver");
         props.setProperty("url","jdbc:mysql://localhost:3306/ssmr?useSSL=false");
@@ -59,7 +59,7 @@ public class SpringMybatisConfig {
         return sqlSessionFactory;
     }
     @Bean
-    public MapperScannerConfigurer mapperScannerConfigurer(){
+    public static MapperScannerConfigurer mapperScannerConfigurer(){
         MapperScannerConfigurer msc = new MapperScannerConfigurer();
         msc.setBasePackage("com.redis._08springredis");
         msc.setSqlSessionFactoryBeanName("sqlSessionFactory");

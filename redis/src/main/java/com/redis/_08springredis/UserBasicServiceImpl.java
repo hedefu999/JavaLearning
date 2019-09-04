@@ -1,11 +1,13 @@
 package com.redis._08springredis;
 
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.stereotype.Service;
 
 @Service("userBasicService")
@@ -24,7 +26,6 @@ public class UserBasicServiceImpl implements UserBasicService {
     }
 
     @Override
-    @CachePut(value = "redisCacheManager",key = "'user-'+#result.id")
     public User updateUserById(User user) {
         int i = userRepo.updateUserById(user);
         return user;
@@ -32,7 +33,6 @@ public class UserBasicServiceImpl implements UserBasicService {
 
     @Override
     //此处应使用result.id,而非user.id
-    @CachePut(value = "redisCacheManager",key = "'user-'+#result.id")
     public User updateUserByPhone(User user) {
         int i = userRepo.updateUserByPhone(user);
         //取保id不为空
@@ -44,7 +44,7 @@ public class UserBasicServiceImpl implements UserBasicService {
     }
 
     @Override
-    @Cacheable(value = "redisCacheManager", key = "'user-'+#id")
+    @Cacheable(cacheNames = "user", key = "#id")
     public User getUserById(Integer id) {
         User user = userRepo.retrieveUserById(id);
         return user;
@@ -56,30 +56,30 @@ public class UserBasicServiceImpl implements UserBasicService {
      * @return
      */
     @Override
-    @Cacheable(value = "redisCacheManager",key = "'user-'+#result.id")
+    @Cacheable(cacheNames = "user",key = "#result.id",condition = "#result.id!=null")
     public User getUserByPhone(String phone) {
         User user = userRepo.retrieveUserByPhone(phone);
+        log.info("查询到用户：{}",user);
         return user;
     }
 
+    /**
+     * 使用缓存时需要注意返回的int究竟是主键还是操作的行数
+     */
     @Override
-    @Cacheable(value = "redisCacheManager",key = "'user-'+#result.id")
+    @CacheEvict(cacheNames = "user",key = "#id")
     public int deleteUserById(Integer id) {
         int i = userRepo.deleteUserById(id);
         return i;
     }
-
     /**
      * 为确保缓存正确，会引入一些不必要的查询。。。
-     * @param phone
-     * @return
      */
     @Override
-    @CacheEvict(value = "redisCacheManager",key = "'user-'+#result")
+    @CacheEvict(cacheNames = "user",key = "#result")
     public int deleteUserByPhone(String phone) {
         User user = userRepo.retrieveUserByPhone(phone);
         int i = userRepo.deleteUserByPhone(phone);
-
         return user.getId();
     }
 }
