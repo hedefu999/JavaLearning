@@ -13,7 +13,7 @@
   <sql id="base_column_list">
     id,phone,name,age
   </sql>
-  <insert id="createUser">
+  <insert id="createUser" parameterType="com.redis._08springredis.User" useGeneratedKeys="true" keyProperty="id">
     insert into user(phone, name, age) values(#{phone},#{name},#{age})
   </insert>
   <select id="retrieveUserById" resultType="com.redis._08springredis.User">

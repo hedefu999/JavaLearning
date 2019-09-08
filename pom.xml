@@ -16,6 +16,7 @@
     <module>designpattern</module>
     <module>effectivejava</module>
     <module>redis</module>
+    <module>redpacket</module>
   </modules>
   <properties>
   </properties>

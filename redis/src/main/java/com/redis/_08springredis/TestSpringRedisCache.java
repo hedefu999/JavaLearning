@@ -31,15 +31,15 @@ public class TestSpringRedisCache {
 
     @Test
     public void testC(){
-        User user = new User("3274891","huis",13);
-        int result = userBasicService.saveUser(user);
+        User user = new User("8376432","tsuis",45);
+        User result = userBasicService.saveUser(user);
         //主键无法获取，这样会造成使用主键做redis key出错，所以新建user的可以考虑不必加入缓存
         log.info("新建用户的主键ID = {}", result);
     }
 
     @Test
     public void testR(){
-        User user1 = userBasicService.getUserById(3);
+        User user1 = userBasicService.getUserById(17);
         log.info("result = {}", JSON.toJSONString(user1));
         //User user2 = userBasicService.getUserByPhone("143209");
         //log.info("依据手机号查用户：{}",JSON.toJSONString(user2));

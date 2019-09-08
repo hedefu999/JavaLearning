@@ -1,13 +1,11 @@
 package com.redis._08springredis;
 
-import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,12 +18,15 @@ public class UserBasicServiceImpl implements UserBasicService {
     @Autowired
     private UserRepo userRepo;
 
+    //mybatis回填生成的主键到了user，但不能直接返回主键，否则加入缓存的就是一个数字，在selectbyid会莫名出错
+    //mybatis回填主键的方式是设置insert的属性  useGeneratedKeys="true" keyProperty="id"
     @Override
-    //此处返回的role中id是数据库生成的无法填充,建议使用其他唯一索引字段.或者在get方法上设置key为主键的缓存
-    @CachePut(value = "user",key = "#user.phone")
-    public int saveUser(User user) {
+    @CachePut(value = "user",key = "#result.id")
+    public User saveUser(User user) {
         int i = userRepo.createUser(user);
-        return i;
+        log.info("SQL执行结果：受影响的行数 = {}",i);
+        log.info("mybatis将生成的主键设置到了user中：{}", user.getId());
+        return user;
     }
 
     @Override
@@ -48,9 +49,18 @@ public class UserBasicServiceImpl implements UserBasicService {
         return user;
     }
 
+    /**
+     * 缓存有这样一个坑：
+     * 如果insert操作返回了主键，但错误地将它放入了缓存，这样缓存中存在user::key
+     * 此时使用select id，框架会认为user::key就是应当返回的缓存，而select返回的是user，这样总是映射错误
+     * 缓存可能会搞坏原本正常的方法逻辑，，，
+     * @param id
+     * @return
+     */
     @Override
     @Cacheable(cacheNames = "user", key = "#id")
     public User getUserById(Integer id) {
+        log.info("依据主键id={}查询用户");
         User user = userRepo.retrieveUserById(id);
         return user;
     }
@@ -116,7 +126,11 @@ public class UserBasicServiceImpl implements UserBasicService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public int saveUsers(List<User> userList){
-        int result = userList.stream().mapToInt(this::saveUser).sum();
+        int result = 0;
+        for (User user : userList) {
+            int saveUser = saveUser(user).getId();
+            result += saveUser;
+        }
         return result;
     }
 }

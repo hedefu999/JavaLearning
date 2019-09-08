@@ -22,7 +22,7 @@ public class TestUserDAO {
 
     @Before
     public void init(){
-        user = new User("123678","jack",12);
+        user = new User("384765","gradu",13);
     }
     @Test
     public void test(){
