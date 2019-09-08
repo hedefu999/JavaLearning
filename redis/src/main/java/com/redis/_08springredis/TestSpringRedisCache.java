@@ -1,6 +1,7 @@
 package com.redis._08springredis;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -10,6 +11,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 报错解决记录：
@@ -27,36 +31,49 @@ public class TestSpringRedisCache {
 
     @Test
     public void testC(){
-        User user = new User("1886374","lucy",13);
-        User user1 = userBasicService.saveUser(user);
+        User user = new User("3274891","huis",13);
+        int result = userBasicService.saveUser(user);
         //主键无法获取，这样会造成使用主键做redis key出错，所以新建user的可以考虑不必加入缓存
-        log.info("新建用户的主键ID = {}", user1.getId());
+        log.info("新建用户的主键ID = {}", result);
     }
 
     @Test
     public void testR(){
         User user1 = userBasicService.getUserById(3);
         log.info("result = {}", JSON.toJSONString(user1));
-        /**
-         * TODO 此处#result.id总是无法获取到值，导致无法添加到缓存
-         */
-        User user2 = userBasicService.getUserByPhone("1886374");
-        log.info("依据手机号查用户：{}",JSON.toJSONString(user2));
+        //User user2 = userBasicService.getUserByPhone("143209");
+        //log.info("依据手机号查用户：{}",JSON.toJSONString(user2));
+
+    }
+    @Test
+    public void testR2(){
+        User query = new User();
+        query.setPhone("143209");
+        query.setId(3);
+        userBasicService.getUserByPhone(query);
+    }
+
+    @Test
+    public void testU(){
+        User user = new User(9,"1349758","jacky",null);
+        userBasicService.updateUserById(user);
+        User user1 = new User("1886374","hashou",22);
+        userBasicService.updateUserByPhone(user1);
     }
 
     @Test
     public void testD(){
-        int i = userBasicService.deleteUserByPhone("123678");
+        int i = userBasicService.deleteUserByPhone("123675");
         log.info("主键是：{}", i);
+        //userBasicService.deleteUserById(9);
     }
 
-    /**
-     * 更新时传递的User可能只有必要的字段，所以不建议更新缓存，否则总是要主动查一次
-     */
     @Test
-    public void testU(){
-        User update = new User(3,null,"jacky",null);
-        User user = userBasicService.updateUserById(update);
+    public void testBatC(){
+        User user1 = new User("13425","junit",45);
+        User user2 = new User("937553","huidn",74);
+        List<User> userList = Arrays.asList(user1, user2);
+        userBasicService.saveUsers(userList);
     }
 
     @Autowired
