@@ -12,12 +12,10 @@
     <result column="version" jdbcType="INTEGER" property="version" />
     <result column="note" jdbcType="VARCHAR" property="note" />
   </resultMap>
-  <sql id="Base_Column_List">
-    id, user_id, amount, send_date, total, unit_amount, stock, version, note
-  </sql>
+
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-    select 
-    <include refid="Base_Column_List" />
+    select
+      id, user_id, amount, send_date, total, unit_amount, stock, version, note
     from redpacket_record
     where id = #{id,jdbcType=INTEGER}
   </select>
@@ -25,16 +23,6 @@
     delete from redpacket_record
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.redpacket.model.RedpacketRecord">
-    insert into redpacket_record (id, user_id, amount, 
-      send_date, total, unit_amount, 
-      stock, version, note
-      )
-    values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{amount,jdbcType=DECIMAL}, 
-      #{sendDate,jdbcType=TIMESTAMP}, #{total,jdbcType=INTEGER}, #{unitAmount,jdbcType=DECIMAL}, 
-      #{stock,jdbcType=INTEGER}, #{version,jdbcType=INTEGER}, #{note,jdbcType=VARCHAR}
-      )
-  </insert>
   <insert id="insertSelective" parameterType="com.redpacket.model.RedpacketRecord">
     insert into redpacket_record
     <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -126,21 +114,14 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.redpacket.model.RedpacketRecord">
-    update redpacket_record
-    set user_id = #{userId,jdbcType=INTEGER},
-      amount = #{amount,jdbcType=DECIMAL},
-      send_date = #{sendDate,jdbcType=TIMESTAMP},
-      total = #{total,jdbcType=INTEGER},
-      unit_amount = #{unitAmount,jdbcType=DECIMAL},
-      stock = #{stock,jdbcType=INTEGER},
-      version = #{version,jdbcType=INTEGER},
-      note = #{note,jdbcType=VARCHAR}
-    where id = #{id,jdbcType=INTEGER}
-  </update>
   <update id="decreaseRedpacket">
     update redpacket_record
     set stock = stock - 1
     where id = #{id}
+  </update>
+  <update id="decreaseRedpacketWithVersion">
+    update redpacket_record
+    set stock = stock - 1, version = version + 1
+    where id = #{redpacketId} and version = #{version}
   </update>
 </mapper>

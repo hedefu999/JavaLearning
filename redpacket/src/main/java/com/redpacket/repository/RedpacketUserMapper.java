@@ -1,7 +1,9 @@
 package com.redpacket.repository;
 
 import com.redpacket.model.RedpacketUser;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface RedpacketUserMapper {
     int deleteByPrimaryKey(Integer id);
 
