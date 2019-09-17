@@ -1,16 +1,20 @@
 package com.redpacket.controller;
 
+import com.redpacket.FileUtils;
 import com.redpacket.service.RedpacketUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,6 +90,28 @@ public class RedPacketUserController {
         return createResult(userId, result);
     }
 
+    /**
+     * 使用redis服务
+     * 抢红包耗时2.53s  触发独立线程保存数据耗时463ms
+     */
+    @RequestMapping("/grab-red-packet_with-redis")
+    @ResponseBody
+    public Map<String,Object> grabRedpacketByRedis(Integer redpacketId,Integer userId){
+        /**
+         * hset red_packet_5 stock 200
+         * hset red_packet_5 unit_amount 100
+         *
+         * HashOperations hashOps = redisTemplate.opsForHash();
+         * hashOps.put("red_packet_1","stock",200);
+         * hashOps.put("red_packet_1","unit_amount",100);
+         */
+        long result = redpacketUserService.grabRedpacketByRedis(redpacketId, userId);
+        Map<String,Object> map = new HashMap<>();
+        map.put("userId",userId);
+        map.put("success",result > 0);
+        map.put("message",result>0?"抢红包成功":"抢红包失败");
+        return map;
+    }
 
 
     @RequestMapping(value = "/grab",method = RequestMethod.GET)
@@ -127,6 +153,39 @@ public class RedPacketUserController {
 
         public void setAmount(Integer amount) {
             this.amount = amount;
+        }
+    }
+    @RequestMapping(value = "/test-file-reading",method = RequestMethod.GET)
+    @ResponseBody
+    public void testFileReading(String filepath){
+        try {
+            File file = ResourceUtils.getFile("classpath*:lua/grab_red_packet.lua");
+
+            System.out.println("1"+new FileInputStream(file).available());
+        } catch (IOException e) {
+        }
+        try {
+            File file = ResourceUtils.getFile("classpath:lua/grab_red_packet.lua");
+            System.out.println("2"+file.length());
+
+        }catch (Exception e){
+
+        }
+        try {
+            File file = ResourceUtils.getFile("lua/grab_red_packet.lua");
+            System.out.println("4"+new FileInputStream(file).available());
+        }catch (Exception e){
+
+        }
+        //在mvc web app下获取resources下的文件的可用方法，上述spring的ResourceUtils写法都报错
+        try {
+            //ClassPathResource resource2 = new ClassPathResource("lua/grab_red_packet.lua");
+            //InputStream inputStream2 = resource2.getInputStream();
+            //System.out.println("3"+inputStream2.available());
+            String result = FileUtils.readClassPathFileToString("lua/grab_red_packet.lua");
+            System.out.println(result);
+        }catch (Exception e){
+
         }
     }
 

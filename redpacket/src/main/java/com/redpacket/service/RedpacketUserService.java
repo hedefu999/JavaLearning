@@ -10,4 +10,6 @@ public interface RedpacketUserService {
     int retryGrabByDuration(Integer redpacketId, Integer userId);
     //固定次数的重试
     int retryGrabByTimes(Integer redpacketId, Integer userId);
+
+    long grabRedpacketByRedis(Integer redpacketId, Integer userId);
 }
