@@ -76,6 +76,7 @@ public class RedisRedpacketServiceImpl implements RedisRedpacketService {
                 redpacketUsers.add(user);
             }
             //保存抢红包信息
+            //TODO 替换成service可否正常在独立线程中发挥作用
             count += executeBatch(redpacketUsers);
         }
         redisTemplate.delete(PREFIX+redpacketId);
