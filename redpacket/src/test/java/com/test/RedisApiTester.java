@@ -98,4 +98,11 @@ public class RedisApiTester {
         String luaScript = FileUtils.readClassPathFileToString("lua/grab_red_packet.lua");
         //a2a4f70013b19b27b3ed23324869fa01d8998d79
     }
+
+    @Test
+    public void testRedisListOps(){
+        BoundListOperations ops = redisTemplate.boundListOps("test_list");
+        List range = ops.range(0, 3);
+        System.out.println(range);
+    }
 }

@@ -12,4 +12,5 @@ public interface RedpacketUserService {
     int retryGrabByTimes(Integer redpacketId, Integer userId);
 
     long grabRedpacketByRedis(Integer redpacketId, Integer userId);
+
 }

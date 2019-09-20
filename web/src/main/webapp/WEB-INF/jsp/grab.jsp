@@ -36,8 +36,8 @@
     <script type="text/javascript">
         function grabRedpacket(url){
             console.log("开始抢红包");
-            var max = 250;
-            var timestamp = Date.parse(new Date());
+            var max = 2050;
+            var timestamp = new Date().getTime();
             for (var i = 1; i <= max; i++) {
                 $.post({
                     url:'/redpacket-user'+url+'?redpacketId=1&userId='+i,
@@ -45,8 +45,8 @@
                     success:function (result) {
                         var userId = result.userId;
                         console.log("用户"+userId+"抢红包结果："+result.message);
-                        if (userId>=250){
-                            var timeConsume = Date.parse(new Date()) - timestamp;
+                        if (userId>=2000){
+                            var timeConsume = new Date().getTime() - timestamp;
                             console.log(url+"方式的抢红包共耗时"+timeConsume+"毫秒");
                         }
                     }

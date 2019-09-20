@@ -91,8 +91,12 @@ public class RedPacketUserController {
     }
 
     /**
+     * 上述测试数据是200个红包，耗时计算存在问题
      * 使用redis服务
-     * 抢红包耗时2.53s  触发独立线程保存数据耗时463ms
+     * 抢2000个红包浏览器端显示耗时7464ms  触发独立线程保存数据耗时1295ms
+     * 优化内容：
+     *   同步等待@Async方法的返回结果
+     *   并发读取lua脚本SHA冲突问题
      */
     @RequestMapping("/grab-red-packet_with-redis")
     @ResponseBody
@@ -120,9 +124,11 @@ public class RedPacketUserController {
         modelAndView.setViewName("grab");
         return modelAndView;
     }
+
     @RequestMapping(value = "/test-return",method = RequestMethod.POST)
     @ResponseBody
     public Map<String,Object> testReturn(){
+        log.info("当前线程名称：{}", Thread.currentThread().getName());
         Map<String,Object> map = new HashMap<>();
         map.put("success",true);
         map.put("data",new UserInfo("E001",12));
