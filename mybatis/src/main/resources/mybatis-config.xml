@@ -29,7 +29,7 @@
   </typeAliases>
   
   <plugins>
-<!--    <plugin interceptor="com.mybatis.chapter08.SimplePlugin">-->
+<!--    <plugin _15_4interceptor="com.mybatis.chapter08.SimplePlugin">-->
 <!--      <property name="dbType" value="mysql"/>-->
 <!--    </plugin>-->
     <plugin interceptor="com.mybatis.chapter08.PagePlugin">
@@ -39,7 +39,7 @@
       <property name="default.checkPageIndex" value="true"/>
       <property name="default.cleanOrderby" value="true"/>
     </plugin>
-<!--    <plugin interceptor="com.mybatis.chapter08.PagePlugin2">-->
+<!--    <plugin _15_4interceptor="com.mybatis.chapter08.PagePlugin2">-->
 <!--      <property name="default.page" value="1" />-->
 <!--      <property name="default.pageSize" value="3" />-->
 <!--      <property name="default.useFlag" value="true" />-->

@@ -11,6 +11,12 @@ public class PageHelper {
         this.pageSize = pageSize;
     }
 
+    public PageHelper(int total, int pageSize, int pageIndex) {
+        this.total = total;
+        this.pageSize = pageSize;
+        this.pageIndex = pageIndex;
+    }
+
     public int getPageCount(){
         return total%pageSize==0?total/pageSize:total/pageSize+1;
     }
@@ -20,5 +26,11 @@ public class PageHelper {
     }
     public int getPageEnd(int pageIndex){
         return pageIndex*pageSize;
+    }
+    public int getMysqlCount(){
+        return pageSize;
+    }
+    public int getMysqlOffset(){
+        return pageSize*(pageIndex-1);
     }
 }

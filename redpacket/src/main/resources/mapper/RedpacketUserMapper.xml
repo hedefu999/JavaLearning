@@ -18,7 +18,8 @@
     from redpacket_user
     where id = #{id,jdbcType=INTEGER}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from redpacket_user
     where id = #{id,jdbcType=INTEGER}
   </delete>
@@ -141,4 +142,16 @@
       </if>
     </trim>
   </insert>
+
+  <select id="getGrabRecordCount" resultType="java.lang.Integer">
+    select count(1) from redpacket_user where id = #{redpacketId}
+  </select>
+  <select id="getGrabRecord" resultType="com.redpacket.model.RedpacketUser">
+    select
+    <include refid="Base_Column_List"/>
+    from redpacket_user
+    where redpacket_id = #{redpacketId}
+    limit #{offset},#{count}
+  </select>
+
 </mapper>

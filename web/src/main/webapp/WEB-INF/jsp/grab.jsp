@@ -40,7 +40,7 @@
             var timestamp = new Date().getTime();
             for (var i = 1; i <= max; i++) {
                 $.post({
-                    url:'/redpacket-user'+url+'?redpacketId=1&userId='+i,
+                    url:'/redpacket'+url+'?redpacketId=1&userId='+i,
                     //异步请求模拟高并发，此时success里看到的i始终是终值
                     success:function (result) {
                         var userId = result.userId;

@@ -6,15 +6,16 @@
 <div style="text-align: center">
     <h2>高并发抢红包DEMO</h2>
     <p>《JavaEE互联网轻量级框架整合开发》- chapter 22</p>
-    <a href="/redpacket-user/grab">去抢红包！</a>
+    <a href="/redpacket/grab">去抢红包！</a>
     <br><br>
-    <button onclick="testReturn()">测试返回功能</button>
+    <button onclick="testReturn()">测试返回功能</button><br><br>
+    <a href="/exportExcel">试试导出excel文件</a>
 </div>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.0.js"></script>
 <script type="text/javascript">
     function testReturn() {
         $.post({
-            url:'/redpacket-user/test-return',
+            url:'/redpacket/test-return',
             success:function (result) {
                 console.log(result.data);
             }
