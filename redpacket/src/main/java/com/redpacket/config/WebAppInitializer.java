@@ -36,6 +36,7 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
                 "/index/main",
                 "/redpacket/grab","/redpacket/grab-red-packet","/redpacket/grab-red-packet_with-redis","/redpacket/test-return","/redpacket/grab-red-packet_retry-fixed-times","/redpacket/grab-red-packet_retry-fixed-duration","/redpacket/grab-red-packet_with-version",
                 "/exportExcel",
+                "/file/upload","/file/uploadMultipart","/file/uploadPart",
                 "/getHeaderAndCookie","/testInterceptor",
         };
         String[] url = {"/"};
@@ -55,7 +56,7 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
     }
 
     /**
-     * dynamic servlet上传文件配置,需要覆写父类的方法
+     * dispatcher servlet上传文件配置,需要覆写父类的方法
      */
     @Override
     protected void customizeRegistration(javax.servlet.ServletRegistration.Dynamic registration) {
