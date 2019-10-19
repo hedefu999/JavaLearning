@@ -1,5 +1,6 @@
 package com.redpacket.config;
 
+import com.redpacket._16.String2UserConverter;
 import org.apache.commons.dbcp.BasicDataSourceFactory;
 import org.apache.ibatis.session.AutoMappingBehavior;
 import org.mybatis.spring.SqlSessionFactoryBean;
@@ -9,9 +10,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.core.io.Resource;
+import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -23,7 +26,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.sql.DataSource;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -90,5 +93,15 @@ public class RootConfig {
         executor.setThreadNamePrefix("redpacket-taskExecutor-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         return executor;
+    }
+
+    @Bean(name = "fcsfb")
+    public FormattingConversionServiceFactoryBean initFCSFB(){
+        Set<Converter> converters = new HashSet<>();
+        converters.add(new String2UserConverter());
+        FormattingConversionServiceFactoryBean fcsfb = new FormattingConversionServiceFactoryBean();
+        fcsfb.setConverters(converters);
+        //fcsfb.getObject().addConverter();
+        return fcsfb;
     }
 }

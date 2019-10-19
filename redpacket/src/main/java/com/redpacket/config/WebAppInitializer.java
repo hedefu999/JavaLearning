@@ -31,6 +31,7 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
          * 实际测试中 /redpacket/* 不能匹配/redpacket/grab,原因不明，可以使用/解决问题，但favicon.ico总是请求不到
          * 另外/*不能匹配任何请求，似乎*不能使用
          * 如果有xml配置文件可以在dispatcher-servlet中加一行 <mvc:resources mapping="/resources/**" location="/resources/"/>
+         * TODO 强制在此处手动加入URL才能访问
          */
         String[] urls = {
                 "/index/main",
@@ -38,6 +39,7 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
                 "/exportExcel",
                 "/file/upload","/file/uploadMultipart","/file/uploadPart",
                 "/getHeaderAndCookie","/testInterceptor",
+                "/advice/test","/advice/exception","/advice/getInitUser",
         };
         String[] url = {"/"};
         return urls;
