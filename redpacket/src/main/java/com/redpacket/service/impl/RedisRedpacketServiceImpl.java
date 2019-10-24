@@ -2,7 +2,7 @@ package com.redpacket.service.impl;
 
 import com.redpacket.model.RedpacketUser;
 import com.redpacket.service.RedisRedpacketService;
-import com.redpacket.service.RedpacketBizService;
+import com.redpacket.service.RedpacketBasicService;
 import com.utils.PageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,7 +130,7 @@ public class RedisRedpacketServiceImpl implements RedisRedpacketService {
 
     /*-=-=-=-=-=-= 我的改进方法 =-=-=-=-=-=*/
     @Autowired
-    private RedpacketBizService redpacketBizService;
+    private RedpacketBasicService redpacketBizService;
     /**
      * 异步方法任务可以使用@Async注解新开线程操作
      * 方法返回void时可以避免阻塞主线程，需要同步等待时就需要返回Future<T>,返回其他类型会框架报错：Null return value from advice does not match primitive return type for

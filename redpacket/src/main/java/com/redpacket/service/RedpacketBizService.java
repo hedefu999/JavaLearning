@@ -1,10 +1,13 @@
 package com.redpacket.service;
 
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.List;
+import com.redpacket.model.RedpacketRecord;
+import com.redpacket.model.RedpacketUser;
 
 public interface RedpacketBizService {
-    int saveRedpacketUsers(Integer redpacketId, BigDecimal unitAmount, List<String> userIdTimestampList);
+    void testVoidAsyncImpact();
+
+    void testNonVoidAsyncImpact();
+
+    void testAsyncTxImpact();
+
 }
