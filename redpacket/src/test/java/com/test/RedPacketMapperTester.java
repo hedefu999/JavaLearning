@@ -17,6 +17,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {RootConfig.class})
 @ComponentScan(
@@ -40,7 +43,15 @@ public class RedPacketMapperTester {
     }
     @Test
     public void testUserMapper(){
-        int insert = redpacketUserMapper.insert(null);
-        System.out.println(insert);
+        RedpacketRecord record = new RedpacketRecord();
+        record.setUserId(346732);
+        record.setAmount(new BigDecimal("240.00"));
+        record.setSendDate(new Date());
+        record.setTotal(12);
+        record.setUnitAmount(new BigDecimal("20.00"));
+        record.setStock(12);
+        record.setNote("发了12个红包");
+        int i = redpacketRecordMapper.insertSelective(record);
+        System.out.println("主键 = "+record.getId());
     }
 }

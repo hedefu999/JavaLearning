@@ -40,7 +40,7 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
                 "/file/upload","/file/uploadMultipart","/file/uploadPart",
                 "/getHeaderAndCookie","/testInterceptor",
                 "/advice/test","/advice/exception","/advice/getInitUser",
-                "/manyfunc/"
+                "/manyfunc/testVoidAsyncImpact","/manyfunc/testNonVoidAsyncImpact","/manyfunc/testAsyncTxImpact",
         };
         String[] url = {"/"};
         return urls;

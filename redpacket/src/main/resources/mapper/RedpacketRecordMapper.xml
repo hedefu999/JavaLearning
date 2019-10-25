@@ -23,7 +23,10 @@
     delete from redpacket_record
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insertSelective" parameterType="com.redpacket.model.RedpacketRecord">
+
+  <!--使用JDBC的Statement对象的getGeneratedKeys() 取出插入操作生成的主键-->
+  <insert id="insertSelective" useGeneratedKeys="true" keyProperty="id"
+          parameterType="com.redpacket.model.RedpacketRecord">
     insert into redpacket_record
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">

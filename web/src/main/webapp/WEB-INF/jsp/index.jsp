@@ -39,18 +39,21 @@
             </form>
         </div>
     </div><br>
-    <p style="color: aqua;"> + springframework之@Async异步注解探究</p>
-    <div class="row" style="width: 100%;">
-        <div class="col-xm-4 col">
-            <a href="">@Async标在空返回的方法上</a>
+    <div style="width: 100%;border: 2px solid black;">
+        <p style="color: aqua;"> + springframework之@Async异步注解探究</p>
+        <div class="row" style="text-align: center;" >
+            <div class="col-xm-4 col">
+                <a href="/manyfunc/testVoidAsyncImpact">@Async标在空返回的方法上</a>
+            </div>
+            <div class="col-xm-4 col">
+                <a href="/manyfunc/testNonVoidAsyncImpact">@Async标在返回Future<>的方法上</a>
+            </div>
+            <div class="col-xm-4 col">
+                <a href="/manyfunc/testAsyncTxImpact">检查@Async注解对于事务的影响</a>
+            </div>
         </div>
-        <div class="col-xm-4 col">
-            <a href="">@Async标在返回Future<>的方法上</a>
-        </div>
-        <div class="col-xm-4 col">
-            <a href="">检查@Async注解对于事务的影响</a>
-        </div>
-</div>
+    </div>
+
 
 <div style="width: 100%;padding: 50px;">
 

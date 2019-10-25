@@ -70,6 +70,12 @@ public class RedpacketBasicServiceImpl implements RedpacketBasicService {
         return redpacketRecordMapper.decreaseRedpacket(id);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.READ_COMMITTED)
+    @Override
+    public int saveRedpacket(RedpacketRecord record) {
+        return redpacketRecordMapper.insertSelective(record);
+    }
+
     @Async("taskExecutor")
     @Override
     public void doTimeConsumedOperation() {
@@ -94,12 +100,7 @@ public class RedpacketBasicServiceImpl implements RedpacketBasicService {
             e.printStackTrace();
         }
         long end = System.currentTimeMillis();
-        log.info("内部方法执行在线程{}上，start = {} end = {} 执行耗时 = {}", Thread.currentThread().getName(),start,end,end-start);
+        log.info("内层方法执行在线程{}上，start = {} end = {} 执行耗时 = {}", Thread.currentThread().getName(),start,end,end-start);
         return new AsyncResult<String>("success");
-    }
-
-    @Override
-    public int saveRedpacketRecord(RedpacketRecord record) {
-        return 0;
     }
 }
