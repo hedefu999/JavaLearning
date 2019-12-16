@@ -18,6 +18,7 @@
     <module>redis</module>
     <module>redpacket</module>
       <module>springboot</module>
+      <module>concurrency</module>
   </modules>
   <properties>
   </properties>
