@@ -1,4 +1,4 @@
-package com.dpchan.c12proxy.ordinaryproxy;
+package com.dpchan.c12proxy._1ordinaryproxy;
 
 public class GamePlayer implements IGamePlayer {
     private String name = "";

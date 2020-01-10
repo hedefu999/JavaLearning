@@ -1,4 +1,4 @@
-package com.dpchan.c12proxy.ordinaryproxy;
+package com.dpchan.c12proxy._1ordinaryproxy;
 
 public interface IGamePlayer {
     //登录游戏

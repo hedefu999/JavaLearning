@@ -1,4 +1,4 @@
-package com.dpchan.c12proxy.ordinaryproxy;
+package com.dpchan.c12proxy._1ordinaryproxy;
 
 public class Client {
     public static void main(String[] args) {
