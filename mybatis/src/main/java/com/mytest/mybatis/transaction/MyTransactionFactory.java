@@ -12,15 +12,18 @@ import java.util.Properties;
 
 public class MyTransactionFactory implements TransactionFactory {
     private Logger log = LoggerFactory.getLogger("MyTransactionFactory");
+    @Override
     public void setProperties(Properties props) {
         log.info("setting properties");
     }
 
+    @Override
     public Transaction newTransaction(Connection conn) {
         log.info("create transaction with one conn");
         return new MyTransaction(conn);
     }
 
+    @Override
     public Transaction newTransaction(DataSource dataSource, TransactionIsolationLevel level, boolean autoCommit) {
         log.info("create transaction with full params");
         return new MyTransaction(dataSource,level,autoCommit);

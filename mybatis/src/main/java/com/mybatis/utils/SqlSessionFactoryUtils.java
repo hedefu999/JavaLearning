@@ -6,12 +6,15 @@ import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.*;
+import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
 
 //加锁保证SqlSessionFactory创建的唯一性
@@ -41,7 +44,7 @@ public class SqlSessionFactoryUtils {
     }
 
     //使用代码方式生成SqlSessionFactory
-    public static SqlSessionFactory getSqlSessionFactory2(String jdbcFileRPath){
+    public static SqlSessionFactory getSqlSessionFactory2(String jdbcFileRPath, boolean autoCommit){
         synchronized (LOCK){
             Properties props = null;
             try {
@@ -55,10 +58,13 @@ public class SqlSessionFactoryUtils {
             dataSource.setUsername(props.getProperty("db.username"));
             dataSource.setPassword(props.getProperty("db.password"));
             dataSource.setUrl(props.getProperty("db.url"));
-            dataSource.setDefaultAutoCommit(true);
-            dataSource.setDefaultTransactionIsolationLevel(TransactionIsolationLevel.READ_COMMITTED.getLevel());
+            dataSource.setDefaultAutoCommit(autoCommit);//AutoC1
+            dataSource.setDefaultTransactionIsolationLevel(TransactionIsolationLevel.READ_UNCOMMITTED.getLevel());
 
             TransactionFactory transacFact = new JdbcTransactionFactory();
+            //Environment实例对象也可以使用内置的建造器进行构建
+            //Environment.Builder builder = new Environment.Builder("dev").transactionFactory(transacFact).dataSource(dataSource);
+            //Environment environment = builder.build();
             Environment env = new Environment("dev", transacFact, dataSource);
             Configuration config = new Configuration(env);
 
@@ -81,9 +87,21 @@ public class SqlSessionFactoryUtils {
         return sqlSessionFactory.openSession();
     }
 
-    public static <T> T getMapper2(Class<T> clazz, String jdbcFileRPath){
-        SqlSessionFactory sqlSessFact = getSqlSessionFactory2(jdbcFileRPath);
-        SqlSession sqlSession = sqlSessFact.openSession();
+    public static <T> T getMapper2(Class<T> clazz, String jdbcFileRPath, boolean autoCommit){
+        SqlSessionFactory sqlSessFact = getSqlSessionFactory2(jdbcFileRPath,autoCommit);
+        //sqlSessFact.getConfiguration().getEnvironment().getDataSource().getConnection().setAutoCommit(true);//AutoC2
+        //在AutoC1处设置的事务隔离级别在openSession()后是有效，但不论在AutoC1还是在AutoC2设置autoCommit都不能在openSession()后带过来，还要再设置一遍
+        SqlSession sqlSession = sqlSessFact.openSession(true);
+        Connection sqlSessionConnection = sqlSession.getConnection();
+        try {
+            //1 TRANSACTION_READ_UNCOMMITTED; 2 TRANSACTION_READ_COMMITTED;
+            //4 TRANSACTION_REPEATABLE_READ; 8 TRANSACTION_SERIALIZABLE;
+            int transactionIsolation = sqlSessionConnection.getTransactionIsolation();
+            boolean sqlSessionAutoCommit = sqlSessionConnection.getAutoCommit();
+            System.out.println("事务隔离级别："+transactionIsolation+"，是否自动提交："+sqlSessionAutoCommit);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         T mapper = sqlSession.getMapper(clazz);
         return mapper;
     }

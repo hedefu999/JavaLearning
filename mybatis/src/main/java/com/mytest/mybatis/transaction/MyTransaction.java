@@ -22,18 +22,22 @@ public class MyTransaction extends JdbcTransaction implements Transaction {
         return super.getConnection();
     }
 
+    @Override
     public void commit() throws SQLException {
         super.commit();
     }
 
+    @Override
     public void rollback() throws SQLException {
 
     }
 
+    @Override
     public void close() throws SQLException {
 
     }
 
+    @Override
     public Integer getTimeout() throws SQLException {
         return null;
     }
