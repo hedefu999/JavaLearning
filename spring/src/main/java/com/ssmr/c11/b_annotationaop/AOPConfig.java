@@ -23,6 +23,11 @@ public class AOPConfig {
   public RoleAspect3 roleAspect3(){
     return new RoleAspect3();
   }
+
+  @Bean
+    public RoleAspect4 roleAspect4(){
+      return new RoleAspect4();
+  }
 }
 /**
  * 使用XML定义切面

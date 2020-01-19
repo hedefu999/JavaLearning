@@ -8,4 +8,6 @@ public interface RoleService {
   void printRole2(Role role);
 
   void printRole3(Role role, Integer code);
+
+  String processParam(Role role, boolean addDesc);
 }

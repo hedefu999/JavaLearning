@@ -1,12 +1,23 @@
 package com.ssmr.c11.b_annotationaop;
 
 import com.ssmr.c11.Role;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class Client {
-  private static RoleService roleService =
-          new AnnotationConfigApplicationContext(AOPConfig.class)
-          .getBean(RoleService.class);
+  private final Logger log = LoggerFactory.getLogger(Client.class);
+  private static RoleService roleService = null;
+  private static UserService userService = null;
+  @Before
+  public void before(){
+      AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AOPConfig.class);
+      roleService = context.getBean(RoleService.class);
+      userService = context.getBean(UserService.class);
+  }
 
   public static void main(String[] args) {
     //showAdiceExecuteOrder();
@@ -52,4 +63,10 @@ public class Client {
      * after returning ...
      */
   }
+
+  @Test
+  public void test57(){
+      userService.getRoleParseResult();
+  }
+
 }
