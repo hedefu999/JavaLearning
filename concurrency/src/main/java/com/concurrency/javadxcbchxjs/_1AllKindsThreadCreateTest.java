@@ -1,15 +1,8 @@
-package com.concurrency.starter;
+package com.concurrency.javadxcbchxjs;
 
 import org.junit.Test;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.concurrent.*;
-
-import static java.time.temporal.ChronoUnit.DAYS;
 
 public class _1AllKindsThreadCreateTest {
     static class ExtendsThread extends Thread{

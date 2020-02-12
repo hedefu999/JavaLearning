@@ -1,4 +1,4 @@
-package com.concurrency.starter;
+package com.concurrency.javadxcbchxjs;
 
 public class _3ThreadUnsafeCases {
     static class ExtendsThread extends Thread{

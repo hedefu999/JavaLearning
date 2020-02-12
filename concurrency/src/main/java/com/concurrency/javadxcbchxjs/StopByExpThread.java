@@ -1,4 +1,4 @@
-package com.concurrency.starter;
+package com.concurrency.javadxcbchxjs;
 
 //1.7.3 能停止的线程--异常法
 public class StopByExpThread extends Thread{
