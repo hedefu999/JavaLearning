@@ -2,6 +2,7 @@ package com.concurrency.javadxcbchxjs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @title 3.1 等待/通知机制
@@ -559,5 +560,211 @@ public class _7WaitNotifyAPI {
             }
         }
     }
+    //演示join方法的使用
+    static class JoinApiTest{
+        static class TestThread extends Thread{
+            @Override
+            public void run() {
+                System.out.print(" hello ");
+            }
+        }
+        public static void main(String[] args) throws InterruptedException {
+            TestThread testThread = new TestThread();
+            //下面写法会输出 world hello
+            //testThread.start();
+            //System.out.print(" world ");
+
+            testThread.start();
+            testThread.join(); //等testThread线程销毁
+            System.out.println("world");
+            //在main线程等待TestThread执行期间如果有其他线程调了TestThread的interrupt方法会导致InterruptedException
+        }
+    }
+
+    /**
+     * @title 3.2.5 比较join与sleep
+     */
+    static class ComparingJoinAndSleep{
+        static class AThread extends Thread{
+            public AThread(String name){setName(name);}
+            @Override
+            public void run() {
+                try {
+                    System.out.println(threadName()+" start "+timeStamp());
+                    Thread.sleep(5000);
+                    System.out.println(threadName()+" end "+timeStamp());
+                }catch (Exception e){}
+            }
+            synchronized public void doService(){
+                System.out.println(threadName()+" do service "+timeStamp());
+            }
+        }
+        static class BThread extends Thread{
+            private AThread aThread;
+            public BThread(AThread aThread,String name){
+                this.aThread = aThread;setName(name);
+            }
+            @Override
+            public void run() {
+                try {
+                    synchronized (aThread){
+                        aThread.start();
+                        Thread.sleep(5000); //A
+                        //aThread.join();      //B
+                        System.out.println(threadName()+" end "+timeStamp());
+                    }
+                }catch (Exception e){}
+            }
+        }
+        static class CThread extends Thread{
+            private AThread aThread;
+            public CThread(AThread aThread, String name){
+                this.aThread = aThread; setName(name);
+            }
+            @Override
+            public void run() {
+                aThread.doService();
+            }
+        }
+        public static void main(String[] args) throws InterruptedException {
+            AThread aThread = new AThread("aThread");
+            BThread bThread = new BThread(aThread,"bThread");
+            CThread cThread = new CThread(aThread,"cThread");
+            bThread.start();
+            Thread.sleep(1000);
+            cThread.start();
+        }
+        /**
+         * b线程和c线程都持有a线程
+         *
+         * 使用A行代码，B会在sleep时一直持有a线程的锁
+         * aThread start 9060
+         * bThread end 4064
+         * aThread end 4065
+         * cThread do service 4065
+         *
+         * 使用B行代码，B会及时让出锁,这样1秒后c能直接拿到a线程的锁运行，并且b线程能在后面等完a线程继续执行
+         * aThread start 715
+         * cThread do service 1718
+         * aThread end 5720
+         * bThread end 5720
+         */
+    }
+
+    // 3.2.6 join方法后面的代码提前运行-出现意外
+    static class ThreadJoinAndThrows{
+        static class AThread extends Thread{
+            @Override
+            synchronized public void run() {
+                System.out.println(threadName()+" begin at "+timeStamp());
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) { }
+                System.out.println(threadName()+" end at "+timeStamp());
+            }
+        }
+        static class BThread extends Thread{
+            private AThread aThread;
+            public BThread(AThread aThread,String name){
+                this.aThread = aThread;
+                setName(name);
+            }
+            @Override
+            public void run() {
+                synchronized (aThread){
+                    System.out.println(threadName() + " start at "+timeStamp());
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) { }
+                    System.out.println(threadName()+" end at "+timeStamp());
+                }
+            }
+        }
+        public static void main2(String[] args) throws InterruptedException {
+            AThread aThread = new AThread();
+            aThread.setName("aThread");
+            BThread bThread = new BThread(aThread,"bThread");
+            bThread.join(2000);//A
+            aThread.start(); //B
+            bThread.start(); //C
+            System.out.println(threadName()+" end at "+timeStamp());
+        }
+        /** A自己锁自己，B持有A锁，main持有B锁，A B C 三行调整顺序会造成不同的启动顺序，日志会有变化
+         * aThread和bThread谁先start似乎与代码顺序有点关系。。。
+         * 原则上讲谁先start与代码声明顺序无关，所以谁先启动就存在很多种情况，这里修改代码顺序来出现这些情况
+         *
+         * -- astart bstart bjoin
+         * aThread begin at 7068
+         * main end at 9073
+         * aThread end at 2073
+         * bThread start at 2073
+         * bThread end at 7077
+         *
+         * -- bstart astart bjoin
+         * bThread start at 925
+         * main end at 2929     //bThread持有aThread锁，main持有了bThread锁，所以在2秒后就释放锁不等了
+         * bThread end at 5929
+         * aThread begin at 5929
+         * aThread end at 930
+         *
+         * -- bjoin astart bstart
+         * main end at 1552     //bThread还没start，main去join只会立即跳过
+         * aThread begin at 1552
+         * aThread end at 6557
+         * bThread start at 6557
+         * bThread end at 1558
+         *
+         * -- bstart bjoin astart
+         * bThread start at 4661
+         * bThread end at 9665
+         * main end at 9665 //？？？？ main线程拿不到B的锁，这是为什么？？？？
+         * aThread begin at 9665
+         * aThread end at 4670
+         */
+        public static void main(String[] args) throws InterruptedException {
+            AThread aThread = new AThread();
+            aThread.setName("aThread");
+            BThread bThread = new BThread(aThread,"bThread");
+            aThread.start();
+            bThread.start();
+            aThread.join(2000);
+            System.out.println(threadName()+" end at "+timeStamp());
+        }
+        /**
+         * A B main都争抢A锁，AB肯定是顺序执行了
+         *
+         * -- ajoin astart bstart
+         * -- ajoin bstart astart
+         * //上面两种a还没start呢，ajoin是不会等两秒的
+         * -- astart ajoin bstart
+         * aThread begin at 8182
+         * aThread end at 3185
+         * main end at 3186
+         * bThread start at 3186
+         * bThread end at 8186
+         * // ajoin拿到锁时aThread已经跑完了，所以2秒不用等了
+         * -- bstart astart ajoin
+         * bThread start at 160
+         * bThread end at 5163
+         * main end at 5163
+         * aThread begin at 5163
+         * aThread end at 168
+         * // 为什么ajoin总是可以早于aThread抢到锁？？？
+         * -- astart bstart ajoin
+         * aThread begin at 9895
+         * aThread end at 4897
+         * bThread start at 4897
+         * bThread end at 9901
+         * main end at 9902
+         */
+    }
+    /**
+     * 总结：
+     * A执行X.join要在Xstart之后才有意义；
+     * X start之后，A要拿到X锁才能join(long)；
+     * 如果X自己锁自己那A拿不到X锁只能等X执行完，执行完后join会立刻结束，里面的long没有作用；
+     * 如果X先start，A能拿到X锁，那么A与X就是并行的，A会等 X运行时间m join(n) 的m,n中的最小值，就继续向下执行
+     *
+     */
 
 }

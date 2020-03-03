@@ -1,4 +1,4 @@
-package com.ssmr.mine.packageInfoAnno;
+package com.packageInfoAnno;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

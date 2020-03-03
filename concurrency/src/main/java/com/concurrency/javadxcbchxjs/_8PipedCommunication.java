@@ -3,6 +3,13 @@ package com.concurrency.javadxcbchxjs;
 import java.io.*;
 
 public class _8PipedCommunication {
+    public static long timeStamp(){
+        return System.currentTimeMillis()%10000;
+    }
+    public static String threadName(){
+        return Thread.currentThread().getName();
+    }
+
     //3.1.12 管道通信 - 字节流
     static class SimplePipedWriterReader{
         static class ReadWriter{
@@ -84,7 +91,7 @@ public class _8PipedCommunication {
             }
         }
     }
-    //3.1.13 管道通信 字符流
+    //3.1.13 管道通信 - 字符流
     static class PipedCommuByChar{
         static class ReadWriter{
             public void write(PipedWriter out){
@@ -139,4 +146,60 @@ public class _8PipedCommunication {
 
         }
     }
+
+    /**
+     * @title 3.1.14 实战：等待/通知之交叉备份
+     * @desc 创建20个线程，其中10个将数据备份到A数据库中，另外10个线程将数据备份到B数据库中
+     * 备份A数据库和B数据库是交叉进行的
+     */
+    static class DoubleXThreadsBackup{
+        static class DBTool{
+            //确保A先执行，交叉运行两个线程
+            volatile private boolean prevIsA = false;
+            synchronized public void backupA(){
+                try {
+                    while (prevIsA){
+                        wait();
+                    }
+                    for (int i = 0; i < 5; i++) {
+                        System.out.println(threadName()+"* * * *");
+                    }
+                    prevIsA = true;
+                    notifyAll();
+                }catch (Exception e){}
+            }
+            synchronized public void backupB(){
+                try {
+                    while (!prevIsA){
+                        wait();
+                    }
+                    for (int i = 0; i < 5; i++) {
+                        System.out.println(threadName()+"- - - -");
+                    }
+                    prevIsA = false;
+                    notifyAll();
+                }catch (Exception e){}
+            }
+        }
+        public static void main(String[] args) {
+            DBTool dbTool = new DBTool();
+            for (int i = 0; i < 10; i++) {
+                new Thread(){
+                    @Override
+                    public void run() {
+                        dbTool.backupA();
+                    }
+                }.start();
+                new Thread(){
+                    @Override
+                    public void run() {
+                        dbTool.backupB();
+                    }
+                }.start();
+            }
+        }/**
+         * 实现两种线程交替运行
+         */
+    }
+
 }

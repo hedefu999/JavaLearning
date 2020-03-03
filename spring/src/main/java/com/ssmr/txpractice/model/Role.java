@@ -1,9 +1,10 @@
-package com.ssmr.txpractice;
+package com.ssmr.txpractice.model;
 
-public class Student {
+public class Role {
     private Integer id;
     private String name;
-    private String level;
+    private Integer age;
+    private String note;
 
     public Integer getId() {
         return id;
@@ -21,20 +22,29 @@ public class Student {
         this.name = name;
     }
 
-    public String getLevel() {
-        return level;
+    public Integer getAge() {
+        return age;
     }
 
-    public void setLevel(String level) {
-        this.level = level;
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 
     @Override
     public String toString() {
-        return "Student{" +
+        return "Role{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", level='" + level + '\'' +
+                ", age=" + age +
+                ", note='" + note + '\'' +
                 '}';
     }
 }

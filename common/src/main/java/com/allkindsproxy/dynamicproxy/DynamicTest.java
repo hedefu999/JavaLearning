@@ -1,7 +1,7 @@
-package com.twokindsproxy.dynamicproxy;
+package com.allkindsproxy.dynamicproxy;
 
-import com.twokindsproxy.staticproxy.HelloSpeaker;
-import com.twokindsproxy.staticproxy.IHello;
+import com.allkindsproxy.staticproxy.HelloSpeaker;
+import com.allkindsproxy.staticproxy.IHello;
 
 public class DynamicTest {
     public static void main(String[] args) {

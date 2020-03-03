@@ -15,8 +15,7 @@ public class ProxyBeanUtil2 implements InvocationHandler{
     _this.obj = obj;
 
     Object proxy = Proxy.newProxyInstance(
-      obj.getClass().getClassLoader(), obj.getClass().getInterfaces(),_this
-    );
+      obj.getClass().getClassLoader(), obj.getClass().getInterfaces(),_this);
     return proxy;
   }
 

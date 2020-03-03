@@ -1,4 +1,7 @@
-package com.ssmr.txpractice;
+package com.ssmr.txpractice.impl;
+
+import com.ssmr.txpractice.model.Role;
+import com.ssmr.txpractice.model.Student;
 
 import java.util.List;
 

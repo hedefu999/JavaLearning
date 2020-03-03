@@ -1,4 +1,4 @@
-package com.twokindsproxy.staticproxy;
+package com.allkindsproxy.staticproxy;
 
 public class MainTest {
     public static void main(String[] args) {

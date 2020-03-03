@@ -1,4 +1,4 @@
-package com.twokindsproxy.staticproxy;
+package com.allkindsproxy.staticproxy;
 
 public class HelloSpeaker implements IHello {
     @Override

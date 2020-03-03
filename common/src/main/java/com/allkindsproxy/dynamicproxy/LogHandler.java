@@ -1,8 +1,4 @@
-package com.twokindsproxy.dynamicproxy;
-
-import com.twokindsproxy.staticproxy.IHello;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.allkindsproxy.dynamicproxy;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

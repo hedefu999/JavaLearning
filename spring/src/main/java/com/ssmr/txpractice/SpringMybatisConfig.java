@@ -57,7 +57,7 @@ public class SpringMybatisConfig {
         return scannerConfig;
     }
 
-    //此bean扫描mapper.xml
+
 
     /**
      * 试验记录
@@ -69,6 +69,7 @@ public class SpringMybatisConfig {
      * 解决方案是将dataSource作为bean注入，这样方法执行会转而初始化DataSource，类似xml中ref的效果
      * 这个@Autowired加到方法上、入参前、删掉都不影响spring按照入参名寻找并初始化bean
      */
+    //此bean扫描mapper.xml
     @Bean
     public static SqlSessionFactoryBean sqlSessionFactoryBean(@Autowired DataSource dataSource){
         SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
@@ -78,7 +79,8 @@ public class SpringMybatisConfig {
             FileUrlResource fileUrlResource = new FileUrlResource("src/main/resources/com/ssmr/txpractice/sqlmap/*.xml");
             FileSystemResource roleMapperResource = new FileSystemResource("src/main/resources/com/ssmr/txpractice/sqlmap/RoleMapper.xml");
             FileSystemResource stuMapperResource = new FileSystemResource("src/main/resources/com/ssmr/txpractice/sqlmap/StudentMapper.xml");
-            Resource[] resources = {roleMapperResource,stuMapperResource};
+            FileSystemResource userMapperResource = new FileSystemResource("src/main/resources/com/ssmr/txpractice/sqlmap/UserMapper.xml");
+            Resource[] resources = {roleMapperResource,stuMapperResource,userMapperResource};
             factoryBean.setMapperLocations(resources);
         } catch (MalformedURLException e) {
             e.printStackTrace();

@@ -1,18 +1,16 @@
 package com.ssmr.txpractice;
 
-import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Lists;
-import com.ssmr.txpractice.mapper.RoleMapper;
-import com.ssmr.txpractice.mapper.StudentMapper;
+import com.ssmr.txpractice.impl.BizService;
+import com.ssmr.txpractice.impl.RoleBasicService;
+import com.ssmr.txpractice.model.Role;
+import com.ssmr.txpractice.model.Student;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -29,18 +27,11 @@ import java.util.Properties;
 //@ContextConfiguration(value = "...",locations = "+++")
 public class TxTester {
     private static final Logger log = LoggerFactory.getLogger("TxTester");
-    @Test  //测试读取配置文件
-    public void testPropsRead()throws Exception{
-        Properties props = new Properties();
-        //相对路径是从src开头。。。
-        File file = new File("src/main/resources/jdbc.properties");
-        FileInputStream inputStream = new FileInputStream(file);
-        props.load(inputStream);
-        //从配置文件流生成的Property设置到DruidDataSource里
-        System.out.println("user = "+props.getProperty("db.username")+props.getProperty("db.password")+props.getProperty("${db.url}")+props.getProperty("${db.driver}"));
 
-    }
-    @Autowired  //如何知道spring究竟注入了哪些bean
+    /**
+     * 打印出spring究竟注入了哪些bean
+     */
+    @Autowired
     private ApplicationContext context;
     @Test
     public void testPrintAllbeans(){

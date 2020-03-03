@@ -1,7 +1,6 @@
 package com.ssmr.txpractice.impl;
 
-import com.ssmr.txpractice.Student;
-import com.ssmr.txpractice.StudentBasicService;
+import com.ssmr.txpractice.model.Student;
 import com.ssmr.txpractice.mapper.StudentMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

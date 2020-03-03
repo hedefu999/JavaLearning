@@ -1,4 +1,6 @@
-package com.ssmr.txpractice;
+package com.ssmr.txpractice.impl;
+
+import com.ssmr.txpractice.model.Student;
 
 public interface StudentBasicService {
     int saveStudent(Student student);

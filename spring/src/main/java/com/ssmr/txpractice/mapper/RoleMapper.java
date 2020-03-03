@@ -1,6 +1,6 @@
 package com.ssmr.txpractice.mapper;
 
-import com.ssmr.txpractice.Role;
+import com.ssmr.txpractice.model.Role;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

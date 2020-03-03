@@ -1,6 +1,6 @@
 package com.ssmr.txpractice.mapper;
 
-import com.ssmr.txpractice.Student;
+import com.ssmr.txpractice.model.Student;
 import org.springframework.stereotype.Repository;
 
 @Repository

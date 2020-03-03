@@ -1,7 +1,6 @@
 package com.ssmr.txpractice.impl;
 
-import com.ssmr.txpractice.Role;
-import com.ssmr.txpractice.RoleBasicService;
+import com.ssmr.txpractice.model.Role;
 import com.ssmr.txpractice.mapper.RoleMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +26,7 @@ public class RoleBasicServiceImpl implements RoleBasicService {
 
     @Autowired
     private ApplicationContext context;
+
     @Transactional(propagation = Propagation.REQUIRES_NEW,isolation = Isolation.READ_COMMITTED)
     @Override
     public int saveRoles(List<Role> roleList){

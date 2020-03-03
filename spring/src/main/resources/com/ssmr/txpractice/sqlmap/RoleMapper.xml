@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssmr.txpractice.mapper.RoleMapper">
-    <resultMap id="base_result_map" type="com.ssmr.txpractice.Role">
+    <resultMap id="base_result_map" type="com.ssmr.txpractice.model.Role">
         <id property="id" column="id"/>
         <result property="name" column="name"/>
         <result property="age" column="age"/>
@@ -24,6 +24,7 @@
                 note = #{note}
             </if>
         </set>
+        where id = #{id}
     </update>
     <delete id="deleteRole">
         delete from role
@@ -33,7 +34,7 @@
         select id,`name`,age,note
         from role where id = #{id}
     </select>
-    <select id="selectByIds" resultType="com.ssmr.txpractice.Role">
+    <select id="selectByIds" resultType="com.ssmr.txpractice.model.Role">
         select * from role
         <where>
             id in

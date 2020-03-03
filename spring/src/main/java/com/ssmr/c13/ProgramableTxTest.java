@@ -47,7 +47,7 @@ public class ProgramableTxTest {
             txManager.rollback(status);
         }
     }
-    //TODO 玩注解 注解的继承 别名。。。@Inherited @Documented什么意思
+    //TODO 玩注解 注解的 别名 @Documented什么意思
     /**
      * 声明式事务
      * 当你的业务方法不发生异常，或者发生异常，但该异常也被配置为允许提交事务，则让事务管理器回滚事务
