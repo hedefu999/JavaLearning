@@ -1,5 +1,7 @@
 package com.redpacket.config;
 
+import com.redpacket._16.String2UserConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -7,7 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Controller;
@@ -167,4 +171,21 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         registry.addInterceptor(localeChangeInterceptor());
         super.addInterceptors(registry);
     }
+
+    //书中说 使用注解@EnableWebMVC或在xml中使用<mvc:annotation-driven/>时系统会自动初始化FormattingConversionServiceFactoryBean实例
+    //未能注入，无法使用转换工具
+    //@Autowired
+    //private FormattingConversionServiceFactoryBean fcsfb;
+    //private List<Converter> specialDataConverter = null;
+    //@Bean(name = "specialUserDataConverter")
+    //public List<Converter> initUserConverter(){
+    //    if (specialDataConverter == null){
+    //        specialDataConverter = new ArrayList<>();
+    //    }
+    //    Converter userConverter = new String2UserConverter();
+    //    specialDataConverter.add(userConverter);
+    //
+    //    fcsfb.getObject().addConverter(userConverter);
+    //    return specialDataConverter;
+    //}
 }

@@ -138,7 +138,7 @@ public class RedpacketUserServiceImpl implements RedpacketUserService {
     //private AtomicReference<String> luaScriptSHAAtomic = new AtomicReference<>();原子跟排他锁是两个场景下的策略
 
     /**
-     * 红包的扣减和记录的生活是在redis中进行的
+     * 红包的扣减和记录的逻辑是在redis中进行的
      */
     @Override
     public long grabRedpacketByRedis(Integer redpacketId, Integer userId) {

@@ -1,8 +1,6 @@
 package com.redpacket.config;
 
-import com.redpacket._16.String2UserConverter;
 import org.apache.commons.dbcp.BasicDataSourceFactory;
-import org.apache.ibatis.session.AutoMappingBehavior;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,17 +8,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileUrlResource;
 import org.springframework.core.io.Resource;
-import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.RestController;
@@ -95,13 +89,5 @@ public class RootConfig {
         return executor;
     }
 
-    @Bean(name = "fcsfb")
-    public FormattingConversionServiceFactoryBean initFCSFB(){
-        Set<Converter> converters = new HashSet<>();
-        converters.add(new String2UserConverter());
-        FormattingConversionServiceFactoryBean fcsfb = new FormattingConversionServiceFactoryBean();
-        fcsfb.setConverters(converters);
-        //fcsfb.getObject().addConverter();
-        return fcsfb;
-    }
+
 }

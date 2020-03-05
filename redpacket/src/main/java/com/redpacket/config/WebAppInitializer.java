@@ -38,7 +38,8 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
                 "/redpacket/grab","/redpacket/grab-red-packet","/redpacket/grab-red-packet_with-redis","/redpacket/test-return","/redpacket/grab-red-packet_retry-fixed-times","/redpacket/grab-red-packet_retry-fixed-duration","/redpacket/grab-red-packet_with-version",
                 "/exportExcel",
                 "/file/upload","/file/uploadMultipart","/file/uploadPart",
-                "/getHeaderAndCookie","/testInterceptor",
+                "/validate","/testListReceive","/requestParam","/testJSONReturn","/testPathVariable",
+                "/getHeaderAndCookie","/testInterceptor","/saveUser",
                 "/advice/test","/advice/exception","/advice/getInitUser",
                 "/manyfunc/testVoidAsyncImpact","/manyfunc/testNonVoidAsyncImpact","/manyfunc/testAsyncTxImpact",
         };

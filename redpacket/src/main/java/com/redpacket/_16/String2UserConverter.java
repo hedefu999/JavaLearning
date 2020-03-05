@@ -4,7 +4,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.StringUtils;
 
 /**
- * 自定义一个转换器，还需要将其注册
+ * 自定义一个转换器，在WebConfig中进行注册，实现?user=jack-12 也能正常接收数据
  */
 public class String2UserConverter implements Converter<String, User> {
     @Override

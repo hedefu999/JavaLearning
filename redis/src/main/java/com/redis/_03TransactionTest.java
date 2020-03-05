@@ -88,7 +88,7 @@ public class _03TransactionTest {
     }
 
     /**
-     * 使用流水线pipedline提高性能
+     * 使用流水线pipelined提高性能
      * 使用JavaApi比redisTemplate的速度要快
      */
     @Autowired
@@ -100,6 +100,7 @@ public class _03TransactionTest {
         long start = System.currentTimeMillis();
         for (int i = 0; i < 100; i++) {
             pipelined.set("key"+i,"value"+i);
+            pipelined.expire("key"+i,10);
         }
         //pipelined.sync(); 仅执行，但不返回结果
         List<Object> result = pipelined.syncAndReturnAll();//返回执行的结果，但list可能撑爆内存

@@ -7,7 +7,7 @@ import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 /**
  * javaEE中将数据暂存在HTTP的request session中进行传递
- * springMVC响应地提供了3个注解予以支持：@RequestAttribute、@SessionAttribute、@SessionAttributes
+ * springMVC相应地提供了3个注解予以支持：@RequestAttribute、@SessionAttribute、@SessionAttributes
  */
 @Controller
 public class _15_3Save2HttpParasite {

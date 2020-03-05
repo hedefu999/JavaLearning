@@ -31,15 +31,14 @@ public class TestSpringRedisCache {
 
     @Test
     public void testC(){
-        User user = new User("8376432","tsuis",45);
+        User user = new User("893564","htgx",38);
         User result = userBasicService.saveUser(user);
-        //主键无法获取，这样会造成使用主键做redis key出错，所以新建user的可以考虑不必加入缓存
         log.info("新建用户的主键ID = {}", result);
     }
 
     @Test
     public void testR(){
-        User user1 = userBasicService.getUserById(17);
+        User user1 = userBasicService.getUserById(18);
         log.info("result = {}", JSON.toJSONString(user1));
         //User user2 = userBasicService.getUserByPhone("143209");
         //log.info("依据手机号查用户：{}",JSON.toJSONString(user2));
@@ -55,23 +54,23 @@ public class TestSpringRedisCache {
 
     @Test
     public void testU(){
-        User user = new User(9,"1349758","jacky",null);
+        User user = new User(18,"45与45","jacky23",12);
         userBasicService.updateUserById(user);
-        User user1 = new User("1886374","hashou",22);
-        userBasicService.updateUserByPhone(user1);
+        //User user1 = new User("1886374","hashou",22);
+        //userBasicService.updateUserByPhone(user1);
     }
 
     @Test
     public void testD(){
-        int i = userBasicService.deleteUserByPhone("123675");
+        int i = userBasicService.deleteUserByPhone("8376432");
         log.info("主键是：{}", i);
         //userBasicService.deleteUserById(9);
     }
 
     @Test
     public void testBatC(){
-        User user1 = new User("13425","junit",45);
-        User user2 = new User("937553","huidn",74);
+        User user1 = new User("876325","fdg",34);
+        User user2 = new User("657843","yhkmty",54);
         List<User> userList = Arrays.asList(user1, user2);
         userBasicService.saveUsers(userList);
     }

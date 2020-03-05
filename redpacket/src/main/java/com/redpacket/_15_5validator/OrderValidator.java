@@ -1,20 +1,23 @@
 package com.redpacket._15_5validator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import java.math.BigDecimal;
+public class OrderValidator implements Validator {
+    private final Logger log = LoggerFactory.getLogger(OrderValidator.class);
 
-public class TransactionValidator implements Validator {
     @Override
     public boolean supports(Class<?> clazz) {
         //验证是否是Transaction类
-        return Transaction.class.equals(clazz);
+        return Order.class.equals(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        Transaction trans = (Transaction) target;
+        Order trans = (Order) target;
+        log.info("验证订单交易数据对象：{}", trans);
         int comp = trans.getDiscount().add(trans.getTotal()).compareTo(trans.getPrice());
         if (comp != 0){
             errors.rejectValue("total","COMMON SENSE","应付金额+折扣!= 标价");

@@ -16,7 +16,7 @@ public class _15_2Redirect {
     public String saveRole(Model model,String roleName, String note){
         int saveResult = 0;//userService.insertData(new User("jack",12));
         model.addAttribute("roleName","...");
-        model.addAttribute("id",saveResult);
+        model.addAttribute("saveResult",saveResult);
         return "redirect:/showUserInfo";
     }
     /**

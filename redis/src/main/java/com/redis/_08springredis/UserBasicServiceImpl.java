@@ -20,6 +20,7 @@ public class UserBasicServiceImpl implements UserBasicService {
 
     //mybatis回填生成的主键到了user，但不能直接返回主键，否则加入缓存的就是一个数字，在selectbyid会莫名出错
     //mybatis回填主键的方式是设置insert的属性  useGeneratedKeys="true" keyProperty="id"
+    //使用spEL从返回结果中取字段，执行该方法后出现key为 " user::18 "的缓存记录
     @Override
     @CachePut(value = "user",key = "#result.id")
     public User saveUser(User user) {
@@ -54,8 +55,6 @@ public class UserBasicServiceImpl implements UserBasicService {
      * 如果insert操作返回了主键，但错误地将它放入了缓存，这样缓存中存在user::key
      * 此时使用select id，框架会认为user::key就是应当返回的缓存，而select返回的是user，这样总是映射错误
      * 缓存可能会搞坏原本正常的方法逻辑，，，
-     * @param id
-     * @return
      */
     @Override
     @Cacheable(cacheNames = "user", key = "#id")
@@ -66,7 +65,7 @@ public class UserBasicServiceImpl implements UserBasicService {
     }
 
     /**
-     * - @Cacheablew无法通过#result.id获得主键，无法添加到缓存
+     * - @Cacheable无法通过#result.id获得主键，无法添加到缓存
      * 所以使用@CachePut从返回结果中取id
      * 没有使用主键查询，每次getByPhone时都会从数据库查询，方法并没有因为缓存而得到性能提升
      */
@@ -96,6 +95,7 @@ public class UserBasicServiceImpl implements UserBasicService {
 
     /**
      * 使用缓存时需要注意返回的int究竟是主键还是操作的行数
+     * beforeInvocation = true  在方法执行前删除key防止有线程从缓存取到数据。默认false
      */
     @Override
     @CacheEvict(cacheNames = "user",key = "#id",beforeInvocation = true)
@@ -105,7 +105,8 @@ public class UserBasicServiceImpl implements UserBasicService {
     }
     /**
      * 为确保缓存正确，会引入一些不必要的查询
-     * allEntries=true并不表示清空redis缓存，只是清空所有key以user::开头的缓存
+     * allEntries=true并不表示清空redis缓存，只是清空所有key以user::开头的缓存，不论phone筛选条件是否命中了缓存中的记录
+     * 一删百删，要求删除缓存中的所有匹配当前命名规则(以cacheNames:: 开头)的所有key
      */
     @Override
     @CacheEvict(cacheNames = "user",key = "#result",allEntries = true)

@@ -8,13 +8,14 @@ import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import java.util.List;
 
-//@Controller  代码未测试
+@Controller  //代码未测试,本类仅用于展示参数接收，返回和链接配置可能是错的
 public class _15_1ParamReceiver {
     @RequestMapping("/requestParam")
     @ResponseBody
     public String requestParam(@RequestParam("name")String name){
         return "requestParam: "+name;
     }
+    //验证通过
     @RequestMapping("/testJSONReturn")
     public ModelAndView testJSONReturn(){
         ModelAndView mv = new ModelAndView();
@@ -22,11 +23,11 @@ public class _15_1ParamReceiver {
         mv.setView(new MappingJackson2JsonView());
         return mv;
     }
-
+    //这个在WebAppInitializer中似乎配置不上，必须要用通配符
     @RequestMapping("/testPathVariable/{var}")
     @ResponseBody
     public String testPathVar(@PathVariable("var") String name){
-        return "testPathVar: "+name;
+        return "index";
     }
 
     /** 前端的写法
@@ -89,10 +90,11 @@ public class _15_1ParamReceiver {
      *     success:function(result){
      *     }
      * });
+     * 直接返回个String BadRequest,重定向看下一个试验
      */
     @RequestMapping("/testListReceive")
     public String testListReceive(@RequestBody List<User> userList){
-        return "testListReceive: "+userList.size();
+        return "index";
     }
     class User{
         private Integer id;
@@ -107,12 +109,4 @@ public class _15_1ParamReceiver {
      * });
      *
      */
-
-    /**
-     * 不返回ModelAndView的视图
-     */
-    public String index(@RequestParam("id") Long id, ModelMap modelMap){
-        modelMap.addAttribute("user",new Object());
-        return "roleDetails";
-    }
 }
