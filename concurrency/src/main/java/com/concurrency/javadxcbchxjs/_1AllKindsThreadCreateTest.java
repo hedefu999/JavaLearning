@@ -77,6 +77,7 @@ public class _1AllKindsThreadCreateTest {
             for (; i<5;i++){
                 System.out.println("循环内容："+i);
             }
+            Thread.sleep(3000);
             return i;
         }
     }

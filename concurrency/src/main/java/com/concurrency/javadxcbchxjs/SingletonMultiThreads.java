@@ -15,7 +15,7 @@ public class SingletonMultiThreads {
     }
 
     /**
-     * @case 单例模式的饿汉模式写法存在线程问题
+     * @case 单例模式的懒汉模式写法存在线程问题
      * 改进方案？
      */
     static class ShowStarveModeNotThreadSafe {
@@ -43,7 +43,7 @@ public class SingletonMultiThreads {
             /**
              * 打开注释就是一样的hashcode
              * 关闭注释就是3个不同的hashcode
-             * 解决饿汉模式线程安全问题的一个办法是在getInstance()方法上加synchronized关键字
+             * 解决懒汉模式线程安全问题的一个办法是在getInstance()方法上加synchronized关键字
              */
         }
 
@@ -150,10 +150,16 @@ public class SingletonMultiThreads {
          * @case 序列化与反序列化的单例模式实现
          * 一个对象经过序列化再反序列化，hashcode是变的，即序列化会破坏单例模式
          * readResolve方法可以替换[反序列化时字节码生成对象这个操作]，也就是直接指定反序列化时拿到的对象，这样JVM里不会有两个SerialData对象
+         *
+         * - read/writeObject方法与readResolve的区别
+         * 如果使用了ObjectInputStream，可以添加readObject(ObjectInputStream) writeObject(ObjectOutputStream)方法进行序列化反序列化
+         * 这两个方法可以自定义序列化和反序列化过程中key-value的存放和取出，使用了map
+         * readResolve()没有任何参数传入，直接指定一个反序列化结果
          */
         static class SingletonInSerializeEnv{
             static class SerialData implements Serializable{
                 private static final long serialVersionUID = -6652178005670761302L;
+
                 protected Object readResolve(){
                     System.out.println("readResolve was invoked");
                     return TestPackage.DataWrapper.data;
@@ -173,7 +179,7 @@ public class SingletonMultiThreads {
             }
             public static void saveData() throws Exception{
                 SerialData data = TestPackage.getInstance();
-                File datafile = new File("datafile");
+                File datafile = new File("novc/datafile");
                 FileOutputStream fos = new FileOutputStream(datafile);
                 ObjectOutputStream oos = new ObjectOutputStream(fos);
                 oos.writeObject(data);
@@ -182,7 +188,7 @@ public class SingletonMultiThreads {
                 System.out.println(data.hashCode());
             }
             public static void readData() throws Exception{
-                FileInputStream fis = new FileInputStream(new File("dataFile"));
+                FileInputStream fis = new FileInputStream(new File("novc/dataFile"));
                 ObjectInputStream ois = new ObjectInputStream(fis);
                 SerialData data = (SerialData) ois.readObject();
                 ois.close();

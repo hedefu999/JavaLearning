@@ -633,69 +633,70 @@ public class _5Syncreleatedapi {
          */
     }
 
-    //示例：静态同步synchronized方法
     /**
+     * synchronized加在static方法与普通方法的影响研究
      * synchronized关键字应用在static方法上表示对当前的*.java文件对应的Class类进行持锁
-     *
      */
-    static class SyncStaticTest{
-        synchronized public static void methodA(){
+    static class SyncStaticTest{ //类中共定义了8个方法进行测试
+        synchronized public static void methodAStaticSync(){
             try {
                 System.out.printf("%s: %s 进入sync static方法A\n",time(),threadName());
                 Thread.sleep(3000);
                 System.out.printf("%s: %s 将退出sync static方法A\n",time(),threadName());
-            }catch (InterruptedException e){
-
-            }
-        }
-        public static void methodB(){
-            try {
-                System.out.printf("%s: %s 进入static方法B\n",time(),threadName());
-                Thread.sleep(3000);
-                System.out.printf("%s: %s 将退出static方法B\n",time(),threadName());
-            }catch (InterruptedException e){
-
-            }
+            }catch (InterruptedException e){}
         }
         synchronized public static void methodBStaticSync(){
             try {
                 System.out.printf("%s: %s 进入static sync方法B\n",time(),threadName());
                 Thread.sleep(3000);
                 System.out.printf("%s: %s 将退出static sync方法B\n",time(),threadName());
-            }catch (InterruptedException e){
-
-            }
+            }catch (InterruptedException e){}
         }
-        public void methodC(){
+        public static void methodAStatic(){
             try {
-                System.out.printf("%s: %s 进入普通方法C\n",time(),threadName());
+                System.out.printf("%s: %s 进入static方法A\n",time(),threadName());
                 Thread.sleep(3000);
-                System.out.printf("%s: %s 将退出普通方法C\n",time(),threadName());
-            }catch (InterruptedException e){
-
-            }
+                System.out.printf("%s: %s 将退出static方法A\n",time(),threadName());
+            }catch (InterruptedException e){}
         }
-        synchronized public void methodCSync(){
+        public static void methodBStatic(){
             try {
-                System.out.printf("%s: %s 进入sync普通方法C\n",time(),threadName());
+                System.out.printf("%s: %s 进入static方法B\n",time(),threadName());
                 Thread.sleep(3000);
-                System.out.printf("%s: %s 将退出sync普通方法C\n",time(),threadName());
+                System.out.printf("%s: %s 将退出static方法B\n",time(),threadName());
+            }catch (InterruptedException e){}
+        }
+        public void methodA(){
+            try {
+                System.out.printf("%s: %s 进入普通方法A\n",time(),threadName());
+                Thread.sleep(3000);
+                System.out.printf("%s: %s 将退出普通方法A\n",time(),threadName());
+            }catch (InterruptedException e){}
+        }
+        public void methodB(){
+            try {
+                System.out.printf("%s: %s 进入普通方法B\n",time(),threadName());
+                Thread.sleep(3000);
+                System.out.printf("%s: %s 将退出普通方法B\n",time(),threadName());
+            }catch (InterruptedException e){}
+        }
+        synchronized public void methodASync(){
+            try {
+                System.out.printf("%s: %s 进入sync普通方法A\n",time(),threadName());
+                Thread.sleep(3000);
+                System.out.printf("%s: %s 将退出sync普通方法A\n",time(),threadName());
+            }catch (InterruptedException e){}
+        }
+        synchronized public void methodBSync(){
+            try {
+                System.out.printf("%s: %s 进入sync普通方法B\n",time(),threadName());
+                Thread.sleep(3000);
+                System.out.printf("%s: %s 将退出sync普通方法B\n",time(),threadName());
             }catch (InterruptedException e){
 
             }
         }
-        static class AThread extends Thread{
-            @Override
-            public void run() {
-                SyncStaticTest.methodA();
-            }
-        }
-        static class BThread extends Thread{
-            @Override
-            public void run() {
-                SyncStaticTest.methodB();
-            }
-        }
+
         static class CThread extends Thread{
             private SyncStaticTest syncStatic;
             public CThread(SyncStaticTest syncStatic){
@@ -703,7 +704,7 @@ public class _5Syncreleatedapi {
             }
             @Override
             public void run() {
-                syncStatic.methodC();
+                //syncStatic.methodC();
             }
         }
         static class DThread extends Thread{
@@ -723,7 +724,7 @@ public class _5Syncreleatedapi {
             }
             @Override
             public void run() {
-                syncStatic.methodA();
+                syncStatic.methodAStaticSync();
             }
         }
         static class FThread extends Thread{
@@ -743,7 +744,7 @@ public class _5Syncreleatedapi {
             }
             @Override
             public void run() {
-                syncStatic.methodCSync();
+                //syncStatic.methodCSync();
             }
         }
         static class HThread extends Thread{
@@ -752,100 +753,53 @@ public class _5Syncreleatedapi {
                 SyncStaticTest.methodBStaticSync();
             }
         }
-        public static void main(String[] args) {
-            AThread aThread = new AThread();aThread.setName("AA");
-            BThread bThread = new BThread();bThread.setName("BB");
-            //aThread.start();
-            //bThread.start();
-            /** 异步执行
-             * 5645: AA 进入sync static方法A
-             * 5645: BB 进入static方法B
-             * 8660: AA 将退出sync static方法A
-             * 8661: BB 将退出static方法B
-             */
-            SyncStaticTest staticTest = new SyncStaticTest();
-            CThread cThread = new CThread(staticTest);cThread.setName("CC");
-            //aThread.start();
-            //cThread.start();
-            /** 异步执行
-             * 4126: AA 进入sync static方法A
-             * 4126: CC 进入普通方法C
-             * 7147: CC 将退出普通方法C
-             * 7147: AA 将退出sync static方法A
-             */
-            DThread dThread = new DThread(staticTest);dThread.setName("DD");
-            //aThread.start();
-            //dThread.start();
-            /** 依然是异步执行效果，不过这种写法比上面两种更容易出现DD线程先跑的效果。。。
-             * 4957: AA 进入sync static方法A
-             * 4957: DD 进入static方法B
-             * 7982: AA 将退出sync static方法A
-             * 7982: DD 将退出static方法B
-             *
-             * 5558: DD 进入static方法B
-             * 5558: AA 进入sync static方法A
-             * 8575: DD 将退出static方法B
-             * 8575: AA 将退出sync static方法A
-             */
-            EThread eThread = new EThread(staticTest);eThread.setName("EE");
-            GThread gThread = new GThread(staticTest);gThread.setName("GG");
-            //eThread.start();//启动 sync static methodA
-            //gThread.start();//启动 sync methodCSync
-            /** 异步执行
-             * 3009: GG 进入sync普通方法C
-             * 3009: EE 进入sync static方法A
-             * 6034: GG 将退出sync普通方法C
-             * 6034: EE 将退出sync static方法A
-             * 即便是两个都带有synchronized关键字的方法也是异步执行
-             * 原因：持有不同的锁，一个是对象锁，另一个是Class锁
-             */
-            //上面的写法结果都是异步执行效果，似乎synchronized加到static方法上持有Class锁 没有什么不同
 
-            FThread fThread = new FThread(staticTest);fThread.setName("FF");
-            //fThread.start();//methodB Static Sync
-            //eThread.start();//启动 sync static methodA
+        public static void main(String[] args) {
+            Thread aStaticSyncThread = new Thread(() -> SyncStaticTest.methodAStaticSync());
+            aStaticSyncThread.setName("aStaticSyncThread");
+            Thread bStaticSyncThread = new Thread(() -> SyncStaticTest.methodBStaticSync());
+            bStaticSyncThread.setName("bStaticSyncThread");
+            Thread aStatic = new Thread(() -> SyncStaticTest.methodBStatic());
+            aStatic.setName("aStatic");
+            Thread bStatic = new Thread(() -> SyncStaticTest.methodBStatic());
+            bStatic.setName("bStatic");
+            //声明对象
+            SyncStaticTest staticTest = new SyncStaticTest();
+            Thread aStaticSyncInstanceThread = new Thread(() -> staticTest.methodAStaticSync());
+            aStaticSyncThread.setName("aStaticSyncThread");
+            Thread aThread = new Thread(() -> staticTest.methodA());
+            aThread.setName("aThread");
+            Thread bThread = new Thread(() -> staticTest.methodB());
+            bThread.setName("bThread");
+            Thread aSyncThread = new Thread(() -> staticTest.methodASync());
+            aSyncThread.setName("aSyncThread");
+            Thread bSyncThread = new Thread(() -> staticTest.methodBSync());
+            bSyncThread.setName("bSyncThread");
+
+            SyncStaticTest staticTest2 = new SyncStaticTest();
+            Thread aStaticSyncInstanceThread2 = new Thread(() -> staticTest2.methodAStaticSync());
+            aStaticSyncInstanceThread2.setName("aStaticSyncInstanceThread2");
             /**
-             * 同步执行 通过同一个类示例执行两个sync方法，自然同步
-             * 5302: FF 进入static sync方法B
-             * 8317: FF 将退出static sync方法B
-             * 8318: EE 进入sync static方法A
-             * 1323: EE 将退出sync static方法A
+             1. synchronized static方法与synchronized普通方法 不排斥
+             aStaticSyncThread.start();
+             aSyncThread.start();
+             2. 同一把对象锁，sync方法与sync方法互斥
+             aSyncThread.start();
+             bSyncThread.start();
+             3. 同一把对象锁，sync static方法与sync方法 不互斥
+             aStaticSyncInstanceThread.start();
+             bSyncThread.start();
+             看来static方法不论使用类调还是使用对象调，都不会与普通sync方法互斥
              */
-            HThread hThread = new HThread();hThread.setName("HH");
-            aThread.start();
-            hThread.start();
-            /** 同步方法：两个Class#sync static方法执行起来会争抢Class锁
-             * 1798: AA 进入sync static方法A
-             * 4819: AA 将退出sync static方法A
-             * 4819: HH 进入static sync方法B
-             * 7821: HH 将退出static sync方法B
+            /**
+             1. 非同一把对象锁，通过对象调sync static方法依然是互斥的
+             aStaticSyncInstanceThread.start();
+             aStaticSyncInstanceThread2.start();
+
              */
-            FThread fThread2 = new FThread(new SyncStaticTest());fThread2.setName("FF2");
-            //fThread2.start();
-            //fThread.start();
-            /** 同步执行，在static方法上加synchronized，即便传进去new 出来的对象实例，也躲不过Class锁
-             * 2584: FF2 进入static sync方法B
-             * 5604: FF2 将退出static sync方法B
-             * 5604: FF 进入static sync方法B
-             * 8608: FF 将退出static sync方法B
-             */
-            //fThread.start();//methodB Static Sync
-            //aThread.start();//直接通过类去执行sync static 方法
-            /** 分别通过类和示例执行同一个 synchronized static 方法都会同步
-             * 6616: AA 进入sync static方法A
-             * 9637: AA 将退出sync static方法A
-             * 9638: FF 进入static sync方法B
-             * 2641: FF 将退出static sync方法B
-             */
-            //gThread.start();
-            //aThread.start();
-            /** 异步 - Class#sync static方法不会占有类示例的锁，所以不会
-             * 9495: GG 进入sync普通方法C
-             * 9495: AA 进入sync static方法A
-             * 2512: GG 将退出sync普通方法C
-             * 2512: AA 将退出sync static方法A
-             */
+
         }
+
     }
 
     //示例：见识下synchronized(ClassXXX.class)的效果

@@ -5,10 +5,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Time;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.*;
 
 /**
  * @title 第4章 Lock的使用
@@ -70,6 +67,11 @@ public class _10AboutLockClass {
                 }
             }.start();
         }
+    }
+
+    //演示"可重入"这一概念。可重入锁即递归锁
+    static class ReEntrantLock{
+        //todo
     }
 
     //Lock new 出来多个Condition被不同线程使用，可以分别唤醒线程
@@ -456,7 +458,7 @@ public class _10AboutLockClass {
     }
     /**
      * 操作方法
-     * lockInterruptibly:如果线程打了中断标记,调这个方法会抛出异常
+     * lockInterruptibly:如果线程调了这个方法，再传递中断标记,会抛出异常
      * tryLock:尝试获取锁，并返回是否获得到boolean
      * tryLock(long timeout, TimeUnit unit)：如果在给定timeout时间后锁没有被其他线程占有，并且自身没有被设置中断标志，就获得这把锁
      */
@@ -580,7 +582,7 @@ public class _10AboutLockClass {
      */
     static class ReentrantReadWriteLockUsage{
         public static void main(String[] args) {
-            ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+            ReadWriteLock lock = new ReentrantReadWriteLock();
             Runnable runnable = new Runnable(){
                 @Override
                 public void run() {

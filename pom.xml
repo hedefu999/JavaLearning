@@ -13,11 +13,11 @@
     <module>web</module>
     <module>spring</module>
     <module>common</module>
-    <module>designpattern</module>
-    <module>effectivejava</module>
+    <module>javacore</module>
     <module>redis</module>
     <module>redpacket</module>
       <module>concurrency</module>
+      <module>algorithm</module>
   </modules>
   <properties>
   </properties>

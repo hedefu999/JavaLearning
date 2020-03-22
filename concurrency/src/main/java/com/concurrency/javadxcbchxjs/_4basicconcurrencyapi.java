@@ -208,11 +208,101 @@ public class _4basicconcurrencyapi {
      * 线程sleep状态下进行interrupt会抛出InterruptedException，并且清除停止状态值
      * 倒过来也会抛出同样的异常
      */
+    static class InterruptWhenThread{
+        static class MyThread extends Thread{
+            @Override
+            public void run() {
+                try {
+                    while (true){
+                        if (this.isInterrupted()){
+                            System.out.println("中断标志被设置");
+                            Thread.sleep(2000); //这一行演示设置了中断标志位时调sleep会抛出异常
+                            //break;//发现中断标志位时如何退出
+                        }
+                    }
+                } catch (Exception e) {
+                    System.out.println("线程内抛出异常并停止:"+e.getMessage());
+                }
+            }
+        }
+        static class MyThread2 extends Thread{
+            @Override
+            public void run() {
+                try {
+                    while (true){
+                        if (this.isInterrupted()){
+                            System.out.println("中断标志被设置");
+                            System.out.println("线程想清除中断标志："+Thread.interrupted());
+                            System.out.println("线程想清除中断标志："+Thread.interrupted());
+                            Thread.sleep(2000); //这一行在中断标志清除后就不会再抛异常了
+                            //break;//发现中断标志位时如何退出
+                        }
+                    }
+                } catch (Exception e) {
+                    System.out.println("线程内抛出异常并停止:"+e.getMessage());
+                }
+            }
+        }
+        public static void main(String[] args) {
+            //MyThread myThread = new MyThread();//A
+            MyThread2 myThread = new MyThread2();//B
+            myThread.start();
+            try {
+                Thread.sleep(1000);
+                myThread.interrupt();
+            }catch (Exception e){
+                System.out.println("main线程抛出异常："+e.getMessage());
+            }
+            /**
+             * A行打印结果：
+             * 中断标志被设置
+             * 线程内抛出异常并停止:sleep interrupted
+             *
+             * 启用B行打印结果：
+             * 中断标志被设置
+             * 线程想清除中断标志：true
+             * 线程想清除中断标志：false
+             */
+        }
+    }
+    static class SleepWhenInterrupt{
+        static class MyThread extends Thread{
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(2000);
+                } catch (Exception e) {
+                    System.out.println("线程内抛出异常并停止:"+e.getMessage());
+                }
+            }
+        }
+        public static void main(String[] args) {
+            MyThread myThread = new MyThread();
+            myThread.start();
+            try {
+                Thread.sleep(1000);
+                myThread.interrupt();
+            }catch (Exception e){
+                System.out.println("main线程抛出异常："+e.getMessage());
+            }
+            /** 打印结果：
+             * 线程内抛出异常并停止:sleep interrupted
+             */
+        }
+    }
     //1.7.5
     /**
      * 使用stop方法的弊端
      * 强制停止线程可能会使一些清理工作得不到完成
      * 对一些锁定的对象进行了"解锁"，导致数据不一致
+     *
+     * 程序中可以直接使用 thread.stop()来强行终止线程，但是 stop 方法是很危险的，就象突然关
+     * 闭计算机电源，而不是按正常程序关机一样，可能会产生不可预料的结果，不安全主要是:
+     * thread.stop()调用之后，创建子线程的线程就会抛出 ThreadDeatherror 的错误，并且会释放子
+     * 线程所持有的所有锁。一般任何进行加锁的代码块，都是为了保护数据的一致性，如果在调用
+     * thread.stop()后导致了该线程所持有的所有锁的突然释放(不可控制)，那么被保护数据就有可能呈
+     * 现不一致性，其他线程在使用这些被破坏的数据时，有可能导致一些很奇怪的应用程序错误。因
+     * 此，并不推荐使用 stop 方法来终止线程。
      */
     static class StopThread extends Thread{
         @Override
