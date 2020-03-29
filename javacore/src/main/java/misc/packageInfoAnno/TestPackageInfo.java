@@ -1,9 +1,9 @@
-package com.packageInfoAnno;
+package misc.packageInfoAnno;
 
 import java.lang.annotation.Annotation;
 
 public class TestPackageInfo {
-    private static final String PACKAGE_NAME = "com.packageInfoAnno";
+    private static final String PACKAGE_NAME = "misc.packageInfoAnno";
     public static void main(String[] args) {
         getAllAnnos(PACKAGE_NAME);
 
@@ -17,7 +17,7 @@ public class TestPackageInfo {
                 System.out.println(((PkgAnno) anno).value());
             }
             System.out.println(anno.toString());
-            //@com.packageInfoAnno.PkgAnno(value=包注解)
+            //@misc.packageInfoAnno.PkgAnno(value=包注解)
         }
     }
     //获取指定类型的注解

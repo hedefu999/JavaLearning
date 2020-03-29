@@ -1,4 +1,4 @@
-package com.primary;
+package misc;
 
 public class InnerClassTest {
     /**

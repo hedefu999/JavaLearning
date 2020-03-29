@@ -1,4 +1,4 @@
-package com.newjavaapi;
+package misc.newjavaapi;
 
 import org.junit.Test;
 import org.slf4j.Logger;

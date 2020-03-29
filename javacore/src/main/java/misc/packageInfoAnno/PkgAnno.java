@@ -1,4 +1,4 @@
-package com.packageInfoAnno;
+package misc.packageInfoAnno;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package com.core;
+package misc.core;
 
 import org.junit.Test;
 

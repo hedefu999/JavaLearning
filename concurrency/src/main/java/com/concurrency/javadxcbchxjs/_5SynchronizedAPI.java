@@ -1,12 +1,17 @@
 package com.concurrency.javadxcbchxjs;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 第二章 对象及变量的并发访问
  */
-public class _5Syncreleatedapi {
+public class _5SynchronizedAPI {
     public static long time(){
         return System.currentTimeMillis()%10000;
     }
@@ -795,7 +800,7 @@ public class _5Syncreleatedapi {
              1. 非同一把对象锁，通过对象调sync static方法依然是互斥的
              aStaticSyncInstanceThread.start();
              aStaticSyncInstanceThread2.start();
-
+             2. 同一个类内synchronized(this)同步代码块与synchronized非static方法是互斥的
              */
 
         }
@@ -1314,7 +1319,58 @@ public class _5Syncreleatedapi {
         }
     }
 
-    //锁对象本身不变，但其字段属性改变，运行结果还是同步的
-    //示例略
+    /**
+     * 锁对象本身不变，但其字段属性改变,synchronized(锁对象)依然具有互斥效果
+     * 但若直接将锁对象的引用换掉，synchronized(锁对象)肯定是锁到了不同的对象上，是非互斥的
+     */
+    static class ChangingLock{
+        @Data @AllArgsConstructor
+        static class Lock{
+            private Integer number;
+            private String name;
+        }
+        static class MultiThreadHandler{
+            private Lock lock = new Lock(1,"locker");
+            public void handle(){
+                synchronized (lock){
+                    System.out.printf("%s - %s\n",time(),threadName());
+                    try {
+                        TimeUnit.SECONDS.sleep(3);
+                    } catch (InterruptedException e) { }
+                }
+            }
+            public void modifyLock(Integer num,String name){
+                if (num != null){
+                    lock.setNumber(num);
+                }
+                if (!StringUtils.isEmpty(name)){
+                    lock.setName(name);
+                }
+            }
+            public void setLock(Lock lock){
+                this.lock = lock;
+            }
+        }
+        public static void main(String[] args) {
+            MultiThreadHandler handler = new MultiThreadHandler();
+            Thread threadA = new Thread(){
+                @Override
+                public void run() {
+                    handler.handle();
+                }
+            };threadA.setName("threadA");
+            Thread threadB = new Thread(){
+                @Override
+                public void run() {
+                    //操作lock
+                    handler.setLock(new Lock(2,"locker2"));
+                    //handler.modifyLock(2,"locker2");
+                    handler.handle();
+                }
+            };threadB.setName("threadB");
+            threadA.start();
+            threadB.start();
+        }
+    }
 
 }

@@ -1,4 +1,4 @@
-package com.primary;
+package misc;
 
 import com.utils.SerializeUtils;
 import lombok.Data;

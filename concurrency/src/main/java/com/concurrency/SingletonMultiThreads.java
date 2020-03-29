@@ -1,4 +1,4 @@
-package com.concurrency.javadxcbchxjs;
+package com.concurrency;
 
 import java.io.*;
 import java.sql.Connection;

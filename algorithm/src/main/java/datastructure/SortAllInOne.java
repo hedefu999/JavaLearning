@@ -117,7 +117,7 @@ public class SortAllInOne {
     }
 
     /**
-     * 归并排序 待默写 https://www.cnblogs.com/chengxiao/p/6194356.html
+     * 归并排序 https://www.cnblogs.com/chengxiao/p/6194356.html
      */
     public void mergeSort(int[] arr,int left,int right,int[] temp){
         if (left < right){
@@ -155,5 +155,43 @@ public class SortAllInOne {
         int[] arr = {3,2};
         int[] temp = new int[10];
         merge(arr,0,0,1,temp);
+    }
+    /**
+     * 快速排序
+     */
+    public int oneTurn(int[] a,int i,int j){
+
+        int pivot = a[i];
+        while (i<j){
+            while (i<j && pivot<=a[j]){
+                j--;
+            }
+            a[i] = a[j];
+            while (i<j && pivot>=a[i]){
+                i++;
+            }
+            a[j] = a[i];
+        }
+        a[i] = pivot;
+        return i;
+    }
+    @Test
+    public void test178(){
+        int[] a = {49,38,65,97,76,13,27};
+        System.out.println(oneTurn(a,0,a.length-1));
+        System.out.println(Arrays.toString(a));
+    }
+    public void quickSort(int[] a,int low,int high){
+        if (low<high){//??判断条件的确定
+            int middle = oneTurn(a, low, high);
+            quickSort(a,low,middle-1);//middle不加减1会出StackOverflow
+            quickSort(a,middle+1,high);
+        }
+    }
+    @Test
+    public void test192(){
+        int[] a = {49,38,65,97,76,13,27};
+        quickSort(a,0,a.length-1);
+        System.out.println(Arrays.toString(a));
     }
 }

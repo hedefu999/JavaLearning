@@ -1,4 +1,4 @@
-package com.core;
+package misc.core;
 
 public class TestClass {
     private int a;

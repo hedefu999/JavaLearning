@@ -1,6 +1,5 @@
-package com.newjavaapi;
+package misc.newjavaapi;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
@@ -9,7 +8,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 本类用于测试JDK8相关API，包含 流式编程

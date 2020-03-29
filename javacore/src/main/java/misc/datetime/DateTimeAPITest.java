@@ -1,15 +1,12 @@
-package com.datetime;
+package misc.datetime;
 
 import org.junit.Test;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 //temporal 时间的； spatial [ˈspeɪʃl] 空间的
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalField;
-import java.time.temporal.WeekFields;
 
 public class DateTimeAPITest {
     @Test
