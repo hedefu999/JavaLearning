@@ -194,4 +194,7 @@ public class SortAllInOne {
         quickSort(a,0,a.length-1);
         System.out.println(Arrays.toString(a));
     }
+    /**
+     * 补充《JAVA核心面试知识整理》：桶排序算法
+     */
 }

@@ -37,4 +37,11 @@ public class PrimativeAndWraper {
         System.out.println(array.getClass().getSuperclass().getName());
         System.out.println(array.getClass().getName());
     }
+    @Test
+    public void test41(){
+        int i = 0;
+        int j = 2;
+        i = j = 3;
+        System.out.println(i+" "+j);
+    }
 }
