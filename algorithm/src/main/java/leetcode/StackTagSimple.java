@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
@@ -110,4 +111,46 @@ public class StackTagSimple {
         String input = "abbaca";
         System.out.println(removeSameChar(input));
     }
+    /**
+     * #20 有效的括号
+     */
+    public boolean isValidBrankets(String s){
+        HashMap<Character,Character> branketPairs = new HashMap<>();
+        branketPairs.put('(',')');
+        branketPairs.put('[',']');
+        branketPairs.put('{','}');
+        char[] chars = s.toCharArray();
+        Stack<Character> stack = new Stack<>();
+        for (char c : chars){
+            if (!stack.empty()){
+                Character peek = stack.peek();
+                if (branketPairs.containsKey(c)){
+                    stack.push(c);
+                }else if (branketPairs.get(peek).equals(c)){
+                    stack.pop();
+                }else {
+                    return false;
+                }
+            }else if (branketPairs.containsKey(c)){
+                stack.push(c);
+            }else {
+                return false;
+            }
+        }
+        if (stack.empty()){
+            return true;
+        }else {
+            return false;
+        }
+    }
+    @Test
+    public void test117(){
+        String[] testCases = {"()","()[]{}","(]","","([)]","{[]}","{[]",")}{({))[{{[}"};
+        for (String str : testCases){
+            System.out.print(isValidBrankets(str));
+        }
+    }
+    /**
+     *
+     */
 }
