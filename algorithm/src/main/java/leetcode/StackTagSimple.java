@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
+import java.util.regex.Pattern;
 
 public class StackTagSimple {
     /**
@@ -66,7 +67,7 @@ public class StackTagSimple {
     }
 
     @Test
-    public void test5(){
+    public void test1021(){
         String s1 = "(()())(())";
         String s2 = "(()())(())(()(()))";
         String s3 = "()()";
@@ -113,6 +114,7 @@ public class StackTagSimple {
     }
     /**
      * #20 有效的括号
+     * isValidBrankets 使用堆栈进行处理
      */
     public boolean isValidBrankets(String s){
         HashMap<Character,Character> branketPairs = new HashMap<>();
@@ -143,14 +145,75 @@ public class StackTagSimple {
             return false;
         }
     }
+    //这种方式代码简单，性能很差，内存占用也高，不推荐
+    public boolean isValidBranket2(String s){
+        while (s.contains("{}")||s.contains("()")||s.contains("[]")){
+            s = s.replaceAll("\\{\\}","");
+            s = s.replaceAll("\\[\\]","");
+            s = s.replaceAll("\\(\\)","");
+        }
+        if (s.length() != 0)
+            return false;
+        else
+            return true;
+    }
+
     @Test
-    public void test117(){
+    public void test20(){
         String[] testCases = {"()","()[]{}","(]","","([)]","{[]}","{[]",")}{({))[{{[}"};
         for (String str : testCases){
             System.out.print(isValidBrankets(str));
         }
+        /**
+         * truetruefalsetruefalsetruefalsefalse
+         * truetruefalsetruefalsetruefalsefalse
+         */
     }
     /**
      *
      */
+    @Test
+    public void test170(){
+
+
+        String s = "(){}[]";
+        s = s.replaceAll("\\(\\)", "--");
+        s = s.replaceAll("\\{\\}","--");
+        s = s.replaceAll("\\[\\]","--");
+        System.out.println(s);
+
+        //boolean matches = s.matches("()");
+        //System.out.println(matches);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
