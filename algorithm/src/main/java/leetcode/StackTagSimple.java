@@ -170,20 +170,29 @@ public class StackTagSimple {
          */
     }
     /**
-     *
+     * 最小栈问题
      */
+    //用两个栈处理
+    static class MinStack{
+        Stack<Integer> data = new Stack<>();
+        Stack<Integer> assist = new Stack<>();
+        public void push(Integer item){
+            data.push(item);
+        }
+        public Integer pop(){
+            return data.pop();
+        }
+        public Integer top(){
+            return data.peek();
+        }
+        public Integer getMin(){
+
+        }
+    }
+    public void minStack(){}
     @Test
-    public void test170(){
-
-
-        String s = "(){}[]";
-        s = s.replaceAll("\\(\\)", "--");
-        s = s.replaceAll("\\{\\}","--");
-        s = s.replaceAll("\\[\\]","--");
-        System.out.println(s);
-
-        //boolean matches = s.matches("()");
-        //System.out.println(matches);
+    public void test155(){
+        //-2 0 -3
     }
 
 
