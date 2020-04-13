@@ -2,11 +2,8 @@ package leetcode;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Stack;
+import javax.validation.constraints.Min;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class StackTagSimple {
@@ -174,25 +171,96 @@ public class StackTagSimple {
      */
     //用两个栈处理
     static class MinStack{
-        Stack<Integer> data = new Stack<>();
-        Stack<Integer> assist = new Stack<>();
-        public void push(Integer item){
-            data.push(item);
+        Stack<Integer> data = null;
+        Stack<Integer> assist = null;
+        public MinStack(){
+            data = new Stack<>();
+            assist = new Stack<>();
+        }
+        public void push(Integer x){
+            if (assist.isEmpty()){
+                assist.push(x);
+            }else {
+                Integer peek = assist.peek();
+                if (x<=peek){
+                    assist.push(x);
+                }
+            }
+            data.push(x);
         }
         public Integer pop(){
-            return data.pop();
+            Integer pop = data.pop();
+            if (pop == assist.peek()){
+                assist.pop();
+            }
+            return pop;
         }
         public Integer top(){
             return data.peek();
         }
         public Integer getMin(){
+            if (assist.isEmpty()){
+                return 0;
+            }else {
+                return assist.peek();
+            }
 
         }
     }
-    public void minStack(){}
+    //方案2 标准解法
+    static class Node{
+        private int value;
+        private int min;
+        private Node next;
+
+        public Node(int value, int min, Node next) {
+            this.value = value;
+            this.min = min;
+            this.next = next;
+        }
+    }
+    static class MinStack2 {
+        private Node head;
+        /** initialize your data structure here. */
+        public MinStack2() {
+
+        }
+        public void push(int x) {
+            if (head == null){
+                head = new Node(x,x,null);
+            }else {
+                head = new Node(x,Math.min(x,head.min),head);
+            }
+        }
+        public void pop() {
+            head = head.next;
+        }
+        public int top() {
+            return head.value;
+        }
+        public int getMin() {
+            return head.min;
+        }
+    }
+    //方案3:-2 0 -3 依次进栈后 -2 -2 0 -3 -3,getMin是一次pop，pop是两次pop
     @Test
     public void test155(){
+        MinStack2 minStack = new MinStack2();
+        minStack.push(512);
+        minStack.push(-1024);
+        minStack.push(-1024);
+        minStack.push(512);
+        minStack.pop();
+        System.out.println(minStack.getMin());
+        minStack.pop();
+        System.out.println(minStack.getMin());
+        minStack.pop();
+        System.out.println(minStack.getMin());
+        minStack.pop();
+        minStack.pop();
+        //System.out.println(minStack.getMin());
         //-2 0 -3
+        Queue queue = new LinkedList();
     }
 
 
