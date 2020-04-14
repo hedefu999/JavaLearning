@@ -258,10 +258,99 @@ public class StackTagSimple {
         System.out.println(minStack.getMin());
         minStack.pop();
         minStack.pop();
-        //System.out.println(minStack.getMin());
-        //-2 0 -3
-        Queue queue = new LinkedList();
     }
+
+    /**
+     * 使用单向对列实现栈（只允许使用peek pop push2Back size isEmpty）
+     *
+     * LinkList（双向队列） apis:
+     * pop、poll、pollFirst 出头结点,pollLast出尾结点
+     * peek、peekFirst取头结点，peekLast取尾结点
+     * offer、offerLast放入尾部，offerFirst 放入头部,带返回结果boolean
+     * add、addLast、linkLast 放入尾部，addFirst、push、linkFirst 放入头部
+     * remove(Index)移除第Index个元素（从0计数）removeFirst移除头部,removeLast移除尾部，都返回移除的元素
+     *
+     * 方案1：pop比push复杂
+     *
+     */
+    static class StackByLinkedList1{
+        private LinkedList<Integer> q1 = new LinkedList<>();
+        private LinkedList<Integer> q2 = new LinkedList<>();
+        public void push(int x){
+            q1.add(x);
+        }
+        public int pop(){
+            while (q1.size()>1){
+                Integer pop = q1.pop();
+                q2.add(pop);
+            }
+            Integer result = q1.pop();
+            LinkedList<Integer> tmp = q1;
+            q1 = q2;
+            q2 = tmp;
+            return result;
+        }
+        public int top(){
+            while (q1.size()>1){
+                Integer pop = q1.pop();
+                q2.add(pop);
+            }
+            Integer result = q1.pop();
+            q2.add(result);
+            LinkedList<Integer> tmp = q1;
+            q1 = q2;
+            q2 = tmp;
+            return result;
+        }
+        public boolean empty(){
+            return q1.isEmpty();
+        }
+    }
+
+    /**
+     * 方案2：在push的时候就转成真正的stack
+     */
+    static class StackByLinkedList2{
+        private LinkedList<Integer> q1 = new LinkedList<>();
+        private LinkedList<Integer> q2 = new LinkedList<>();
+        public void push(int x){
+            q2.add(x);
+            while (!q1.isEmpty()){
+                q2.add(q1.pop());
+            }
+            LinkedList<Integer> tmp = q1;
+            q1 = q2;
+            q2 = tmp;
+        }
+        public int pop(){
+            return q1.pop();
+        }
+        public int top(){
+            return q1.peek();
+        }
+        public boolean empty(){
+            return q1.isEmpty();
+        }
+    }
+    @Test
+    public void test255(){
+        StackByLinkedList1 stack = new StackByLinkedList1();
+        stack.push(1);
+        stack.push(4);
+        System.out.println(stack.top());//4
+        stack.push(3);
+        System.out.println(stack.pop());//3
+        stack.push(7);
+        System.out.println(stack.top());//1 4 7,7
+        System.out.println(stack.pop());//14,7
+        System.out.println(stack.top());//4
+        System.out.println(stack.empty());//false
+        System.out.println(stack.pop());//4
+        System.out.println(stack.top());//1
+        System.out.println(stack.pop());//1
+        System.out.println(stack.empty());//true
+    }
+
 
 
 
