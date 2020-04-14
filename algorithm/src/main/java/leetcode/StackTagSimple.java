@@ -332,9 +332,32 @@ public class StackTagSimple {
             return q1.isEmpty();
         }
     }
+
+    /**
+     * 方案3：用一个队列实现stack
+     */
+    static class StackByLinkedList3{
+        LinkedList<Integer> q = new LinkedList<>();
+        public void push(int x){
+            q.add(x);
+            int size = q.size();
+            for (int i = 0; i < size; i++) {
+                q.add(q.pop());
+            }
+        }
+        public int pop(){
+            return q.pop();
+        }
+        public int top(){
+            return q.peek();
+        }
+        public boolean empty(){
+            return q.isEmpty();
+        }
+    }
     @Test
     public void test255(){
-        StackByLinkedList1 stack = new StackByLinkedList1();
+        StackByLinkedList3 stack = new StackByLinkedList3();
         stack.push(1);
         stack.push(4);
         System.out.println(stack.top());//4
