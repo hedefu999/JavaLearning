@@ -269,17 +269,17 @@ public class StackTagSimple {
      * offer、offerLast放入尾部，offerFirst 放入头部,带返回结果boolean
      * add、addLast、linkLast 放入尾部，addFirst、push、linkFirst 放入头部
      * remove(Index)移除第Index个元素（从0计数）removeFirst移除头部,removeLast移除尾部，都返回移除的元素
-     *
-     * 方案1：pop比push复杂
-     *
+     */
+     /**
+     * 方案1：pop比push复杂,pop时把元素都移到辅助队列中只剩一个元素，剩下的就是栈顶，再互换两个队列的身份 数据队列和辅助队列
      */
     static class StackByLinkedList1{
         private LinkedList<Integer> q1 = new LinkedList<>();
         private LinkedList<Integer> q2 = new LinkedList<>();
-        public void push(int x){
+        public void push(int x){//时空复杂度都是O(1)
             q1.add(x);
         }
-        public int pop(){
+        public int pop(){//时间复杂度O(n)
             while (q1.size()>1){
                 Integer pop = q1.pop();
                 q2.add(pop);
@@ -308,12 +308,12 @@ public class StackTagSimple {
     }
 
     /**
-     * 方案2：在push的时候就转成真正的stack
+     * 方案2：在push的时候就转成真正的stack,两个队列倒腾
      */
     static class StackByLinkedList2{
         private LinkedList<Integer> q1 = new LinkedList<>();
         private LinkedList<Integer> q2 = new LinkedList<>();
-        public void push(int x){
+        public void push(int x){//时间复杂度O(n) 空间复杂度O(1)
             q2.add(x);
             while (!q1.isEmpty()){
                 q2.add(q1.pop());
@@ -322,10 +322,10 @@ public class StackTagSimple {
             q1 = q2;
             q2 = tmp;
         }
-        public int pop(){
+        public int pop(){//时空复杂度O(1)
             return q1.pop();
         }
-        public int top(){
+        public int top(){//时空复杂度O(1)
             return q1.peek();
         }
         public boolean empty(){
@@ -338,13 +338,14 @@ public class StackTagSimple {
      */
     static class StackByLinkedList3{
         LinkedList<Integer> q = new LinkedList<>();
-        public void push(int x){
-            q.add(x);
+        public void push(int x){//时间复杂度O(n) 空间复杂度O(1)
             int size = q.size();
+            q.add(x);
             for (int i = 0; i < size; i++) {
                 q.add(q.pop());
             }
         }
+        //下述三个方法时空复杂度都是O(1)
         public int pop(){
             return q.pop();
         }
