@@ -2,9 +2,7 @@ package leetcode;
 
 import org.junit.Test;
 
-import javax.validation.constraints.Min;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class StackTagSimple {
     /**
@@ -373,6 +371,81 @@ public class StackTagSimple {
         System.out.println(stack.top());//1
         System.out.println(stack.pop());//1
         System.out.println(stack.empty());//true
+    }
+    static class QueueByStack{
+        Stack<Integer> s1 = new Stack<>();
+        Stack<Integer> s2 = new Stack<>();
+        public void push(int x) {//时间复杂度O(n)
+            if (s1.isEmpty()){
+                s1.push(x);
+            }else {
+                while (!s1.isEmpty()){
+                    s2.push(s1.pop());
+                }
+                s2.push(x);
+                while (!s2.isEmpty()){
+                    s1.push(s2.pop());
+                }
+            }
+        }
+        public int pop() {
+            return s1.pop();
+        }
+        public int peek() {
+            return s1.peek();
+        }
+        public boolean empty() {
+            return s1.isEmpty();
+        }
+    }
+    //进阶版 摊还复杂度为O(1),最坏情况下为O(n)
+    static class QueueByStack2{
+        int head = 0;
+        Stack<Integer> s1 = new Stack<>();
+        Stack<Integer> s2 = new Stack<>();
+        public void push(int x) {
+            if (s1.isEmpty()){
+                head = x;
+            }
+            while (!s2.isEmpty()){
+                s1.push(s2.pop());
+            }
+            s1.push(x);
+        }
+        public int pop() {
+            if (s1.isEmpty()){
+                Integer top = s2.pop();
+                head = s2.peek();
+                return top;
+            }else {
+                while (!s1.isEmpty()){
+                    s2.push(s1.pop());
+                }
+                int result = s2.pop();
+                head = s2.peek();
+                return result;
+            }
+        }
+        public int peek() {
+            return head;
+        }
+        public boolean empty() {
+            return s1.isEmpty() && s2.isEmpty();
+        }
+    }
+    @Test
+    public void test232(){
+        QueueByStack2 que = new QueueByStack2();
+        System.out.println(que.empty());//false
+        que.push(2);
+        que.push(5);
+        System.out.println(que.peek());//2
+        que.push(6);
+        System.out.println(que.pop());//2
+        que.push(7);
+        System.out.println(que.pop());//5
+        System.out.println(que.empty());//false
+
     }
 
 
