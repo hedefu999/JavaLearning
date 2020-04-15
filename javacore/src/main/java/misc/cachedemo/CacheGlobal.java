@@ -1,4 +1,4 @@
-package misc.homemadecache;
+package misc.cachedemo;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
