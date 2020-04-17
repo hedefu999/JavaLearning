@@ -415,14 +415,14 @@ public class StackTagSimple {
         public int pop() {
             if (s1.isEmpty()){
                 Integer top = s2.pop();
-                head = s2.peek();
+                head =s2.isEmpty()?0:s2.peek();
                 return top;
             }else {
                 while (!s1.isEmpty()){
                     s2.push(s1.pop());
                 }
                 int result = s2.pop();
-                head = s2.peek();
+                head =s2.isEmpty()?0:s2.peek();
                 return result;
             }
         }
@@ -445,6 +445,27 @@ public class StackTagSimple {
         que.push(7);
         System.out.println(que.pop());//5
         System.out.println(que.empty());//false
+        //测试用例1
+        //System.out.println(que.empty());//false
+        //que.push(2);
+        //que.push(5);
+        //System.out.println(que.peek());//2
+        //que.push(6);
+        //System.out.println(que.pop());//2
+        //que.push(7);
+        //System.out.println(que.pop());//5
+        //System.out.println(que.empty());//false
+
+        //测试用例2
+        //que.push(1);
+        //que.pop();
+        //que.empty();
+        que.push(1);
+        que.push(2);
+        que.peek();
+        que.pop();
+        que.pop();
+        que.empty();
     }
 
     //巧妙使用stack避免两层for循环！

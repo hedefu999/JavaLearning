@@ -1,4 +1,4 @@
-package misc.homemadecache;
+package misc.cachedemo;
 
 import lombok.Data;
 
