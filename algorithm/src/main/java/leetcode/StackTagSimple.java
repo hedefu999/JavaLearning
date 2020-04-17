@@ -445,8 +445,92 @@ public class StackTagSimple {
         que.push(7);
         System.out.println(que.pop());//5
         System.out.println(que.empty());//false
-
     }
+
+    //巧妙使用stack避免两层for循环！
+    public int[] nextGreaterElement(int[] sub, int[] total){
+        Stack<Integer> stack = new Stack<>();
+        HashMap<Integer,Integer> map = new HashMap<>();
+        int[] res = new int[sub.length];
+        for (int i = 0; i < total.length; i++) {
+            while (!stack.empty() && total[i] > stack.peek())
+                map.put(stack.pop(),total[i]);
+            stack.push(total[i]);
+        }
+        while (!stack.empty()){
+            map.put(stack.pop(), -1);
+        }
+        for (int i = 0; i < sub.length; i++) {
+            res[i] = map.get(sub[i]);
+        }
+        return res;
+    }
+    //先建立value-index的hash表，比较复杂
+    public int[] nextGreaterElement2(int[] nums1, int[] nums2) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        // 遍历 nums2 将 nums2 建立哈希表 (nums2[i], i)，时间复杂度 O(n)
+        for (int i = 0; i < nums2.length; i++)
+            map.put(nums2[i], i);
+        int[] arr = new int[nums1.length];
+        // 遍历 nums1，时间复杂度 O(n)
+        for (int i = 0; i < nums1.length; i++) {
+            if (map.get(nums1[i]) == nums2.length-1)
+                arr[i] = -1;
+            else
+                // nums2 中若后一个比当前大，arr成功接收赋值，时间复杂度 O(1)，概率 1/2
+                if (nums2[map.get(nums1[i])+1] > nums1[i])
+                    arr[i] = nums2[map.get(nums1[i])+1];
+                else {
+                    int j;
+                    // nums2 中若后一个小于等于当前，循环找到后面第一个最大的，时间复杂度计算介于 1-1/2^n 到 (n-1)/2 之间，概率 1/2
+                    for (j = map.get(nums1[i]) + 1; j < nums2.length; j++)
+                        if (nums2[j] > nums1[i])
+                            break;
+                    if (j == nums2.length)
+                        arr[i] = -1;
+                    else
+                        arr[i] = nums2[j];
+                }
+        }
+        return arr;
+    }
+    public int[] nextGreaterInt(int[] nums1, int[] nums2){
+        int[] result = new int[nums1.length];
+//        int[] dict = new int[nums2.length];
+        Map<Integer,Integer> map = new HashMap<>();
+        for (int i = 0; i < nums2.length; i++) {
+            boolean exist = false;
+            for (int j = i+1; j < nums2.length; j++) {
+                if (nums2[j] > nums2[i]){
+//                    dict[i] = nums2[j];
+                    map.put(nums2[i],nums2[j]);
+                    exist = true;
+                    break;
+                }
+            }
+            if (!exist){
+//                dict[i] = -1;
+                map.put(nums2[i],-1);
+            }
+        }
+        for (int i = 0; i < nums1.length; i++) {
+            result[i] = map.get(nums1[i]);
+        }
+        return result;
+    }
+    @Test
+    public void test496(){
+        int[] nums1 = {4,1,2};
+        int[] nums2 = {1,3,4,2};
+        int[] nums11 = {2,4};
+        int[] nums22 = {1,2,3,4};
+        int[] result1 = nextGreaterElement(nums1, nums2);//-1 3 -1
+//        int[] result2 = nextGreaterElement(nums11, nums22);
+//        System.out.println(Arrays.toString(result2));//3 -1
+        int[] ints = nextGreaterInt(nums11, nums22);
+        System.out.println(Arrays.toString(ints));
+    }
+
 
 
 
