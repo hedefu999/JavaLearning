@@ -551,6 +551,81 @@ public class StackTagSimple {
         int[] ints = nextGreaterInt(nums11, nums22);
         System.out.println(Arrays.toString(ints));
     }
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer,Integer> valueIndexMap = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            //valueIndexMap.put(nums[i],i); 这个放前面纠错了
+            int other = target - nums[i];
+            if (valueIndexMap.containsKey(other)){
+                return new int[]{valueIndexMap.get(other),i};
+            }
+            valueIndexMap.put(nums[i],i);
+        }
+        return null;
+    }
+    @Test
+    public void test1(){
+        //使用hashMap
+        int[] nums = {3,2,4};
+        System.out.println(Arrays.toString(twoSum(nums,6)));
+    }
+    //使用stack
+    public int calPoints(String[] ops) {
+        Stack<Integer> stack = new Stack<>();
+        int sum = 0;
+        for (int i = 0; i < ops.length; i++) {
+            String op = ops[i];
+            Integer score = 0;
+            switch (op){
+                case "C":
+                    score = stack.pop()*-1;
+                    break;
+                case "D":
+                    score = stack.peek() * 2;
+                    stack.push(score);
+                    break;
+                case "+":
+                    Integer score1 = stack.pop();
+                    score = score1 + stack.peek();
+                    stack.push(score1);
+                    stack.push(score);
+                    break;
+                default:
+                    score = Integer.parseInt(op);
+                    stack.push(score);
+
+                    break;
+            }
+            sum+=score;
+        }
+        return sum;
+    }
+    //使用数组
+    public int calPoints2(String[] ops) {
+        int[] arr = new int[ops.length];
+        int i=0;
+        for(String s:ops){
+            switch (s){
+                case "+":arr[i]=arr[i-1]+arr[i-2];i++;break;
+                case "D":arr[i]=2*arr[i-1];i++;break;
+                case "C":arr[i-1]=0;i--;break;
+                default:
+                    arr[i]=Integer.valueOf(s);
+                    i++;
+            }
+        }
+        int sum=0;
+        for (int j = 0; j <arr.length ; j++) {
+            sum+=arr[j];
+        }
+        return sum;
+    }
+    @Test
+    public void test682(){
+        String[] ops = {"5","-2","4","C","D","9","+","+"};
+        String[] ops2 = {"5","2","C","D","+"};
+        System.out.println(calPoints(ops));
+    }
 
 
 
@@ -564,10 +639,8 @@ public class StackTagSimple {
 
 
 
-
-
-
-
+//简单未做的tag - stack
+//https://leetcode-cn.com/problemset/algorithms/?topicSlugs=stack&difficulty=%E7%AE%80%E5%8D%95&status=%E6%9C%AA%E5%81%9A
 
 
 
