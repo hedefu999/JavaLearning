@@ -626,7 +626,43 @@ public class StackTagSimple {
         String[] ops2 = {"5","2","C","D","+"};
         System.out.println(calPoints(ops));
     }
-
+    public boolean backspaceCompare(String S, String T) {
+        Stack<Character> stackS = new Stack<>();
+        Stack<Character> stackT = new Stack<>();
+        for (Character s: S.toCharArray()){
+            if (s == '#'){
+                if (!stackS.empty())
+                stackS.pop();
+            }else {
+                stackS.push(s);
+            }
+        }
+        for (Character t : T.toCharArray()){
+            if (t == '#'){
+                if (!stackT.empty())
+                stackT.pop();
+            }else {
+                stackT.push(t);
+            }
+        }
+        while (!stackS.empty() && !stackT.empty()){
+            if (stackS.pop() != stackT.pop()){
+                return false;
+            }
+        }
+        if (!stackS.empty() || !stackT.empty()){
+            return false;
+        }
+        return true;
+    }
+    @Test
+    public void test844(){
+        String S = "ab#c", T = "ad#c";
+        String S1 = "ab##", T1 = "c#d#";
+        String S2 = "a##c", T2 = "#a#c";
+        String S3="y#fo##f",T3= "y#f#o##f";
+        System.out.println(backspaceCompare(S3,T3));
+    }
 
 
 
