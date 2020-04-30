@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 
 public class StringTagSimple {
     public int romanToInt(String s) {
@@ -91,9 +90,9 @@ public class StringTagSimple {
      * 水平扫描
      * LCP(s1,s2,...,sn) = LCP(LCP(s1,s2)s3,...,sn)
      * TC(Time Complicity) - O(所有字符串字符数量总和)
-     * SP(Space Complicity)
+     * SC(Space Complicity)
      */
-    public String longestCommonPrefix(String[] strs) {
+    public String longestCommonPrefix3_1(String[] strs) {
         if (strs.length == 0) return "";
         String prefix = strs[0];
         for (int i = 1; i < strs.length; i++){
@@ -104,7 +103,6 @@ public class StringTagSimple {
         }
         return prefix;
     }
-
     /**
      * 垂直扫描
      * 时间复杂度：O(S)，S 是所有字符串中字符数量的总和。
@@ -125,38 +123,39 @@ public class StringTagSimple {
         }
         return strs[0];
     }
-
     /**
      * LCP操作的结合律：LCP(S1,S2...,Sn)=LCP(LCP(S1...Sk),LCP(Sk+1...Sn))=LCP(LCP.left, LCP.right)
-     * 最坏情况：有n个长度为m的字符串。
+     * 最坏情况：有n个长度为m的完全相同的字符串。
      * TC - O(S),S=m*n
-     *
+     * TC的递推式 T(n) = T(left)+T(right)+O(m) = 2*T(n/2)+O(m) [todo 如何化简至O(S),参考离散数学]
+     * SC - O(m*log(n))
      */
     public String longestCommonPrefix3(String[] strs) {
         if (strs == null || strs.length == 0) return "";
-        return longestCommonPrefix(strs, 0 , strs.length - 1);
+        return longestCommonPrefix3_1(strs, 0 , strs.length - 1);
     }
-
-    private String longestCommonPrefix(String[] strs, int l, int r) {
+    private String longestCommonPrefix3_1(String[] strs, int l, int r) {
         if (l == r) {
             return strs[l];
         }
         else {
             int mid = (l + r)/2;
-            String lcpLeft =   longestCommonPrefix(strs, l , mid);
-            String lcpRight =  longestCommonPrefix(strs, mid + 1,r);
-            return commonPrefix(lcpLeft, lcpRight);
+            String lcpLeft = longestCommonPrefix3_1(strs, l , mid);
+            String lcpRight = longestCommonPrefix3_1(strs, mid + 1,r);
+            return commonPrefix3_2(lcpLeft, lcpRight);
         }
     }
-
-    String commonPrefix(String left,String right) {
+    String commonPrefix3_2(String left, String right) {
         int min = Math.min(left.length(), right.length());
         for (int i = 0; i < min; i++) {
             if ( left.charAt(i) != right.charAt(i) )
                 return left.substring(0, i);
         }
         return left.substring(0, min);
-    }
+    }/**
+     * 递归产生的数据、待执行方法在堆栈中是怎样变化的？
+     *
+     */
 
     /**
      * 二分查找法
@@ -171,7 +170,7 @@ public class StringTagSimple {
         int high = minLen;
         while (low <= high) {
             int middle = (low + high) / 2;
-            if (isCommonPrefix(strs, middle))
+            if (isCommonPrefix4_1(strs, middle))
                 low = middle + 1;
             else
                 high = middle - 1;
@@ -179,7 +178,7 @@ public class StringTagSimple {
         return strs[0].substring(0, (low + high) / 2);
     }
 
-    private boolean isCommonPrefix(String[] strs, int len){
+    private boolean isCommonPrefix4_1(String[] strs, int len){
         String str1 = strs[0].substring(0,len);
         for (int i = 1; i < strs.length; i++)
             if (!strs[i].startsWith(str1))
@@ -195,6 +194,6 @@ public class StringTagSimple {
     public void test14() {
         String[] strs = {"flower","flow","flight"};
         String[] strs2 = {"dog","racecar","car"};
-        System.out.println(longestCommonPrefix2(strs));
+        System.out.println(longestCommonPrefix3(strs));
     }
 }
