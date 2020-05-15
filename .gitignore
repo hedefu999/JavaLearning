@@ -6,3 +6,5 @@
 .classpath
 */bin/
 novc/
+*.class
+*.log

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+
+    <bean id="javaAPIAdvice" class="com.ssmr.c11.a_apiaop.JavaAPIAdvice"/>
+
+    <bean id="person" class="com.ssmr.c11.a_apiaop.Person"/>
+
+    <bean class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+        <property name="advice" ref="javaAPIAdvice"/>
+        <!--find.*表示拦截方法名称为find* todo 方法名的正则规则是怎样的？-->
+        <property name="pattern" value="com.ssmr.c11.a_apiaop.*.find.*"/>
+    </bean>
+
+</beans>
