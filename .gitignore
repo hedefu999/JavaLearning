@@ -7,3 +7,5 @@
 */bin/
 novc/
 changingedu/
+*.class
+*.log
