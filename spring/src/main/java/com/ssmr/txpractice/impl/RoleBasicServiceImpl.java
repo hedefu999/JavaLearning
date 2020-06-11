@@ -64,11 +64,11 @@ public class RoleBasicServiceImpl implements RoleBasicService {
 
     @Override
     public int updateRole(Role role) {
-        return 0;
+        return roleMapper.updateRole(role);
     }
 
     @Override
     public int deleteRoleById(Integer id) {
-        return 0;
+        return roleMapper.deleteRole(id);
     }
 }

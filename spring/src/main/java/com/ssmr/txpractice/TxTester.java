@@ -2,6 +2,7 @@ package com.ssmr.txpractice;
 
 import com.ssmr.txpractice.impl.BizService;
 import com.ssmr.txpractice.impl.RoleBasicService;
+import com.ssmr.txpractice.manager.BusinessManager;
 import com.ssmr.txpractice.model.Role;
 import com.ssmr.txpractice.model.Student;
 import org.junit.Before;
@@ -142,5 +143,15 @@ public class TxTester {
     @Test
     public void testNEST(){
         bizService.insertBoth3(students,roles);
+    }
+
+    /**
+     * 一连串自调用，事务可以在中间的方法上添加吗？
+     */
+    @Autowired
+    private BusinessManager bizManager;
+    @Test
+    public void test151() {
+        bizManager.operateByType(1L,2);
     }
 }

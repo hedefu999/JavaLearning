@@ -2,8 +2,13 @@ package leetcode;
 
 import org.junit.Test;
 
+import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 
 public class StringTagSimple {
     public int romanToInt(String s) {
@@ -86,7 +91,7 @@ public class StringTagSimple {
         System.out.println(romanToInt(e));
     }
 
-    /** 14 最长公共前缀
+    /** 14 最长公共前缀 todo 待回溯
      * 水平扫描
      * LCP(s1,s2,...,sn) = LCP(LCP(s1,s2)s3,...,sn)
      * TC(Time Complicity) - O(所有字符串字符数量总和)
@@ -189,7 +194,6 @@ public class StringTagSimple {
     /**
      * 使用字典树查找
      */
-
     @Test
     public void test14() {
         String[] strs = {"flower","flow","flight"};
@@ -350,7 +354,6 @@ public class StringTagSimple {
 
     @Test
     public void test28() {
-
         String haystack = "hello", needle = "ll";
         String haystack1 = "aaaaa", needle1 = "bba";
         System.out.println(rabinKarpSolution(haystack,needle));
@@ -406,4 +409,269 @@ public class StringTagSimple {
     public void test38() {
         System.out.println(countAndSayRecursively(5));//1112231214
     }
+
+    /**
+     * 58 最后一个单词的长度
+     */
+    public int lengthOfLastWord(String s) {
+        if (s == null || s.length() == 0){
+            return 0;
+        }
+        if (s.charAt(s.length()-1) == ' '){
+            return 0;
+        }
+        return s.length()-1 - s.lastIndexOf(' ');
+    }
+    @Test
+    public void test58() {
+        String input = "Hello World";
+        String input2 = " ";
+        String input3 = "a ";
+        System.out.println(lengthOfLastWord(input3));
+    }
+
+    /**
+     * 67 二进制加法
+     * Integer.toBinaryString(Integer.parseInt(a, 2) + Integer.parseInt(b, 2));
+     */
+    //官解 逐位计算 OC=O(max(M,N)) SC=O(max(M,N))
+    public String addBinaryRecursively(String a,String b){
+        int al = a.length();
+        int bl = b.length();
+        //两个数字不一样长时，代码逻辑里要确定哪一个更长，这里主动将 a b 替换，较长的数作为a
+        if (al < bl) return addBinaryRecursively(b,a);
+        char[] achars = a.toCharArray();
+        char[] bchars = b.toCharArray();
+        StringBuilder builder = new StringBuilder();
+        int carry = 0;
+        int L = Math.max(al,bl);
+        for (int i = L-1; i > -1; i--) {
+            if (a.charAt(i) == '1') carry++;
+            if (bl+i>L-1 && b.charAt(bl+i-L) == '1') carry++;
+            //判断两个bit位加法计算结果的方法是：直接对1计数，再对2取模
+            builder.append(carry%2);
+            carry = carry/2;
+        }
+        if (carry==1) builder.append(1);
+        builder.reverse();//使用prepend
+        return builder.toString();
+    }
+    //这个思路清晰点
+    public String addBinary4(String a, String b) {
+        StringBuilder ans = new StringBuilder();
+        int pa = a.length()-1;
+        int pb = b.length()-1;
+        int carry = 0;
+        while (pa >=0 || pb >= 0) {
+            int va = pa<0 ? 0 : a.charAt(pa)-'0';
+            int vb = pb<0 ? 0 : b.charAt(pb)-'0';
+            int sum = (va + vb + carry)%2;
+            ans.append(sum);
+            carry = (va + vb + carry)/2;
+            pa--;
+            pb--;
+        }
+        ans.append(carry==0 ? "" : carry);
+        return  ans.reverse().toString();
+    }
+    /**
+        解法【巧】 - 使用位操作实现加法
+     XOR操作本身就带有加法的效果，只不过忽略了进位
+     a - 11011 , b - 1010
+     a` = a XOR b - 10001
+     b` = (a & b)<< 1 - 10100
+    开始循环
+     a = a` XOR b` - 00101
+     b = (a` & b`)<<1 - 100000
+    循环结束的条件是进位变成0
+     a` - 100101
+     b` - 000000 <-- 进位变成了0，终止循环
+
+     把 aa 和 bb 转换成整型数字 xx 和 yy，xx 保存结果，yy 保存进位。
+     当进位不为 0：y != 0：
+     计算当前 xx 和 yy 的无进位相加结果：answer = x^y。
+     计算当前 xx 和 yy 的进位：carry = (x & y) << 1。
+     完成本次循环，更新 x = answer，y = carry。
+     返回 xx 的二进制形式。
+
+     OC=O(M+N), SC=O(max(N,M))
+     */
+    //下述算法题也使用了这一思路
+    // 只出现一次的数字 III，
+    // 数组中两个数的最大异或值，
+    // 重复的DNA序列，
+    // 最大单词长度乘积，
+    public String addBinary3(String a, String b) {
+        BigInteger x = new BigInteger(a, 2);
+        BigInteger y = new BigInteger(b, 2);
+        BigInteger zero = new BigInteger("0", 2);
+        BigInteger carry, answer;
+        while (y.compareTo(zero) != 0) {
+            answer = x.xor(y);
+            carry = x.and(y).shiftLeft(1);
+            x = answer;
+            y = carry;
+        }
+        return x.toString(2);
+    }
+
+    @Test
+    public void test67() {
+        String a = "11",b="1";
+        String a1 = "1000",b1="11";
+        String a2 = "1010",b2="11011";
+        System.out.println(addBinary3(b2,a2));
+        // Integer.toBinaryString(Integer.parseInt(a, 2) + Integer.parseInt(b, 2));
+    }
+
+    /**
+     * #125 验证回文串
+     */
+    public boolean isPalindrome(String s) {
+        if (s == null || s.length() == 0){
+            return true;
+        }
+        String s1 = s.replaceAll(" ", "").toLowerCase();
+        int length = s1.length();
+        for (int i = 0; i < length/2; i++) {
+            if (s1.charAt(i) != s1.charAt(length-1-i))
+                return false;
+        }
+        return true;
+    }
+    static class HeadTailPointer{
+        private static boolean isNumOrChar(char c){
+            if ((Character.toLowerCase(c)>='a' && Character.toLowerCase(c)<='z')
+                    || (Character.toLowerCase(c)>='0' && Character.toLowerCase(c)<='9')){
+                return true;
+            }
+            return false;
+        }
+        public static boolean isPalindrome(String str){
+            int length = str.length();
+            if (length == 0) return true;
+            int low = 0, high = length - 1;
+            while (!isNumOrChar(str.charAt(low)) && low < length-1) low++;
+            while (!isNumOrChar(str.charAt(high)) && high > 0) high--;
+            while (low < high){
+                while (!isNumOrChar(str.charAt(low)) && low < length-1) low++;
+                while (!isNumOrChar(str.charAt(high)) && high > 0) high--;
+                if (Character.toLowerCase(str.charAt(low)) != Character.toLowerCase(str.charAt(high))){
+                    return false;
+                }
+                low++;high--;
+            }
+            return true;
+        }
+    }
+
+    @Test
+    public void test125() {
+        String a = "A man, a plan, a   canal: Panama";//true
+        String b = "race a car";//false
+        String c = ".,";
+        String d = ",.a";
+        String e = ",4.";
+        System.out.println(HeadTailPointer.isPalindrome(e));
+    }
+
+    /**
+     * 回文数
+     */
+    //MINE - 接上面回文字符串双指针判断的方法，这里对数字也采取双指针取值，性能34 内存5
+    public boolean isPalindrome(int x) {
+        if (x < 0) return false;
+        int bit = (int)Math.log10(x);
+        for (int i = 0; i < bit/2+bit%2; i++) {
+            int high = (x / (int)Math.pow(10, bit-i))%10;
+            int end = (x/(int)Math.pow(10,i)) % 10;
+            if (high != end) return false;
+        }
+        return true;
+    }
+    //上述的 数学计算很低效
+    //官解1 整数反转判断是否相等，但整体反转会有Integer溢出问题，所以翻转一半
+    //TC = O(lgn) SC = O(1)
+    public boolean isPalindrome2(int x){
+        //先排除负数和末位数字是0的整数
+        if (x<0) return false;
+        if (x%10==0&&x!=0) return false;
+        int revertNumber = 0;
+        //反转一半的临界点 是 反转数>=前半部截短的数
+        while (x > revertNumber){
+            //原始数字截到末位数字不断 *10+ 达到反转的效果
+            revertNumber = revertNumber*10+x%10;
+            x/=10;
+        }
+        return x == revertNumber || x == revertNumber/10;
+    }
+    @Test
+    public void leco9() {
+        System.out.println(isPalindrome(1));//10250-4
+        // System.out.println((10^1));
+    }
+
+    /**
+     * #345 反转字符串中的元音字母
+     * 没有官解，不知道怎么提升性能。。。
+     */
+    public String reverseVowels(String s) {
+        char[] chars = s.toCharArray();
+        Set<Character> vowelSet = new HashSet<Character>(){{
+            add('a');add('i');add('o');
+            add('e');add('u');add('A');add('I');add('O');
+            add('E');add('U');
+        }};
+        int i = 0,j=chars.length-1;
+        while (i<j){
+            while (i<j && vowelSet.contains(chars[i]) && !vowelSet.contains(chars[j])){
+                j--;
+            }
+            while (i<j && !vowelSet.contains(chars[i]) && vowelSet.contains(chars[j])){
+                i++;
+            }
+            if (i<j && vowelSet.contains(chars[i]) && vowelSet.contains(chars[j])){
+                char temp = chars[i];
+                chars[i]=chars[j];
+                chars[j]=temp;
+            }
+            i++;j--;
+        }
+        return String.copyValueOf(chars);
+    }
+    //这个性能好很多
+    public String reverseVowels2(String s){
+        if(s.length()<2) return s;
+        char[]chars = s.toCharArray();
+        int i= 0; int j = chars.length -1 ;
+        while(i<j){
+            if(chars[i]=='a'||chars[i]=='e'||chars[i]=='o'||chars[i]=='i'||chars[i]=='u'||chars[i]=='A'||chars[i]=='E'||chars[i]=='O'||chars[i]=='I'||chars[i]=='U'){
+                if(chars[j]=='a'||chars[j]=='e'||chars[j]=='o'||chars[j]=='i'||chars[j]=='u'||chars[j]=='A'||chars[j]=='E'||chars[j]=='O'||chars[j]=='I'||chars[j]=='U'){
+                    if(chars[i]!=chars[j]){
+                        char temp = chars[i];
+                        chars[i] = chars[j];
+                        chars[j] = temp;
+                    }
+                    ++i;
+                    --j;
+                }else{
+                    --j;
+                }
+            }else{
+                ++i;
+            }
+        }
+        return new String(chars);
+    }
+    @Test
+    public void leco345() {
+        String input = "hello";
+        String input2 = "leetcode";
+        String input3 = "shfgug";
+        String input4 = "suhgfg";
+        String input5 = "aA";
+        System.out.println(reverseVowels(input5));
+    }
+
+
 }

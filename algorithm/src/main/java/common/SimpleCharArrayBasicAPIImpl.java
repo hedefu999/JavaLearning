@@ -1,4 +1,4 @@
-package leetcode;
+package common;
 
 import org.junit.Test;
 
@@ -87,4 +87,9 @@ public class SimpleCharArrayBasicAPIImpl {
         String target1 = "shii";
         System.out.println(indexOf2(source1,target1));
     }
+    /**
+     * 待执行：String#toLowerCase Stirng#toCharArray
+     * Character.isLetterOrDigit
+     * StirngBuilder#reverse
+     */
 }

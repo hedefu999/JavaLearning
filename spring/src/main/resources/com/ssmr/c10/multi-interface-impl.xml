@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+    <!--注意下述配置，各组需要保证LoggerAspect正常使用-->
+
+    <!-- -=-=-=-=-=-=-= 第一组 -=-=-=-=-=-=-=-=- -->
+    <!--<context:component-scan base-package="com.ssmr.c10.multimplinject"/>-->
+    <!--<bean id="loggerAspect" class="com.ssmr.c10.multimplinject.LoggerAspect"/>-->
+    <!--true表示使用aspectj的cglib，false表示使用jdk proxy,
+        这一行等同于@EnableAspectJAutoProxy(proxyTargetClass = true|false)的注解，默认值是false表示使用JDK-->
+    <!--<aop:aspectj-autoproxy proxy-target-class="true"/>-->
+
+    <!---=-=-=-=-=-=-=-=第二组 -=-=-=-=-=-=-=-=-=-=-->
+    <context:component-scan base-package="com.ssmr.c10.multimplinject">
+        <context:include-filter type="annotation" expression="org.aspectj.lang.annotation.Aspect"/>
+    </context:component-scan>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+    <!--缺少proxy-target-class属性或者proxy-target-class="false"将报异常（默认是false）
+        org.springframework.beans.factory.BeanNotOfRequiredTypeException: Bean named 'alipayTool' is expected to be of type 'com.ssmr.c10.multimplinject.AlipayTool' but was actually of type 'com.sun.proxy.$Proxy17'
+
+        使用false配置将要求使用JDK代理，抛出的错误不是@Aspect出问题，而是AlipayTool类型映射失败
+        表面上看，这是配置JDK代理却使用注解@Aspect的错误逻辑，但错误抛出的地方是有接口的实现类
+        这是代理混乱导致的，如果不使用切面，就不需要<aop/>结点的配置，也就没有这种报错
+
+        aspectj-autoproxy/@EnableAspectJAutoProxy源码解读：https://www.jianshu.com/p/05c262a67283
+        -->
+
+</beans>

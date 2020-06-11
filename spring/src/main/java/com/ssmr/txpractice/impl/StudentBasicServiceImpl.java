@@ -29,11 +29,11 @@ public class StudentBasicServiceImpl implements StudentBasicService {
 
     @Override
     public int updateStudent(Student student) {
-        return 0;
+        return studentMapper.updateStudent(student);
     }
 
     @Override
     public int deleteStudent(Integer id) {
-        return 0;
+        return studentMapper.deleteStudent(id);
     }
 }
