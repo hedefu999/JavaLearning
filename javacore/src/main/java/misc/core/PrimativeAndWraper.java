@@ -44,4 +44,13 @@ public class PrimativeAndWraper {
         i = j = 3;
         System.out.println(i+" "+j);
     }
+    @Test
+    public void test48(){
+        int i = 3;
+        System.out.println(i+'a');
+//据此可以进行int到char的转化，下面两种方式相同
+        char j = (char)(i+48);  //(char)(i+'0');
+        char ch = '9';
+        int n = (int)(ch) - (int)('0');//此处ch也是‘0’至‘9’的数字字符
+    }
 }
