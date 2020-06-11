@@ -6,5 +6,6 @@
 .classpath
 */bin/
 novc/
+changingedu/
 *.class
 *.log

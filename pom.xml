@@ -18,6 +18,8 @@
     <module>redpacket</module>
       <module>concurrency</module>
       <module>algorithm</module>
+      <module>distribution</module>
+      <module>changingedu</module>
   </modules>
   <properties>
   </properties>
