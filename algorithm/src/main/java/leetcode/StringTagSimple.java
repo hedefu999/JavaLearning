@@ -3,12 +3,13 @@ package leetcode;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 public class StringTagSimple {
     public int romanToInt(String s) {
@@ -673,5 +674,215 @@ public class StringTagSimple {
         System.out.println(reverseVowels(input5));
     }
 
+    /**
+     * #434 字符串中的单词数
+     * java的 split(), 空字符串调用时会返回只含一个空字符串元素的数组,所以开头的多个空字串要去掉
+     * 并且split(" ") 与 split("\\s+") 是不一样的
+     */
+    public int countSegments(String s) {
+        String trimmed = s.trim();
+        if (trimmed.equals("")) {
+            return 0;
+        }
+        // return trimmed.split("\\s+").length;
+        return trimmed.split(" ").length;
+    }
+    public int countSegments2(String s){
+        int segmentCount = 0;
+        for (int i = 0; i < s.length(); i++) {
+            // if ((i == 0||str.charAt(i-1) == ' ') && str.charAt(i) != ' '){
+            //     segmentCount++;
+            // }
+            if (s.charAt(i) != ' ' && (i==s.length()-1 || s.charAt(i+1) == ' ')){
+                segmentCount++;
+            }
+        }
+        return segmentCount;
+    }
+    @Test
+    public void leco434() {
+        String sentence = "  hello, I am jack";
+        System.out.println(countSegments2(sentence));
+    }
 
+    /**
+     * #443 压缩字符串
+     * 原地法压缩字符串
+     */
+    public int compress(char[] chars) {
+        char current = chars[0];
+        int sum = 0;
+        boolean isMulti = false;
+        for (int i = 1; i < chars.length; i++) {
+            if(current != chars[i]){
+                current = chars[i];
+                if (isMulti) sum += 2;
+                else sum+=1;
+                isMulti = false;
+            }else {
+                isMulti = true;
+            }
+        }
+        if (isMulti) sum+=2;
+        else sum+=1;
+        return sum;
+    }
+    public List<String> compress2(char[] chars) {
+        char current = chars[0];
+        int count = 1;
+        java.util.List<String> result = new ArrayList<>();
+        for (int i = 1; i < chars.length; i++) {
+            if(current != chars[i]){
+                if (count>1){ result.add(current+"");result.add(count+"");}
+                else result.add(current+"");
+                current = chars[i];
+                count = 1;
+            }else {
+                count++;
+            }
+        }
+        if (count>1){ result.add(current+"");result.add(count+"");}
+        else result.add(current+"");
+        return result;
+    }
+    public int compress3(char[] chars) {
+        int anchor = 0, write = 0;
+        for (int read = 0; read < chars.length; read++) {
+            if (read + 1 == chars.length || chars[read + 1] != chars[read]) {
+                chars[write++] = chars[anchor];
+                if (read > anchor) {
+                    for (char c: ("" + (read - anchor + 1)).toCharArray()) {
+                        chars[write++] = c;
+                    }
+                }
+                anchor = read + 1;
+            }
+        }
+        //最后变成了 a,2,b,2,c,3,c
+        return write;
+    }
+    @Test
+    public void leco443() {
+        char[] chars = {'a','a','b','b','c','c','c'};//a2b2c3-6
+        char[] chars1 = {'a'};//a - 1
+        char[] chars2 = {'a','b','b','b','b','b'};//ab5 - 3
+        char[] chars3 = {'a','b','b','c'};//ab2c - 4
+        System.out.println(compress3(chars));
+    }
+
+    /**
+     * # 387 字符串中的第一个唯一字符
+     * 两层遍历在字符串是cc时出错，查找时都是向后看的，后面重复的字符串不知道前面已经重复了，算法低效
+     * 构造hash
+     */
+    public int firstUniqChar(String s) {
+        Map<Character, Integer> count = new HashMap<>();
+        int length = s.length();
+        for (int i = 0; i < length; i++) {
+            char c = s.charAt(i);
+            count.put(c,count.getOrDefault(c,0)+1);
+        }
+        for (int i = 0; i < length; i++) {
+            if (count.get(s.charAt(i)) < 2)
+                return i;
+        }
+        return -1;
+    }
+
+    @Test
+    public void leco387() {
+        String s = "leetcode";
+        String s2 = "loveleetcode";
+        String s3 = "cc";
+        String s4 = "c";
+        System.out.println(firstUniqChar(s3));
+    }
+
+    /**
+     * #383 赎金信
+     * 很多查找问题在排序后会很方便
+     * 从b字符串找出内容组成a字符串，不允许重复使用
+     */
+    //解1 对两个字符串进行排序
+    public boolean canConstruct(String ransomNote, String magazine) {
+        char[] r = ransomNote.toCharArray();
+        char[] m = magazine.toCharArray();
+        Arrays.sort(r);Arrays.sort(m);
+        int i = 0, j = 0;
+        for (;i<r.length && j<m.length;){
+            while (j<m.length && r[i] != m[j]) {
+                j++;
+            }
+            if (j < m.length){
+                i++;j++;
+            }
+        }
+        //上述for循环可以替换为
+        // while (i<r.length && j<m.length){
+        //     if (j<m.length && r[i] != m[j]) j++;
+        //     else {
+        //         i++;j++;//这里控制杂志里的一个字母只能用一次
+        //     }
+        // }
+        return i == r.length;//j!=m.length+1;
+    }
+    //解2 哈希表计数 对两个字符串中字母出现的次数进行Hash表统计
+    public boolean canConstruct2(String ransomNote, String magazine) {
+        char[] r = ransomNote.toCharArray();
+        Map<Character,Integer> rmap = new HashMap<>();
+        char[] m = magazine.toCharArray();
+        Map<Character,Integer> mmap = new HashMap<>();
+        for (char cr : r){
+            Integer count = rmap.computeIfAbsent(cr, key -> 0);
+            rmap.put(cr,++count);
+        }
+        for (char cr : m){
+            Integer count = mmap.computeIfAbsent(cr, key -> 0);
+            mmap.put(cr,++count);
+            // 上面两行可以简写成一行：mmap.put(cr,mmap.getOrDefault(cr,0)+1);
+        }
+        for (Map.Entry<Character,Integer> entry:rmap.entrySet()){
+            Character key = entry.getKey();
+            Integer value = entry.getValue();
+            if (mmap.get(key) == null || mmap.get(key) < value){
+                return false;
+            }
+        }
+        return true;
+    }
+    //解3 hash表思想，hashcode计算出来只是为了统计各字母的出现次数，那为何不用ASCII码直接做hashcode呢，反正不会冲突
+    //不能有标点符号和空格，只能是小写字母
+    public boolean canConstruct3(String ransomNote, String megazine) {
+        ransomNote = ransomNote.replaceAll(" ","");
+        megazine = megazine.replaceAll(" ","");
+        int[] rhash = new int[26];
+        int[] mhash = new int[26];
+        for (char rs : ransomNote.toCharArray()){
+            rhash[rs-'a'] += 1;
+        }
+        for (char ms : megazine.toCharArray()){
+            mhash[ms-'a'] += 1;
+        }
+        for (int i = 0; i < 26; i++) {
+            if (rhash[i] > mhash[i]) return false;
+        }
+        return true;
+    }
+    @Test
+    public void leco383() {
+        String a = "a",b="";
+        String a1 = "a",b1="b";
+        String a2 = "aa",b2="bb";
+        String a3 = "aa",b3="aab";
+        String a5 = "aa",b5="ab";
+        String a4 = "shanghai",b4 = "hello ai,shall we begin the game?";
+        System.out.println(canConstruct3(a5,b5));
+        System.out.println(canConstruct3(a4,b4));
+        System.out.println(canConstruct3(a3,b3));
+        System.out.println(canConstruct3(a2,b2));
+        System.out.println(canConstruct3(a1,b1));
+        System.out.println(canConstruct3(a,b));
+        //false true true false false false
+
+    }
 }

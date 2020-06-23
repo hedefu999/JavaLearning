@@ -25,4 +25,12 @@ public class PropagationJunitTest {
         propagation.hybridSelfInvokeAndOtherRequired();
     }
 
+    @Autowired
+    private CompactPropagationService compactPropagation;
+
+    @Test
+    public void test31() {
+        compactPropagation.test01_AMethod();
+    }
+
 }

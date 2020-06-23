@@ -29,6 +29,7 @@ public class LogHandler implements InvocationHandler {
             //proxy是被代理对象
             //System.out.println(proxy instanceof IHello);
             //通过反射执行被代理对象的方法
+            // method.setAccessible(true); JDK动态代理的方法是从接口过来的，不会是private
             result = method.invoke(delegate,args);
             //log.info("方法执行后。。。");
         }catch (Exception e){}

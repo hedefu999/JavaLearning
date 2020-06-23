@@ -13,7 +13,8 @@ public class Client {
         enhancer.setCallback(operator);
         //生成代理对象
         Welcom agency = (Welcom) enhancer.create();
-
+        //cglib被代理方法如果是private的，这里编译不通过
+        // 所以@Transactional加在private方法上，即便是编译通过（IDEA提示“使用@Transactional注解的方法必须是overridable）
         agency.sayHello();
     }
 }
