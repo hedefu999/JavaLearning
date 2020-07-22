@@ -49,4 +49,12 @@ public class Java8Feature {
         map.put(c, map.getOrDefault(c, 0) + 1);
     }
 
+    /**
+     * Optional的使用
+     */
+    @Test
+    public void testOptionalApi() {
+
+    }
+
 }
