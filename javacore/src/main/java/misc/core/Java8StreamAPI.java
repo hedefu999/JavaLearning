@@ -5,19 +5,24 @@ import lombok.Data;
 import org.junit.Test;
 import org.slf4j.Logger;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Spliterator;
+import java.util.Spliterator.OfInt;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -33,8 +38,8 @@ import static org.slf4j.LoggerFactory.getLogger;
  * 流式编程API案例展示
  * 对流排序不会修改数据源的顺序
  */
-public class StreamProgrammingAPI {
-    private static final Logger logger = getLogger(StreamProgrammingAPI.class);
+public class Java8StreamAPI {
+    private static final Logger logger = getLogger(Java8StreamAPI.class);
 
     @Data
     @AllArgsConstructor
@@ -190,6 +195,8 @@ public class StreamProgrammingAPI {
         });
         System.out.println(multiplyResult);
 
+        double bigDecimalResult = Stream.of(12.8, 13.87, 15.99, 23.0).map(BigDecimal::new).reduce(BigDecimal.ZERO, BigDecimal::add).doubleValue();
+        System.out.println(bigDecimalResult);//65.66
     }
 
     /**
@@ -314,8 +321,22 @@ public class StreamProgrammingAPI {
             data.add(new Student("spy5", 160, 320.00,""));
             //间谍spy因number重复导致hashMapkey重复，从而导致下面一行的写法抛出merge相关的异常！异常的定义见Collectors.throwingMerger
             // Map<Integer, Student> containerMap = data.stream().collect(Collectors.toMap(item -> item.getNumber(), item -> item));
-            // Map<Integer, Container> containerMap = data.stream().collect(HashMap::new, (map, item) -> map.put(item.getNumber(), item), HashMap::putAll);
-            // System.out.println(containerMap.size());
+
+            //duplicate key 解决方案 1:
+            //只能返回newValue（表示替换为新值）和null（表示移除这个重复的key）
+            HashMap<Integer, Student> complicateAPIMap = data.stream().collect(Collectors.toMap(
+                    item -> item.getNumber(),
+                    item -> item,
+                    (existValue, puttingValue) -> existValue,
+                    HashMap::new));
+            System.out.println(complicateAPIMap);
+            Map<Integer, Student> containerMap = data.stream().collect(HashMap::new, (map, item) -> map.putIfAbsent(item.getNumber(), item), new BiConsumer<HashMap<Integer, Student>, HashMap<Integer, Student>>() {
+                @Override
+                public void accept(HashMap<Integer, Student> integerStudentHashMap, HashMap<Integer, Student> integerStudentHashMap2) {
+                    logger.info("串行流也会走到这里？？？");
+                }
+            });
+            System.out.println(containerMap.size());
             ArrayList<Integer> noDuplicateIds = data.stream().map(Student::getNumber).collect(Collectors.collectingAndThen(Collectors.toSet(), ArrayList::new));
             System.out.println(noDuplicateIds);
         }
@@ -359,7 +380,7 @@ public class StreamProgrammingAPI {
             //显然，使用自定义Comparator会另代码看起来很奇怪，而且编译器无法推测类型
             Student maxNumStu = data.stream().collect(Collectors.reducing(BinaryOperator.maxBy(Comparator.comparing(Student::getNumber)))).get();
             Integer minNumber = data.stream().collect(Collectors.minBy(Comparator.comparing(Student::getNumber))).get().getNumber();//reducing动作可以去掉
-            Integer minNum = data.stream().min(Comparator.comparing(Student::getNumber)).orElse(Student.DEFAULT).getNumber();//还可以进一步简化
+            Integer minNum = data.stream().min(Comparator.comparing(Student::getNumber).thenComparingDouble(Student::getADouble)).orElse(Student.DEFAULT).getNumber();//还可以进一步简化
             System.out.println(maxNumStu);
             System.out.println(minNumber);
             System.out.println("学生最小number = " + minNum);
@@ -459,11 +480,12 @@ public class StreamProgrammingAPI {
     }
 
     /**
-     * 迭代器
+     * 可拆分迭代器Spliterator
      * Spliterator不同于传统iterator的一点是其支持并行迭代
      */
     static class SpliteratorDemo{
-        public static void main(String[] args) {
+        static class DiffBetweenIteratorAndSpliterator{
+            public static void main(String[] args) {
             /*
             //1. 传统的iterator操作
             //forEach在编译后会转换成iterator遍历操作
@@ -471,25 +493,88 @@ public class StreamProgrammingAPI {
              while (iterator.hasNext()){
              System.out.println(iterator.next().getString());
              }
-
-
              //2. 使用 Spliterator#tryAdvance 进行遍历
             Spliterator<Container> spliterator = data.stream().spliterator();
             while (spliterator.tryAdvance(System.out::println));
              */
 
-            //3. forEachRemaining和trySplit方法
-            Spliterator<Student> spliterator1 = data.stream().spliterator();
-            Spliterator<Student> spliterator2 = spliterator1.trySplit();
-            if (spliterator2 != null){
-                spliterator2.forEachRemaining(System.out::println);
+                //3. forEachRemaining和trySplit方法
+                Spliterator<Student> spliterator1 = data.stream().spliterator();
+                Spliterator<Student> spliterator2 = spliterator1.trySplit();
+                if (spliterator2 != null){
+                    spliterator2.forEachRemaining(System.out::println);
+                }
+                System.out.println("=-=-=-=-=-=-=-=-=");
+                spliterator1.forEachRemaining(System.out::println);
+                /*
+                 * 4分2了，各打印两个元素
+                 * spliterator由API内部调用，现有设计不满足时才考虑自定义split处理大数据集
+                 */
             }
-            System.out.println("=-=-=-=-=-=-=-=-=");
-            spliterator1.forEachRemaining(System.out::println);
-            /*
-             * 4分2了，各打印两个元素
-             * spliterator由API内部调用，现有设计不满足时才考虑自定义split处理大数据集
-             */
+        }
+        static class SpliteratorPrimaryUsage{
+            public static void main(String[] args) {
+                int[] intArray = new int[]{1,2,3,4,5,6,7,8,9,10};
+                Spliterator.OfInt intSpliterator = IntStream.range(0,intArray.length).spliterator();
+                intSpliterator.forEachRemaining((int value) -> { //这里不写value的类型编译器因为函数重载会不知道调哪一个
+                    System.out.println(Thread.currentThread().getName()+"--"+value);//value是0-9这是声明10个元素的默认值
+                });
+
+                Spliterator.OfInt intSpliterator2 = Arrays.spliterator(intArray);
+                Spliterator.OfInt splitLeft = intSpliterator2.trySplit();
+                Spliterator.OfInt splitRight = intSpliterator2.trySplit();
+                System.out.println("-=-=-=-= show left -=-=-=-=");
+                splitLeft.forEachRemaining((int value) -> {
+                    System.out.println(Thread.currentThread().getName()+"--"+value);
+                });
+                System.out.println("-=-=-=-- show right -=-=-");
+                splitRight.forEachRemaining((int value) -> {
+                    System.out.println(Thread.currentThread().getName()+"--"+value);
+                });
+                System.out.println("-=-=-=-- show origin intSpliterator -=-=-");
+                intSpliterator2.forEachRemaining((int value) -> {
+                    System.out.println(Thread.currentThread().getName()+"--"+value);
+                });
+                /* 每次trySplit都是分到剩余元素的一半数量
+                 * -=-=-=-= show left -=-=-=-=
+                 * main--1
+                 * main--2
+                 * main--3
+                 * main--4
+                 * main--5
+                 * -=-=-=-- show right -=-=-
+                 * main--6
+                 * main--7
+                 * -=-=-=-- show origin intSpliterator -=-=-
+                 * main--8
+                 * main--9
+                 * main--10
+                 */
+            }
+        }
+        static class CustomizedSpliterator{
+            static class TaggedArraySpliterator<T> implements Spliterator<T>{
+
+                @Override
+                public boolean tryAdvance(Consumer<? super T> action) {
+                    return false;
+                }
+
+                @Override
+                public Spliterator<T> trySplit() {
+                    return null;
+                }
+
+                @Override
+                public long estimateSize() {
+                    return 0;
+                }
+
+                @Override
+                public int characteristics() {
+                    return 0;
+                }
+            }
         }
     }
 
