@@ -883,6 +883,53 @@ public class StringTagSimple {
         System.out.println(canConstruct3(a1,b1));
         System.out.println(canConstruct3(a,b));
         //false true true false false false
+    }
+
+    /**
+     * # 520 大写字母的正确使用
+     * 1:USA 2:leetcode 3:Google
+     */
+    public boolean detectCapitalUse(String word) {
+        int type = 0;
+        char[] chars = word.toCharArray();
+        if (chars.length == 1) return true;
+        if ('A' <= chars[0] && chars[0] <= 'Z'){
+            if ('A' <= chars[1] && chars[1] <= 'Z'){
+                type = 1;
+            }else {
+                type = 3;
+            }
+        }else {
+            type = 2;
+        }
+        switch (type){
+            case 1:
+                for (int i = 1; i < chars.length; i++) {
+                    if ('A' > chars[i] || chars[i] > 'Z')
+                        return false;
+                }
+                break;
+            case 2:
+            case 3:
+                for (int i = 1; i < chars.length; i++) {
+                    if ('A' <= chars[i] && chars[i] <= 'Z')
+                        return false;
+                }
+                break;
+        }
+        return true;
+    }
+    @Test
+    public void test520() {
+        System.out.println(detectCapitalUse("FlaG"));
+    }
+
+    /**
+     * #415 字符串相加
+     *
+     */
+    @Test
+    public void test415() {
 
     }
 }
