@@ -5,6 +5,7 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -883,6 +884,218 @@ public class StringTagSimple {
         System.out.println(canConstruct3(a1,b1));
         System.out.println(canConstruct3(a,b));
         //false true true false false false
+    }
+
+    /**
+     * # 520 大写字母的正确使用
+     * 1:USA 2:leetcode 3:Google
+     */
+    public boolean detectCapitalUse(String word) {
+        int type = 0;
+        char[] chars = word.toCharArray();
+        if (chars.length == 1) return true;
+        if ('A' <= chars[0] && chars[0] <= 'Z'){
+            if ('A' <= chars[1] && chars[1] <= 'Z'){
+                type = 1;
+            }else {
+                type = 3;
+            }
+        }else {
+            type = 2;
+        }
+        switch (type){
+            case 1:
+                for (int i = 1; i < chars.length; i++) {
+                    if ('A' > chars[i] || chars[i] > 'Z')
+                        return false;
+                }
+                break;
+            case 2:
+            case 3:
+                for (int i = 1; i < chars.length; i++) {
+                    if ('A' <= chars[i] && chars[i] <= 'Z')
+                        return false;
+                }
+                break;
+        }
+        return true;
+    }
+    @Test
+    public void test520() {
+        System.out.println(detectCapitalUse("FlaG"));
+    }
+
+    /**
+     * #415 字符串相加
+     * 两个字符串形式的非负整数 num1和num2长度都<5100，num1和num2只含数字0-9，num1和num2不包含任何前导零
+     * '0'-48, '9'-57
+     */
+    public String addStrings(String num1, String num2) {
+        char[] char1 = num1.toCharArray();
+        char[] char2 = num2.toCharArray();
+        int i = char1.length - 1,j = char2.length - 1, num = 0;
+        boolean addin = false;
+        StringBuilder builder = new StringBuilder();
+        for (; i >= 0 && j >= 0; i--,j--) {
+            int sum = sum(char1[i],char2[j],addin);
+            addin = sum >= 10;
+            builder.append(sum%10);
+        }
+        for (; i >= 0; i--) {
+            int sum = sum(char1[i],'0',addin);
+            addin = sum >= 10;
+            builder.append(sum%10);
+        }
+        for (; j >= 0; j--) {
+            int sum = sum('0',char2[j],addin);
+            addin = sum >= 10;
+            builder.append(sum%10);
+        }
+        if (addin){
+            builder.append('1');
+        }
+        builder.reverse();
+        return builder.toString();
+    }
+    private int sum(char char1, char char2, boolean addin){
+        int left = char1 - 48;
+        int right = char2 - 48;
+        return left + right + (addin?1:0);
+    }
+    //上面的额外遍历其实可以放在一个for循环里的。。。就是判断条件改为或，内部再判断一次是否越界
+    public String addStrings2(String num1, String num2) {
+        StringBuilder sb = new StringBuilder();
+        int carry = 0, i = num1.length()-1, j = num2.length()-1;
+        while(i >= 0 || j >= 0 || carry != 0){
+            if(i>=0) carry += num1.charAt(i--)-'0';
+            if(j>=0) carry += num2.charAt(j--)-'0';
+            sb.append(carry%10);
+            carry /= 10;
+        }
+        return sb.reverse().toString();
+    }
+    @Test
+    public void test415() {
+        System.out.println(addStrings2("9999","10"));
+        System.out.println(addStrings2("32768","77256"));//110024
+        System.out.println(addStrings2("1","2"));
+    }
+    /**
+     * #344 原地反转字符串
+     * 不得分配另外的数组额外空间，必须原地修改输入数组，使用O(1)的SC解决问题
+     * 数组中的所有字符都是ASCII码表中的可打印字符
+     */
+    public void reverseString(char[] s) {
+        char tmp;
+        for (int i = 0; i < s.length / 2; i++) {
+            int mirror = s.length - i - 1;
+            tmp = s[i];s[i]=s[mirror];s[mirror]=tmp;
+        }
+    }
+    //递归写法
+    public void helper(char[] s, int left, int right) {
+        if (left >= right) return;
+        char tmp = s[left];
+        s[left++] = s[right];
+        s[right--] = tmp;
+        helper(s, left, right);
+    }
+    public void reverseString2(char[] s) {
+        helper(s, 0, s.length - 1);
+    }
+    @Test
+    public void test344() {
+        char[] input = {'h','e','l','l','o'};
+        char[] input2 = {'H','a','n','n','a','h'};
+        reverseString(input);
+        reverseString(input2);
+        System.out.println(Arrays.toString(input));
+        System.out.println(Arrays.toString(input2));
+    }
+
+    /**
+     * #459 重复的子字符串
+     * 一个非空的字符串可否由它的一个字串重复多次构成
+     * 字符串均为小写英文字母，长度<=10000
+     */
+    public boolean repeatedSubstringPattern(String s) {
+        char[] chars = s.toCharArray();
+        char start = chars[0];
+        int index;
+        for (index = 1; index <= chars.length / 2; index ++) {
+            if (chars[index] == start) break;
+        }
+        if (index > chars.length / 2) return false;
+        if ((chars.length % index) != 0) return false;
+        for (int i = index, j = 0; i < chars.length; i++,j++) {
+            if (chars[i] != chars[j]) return false;
+            if (j == index) j = 0;
+        }
+        return true;
+        //这种写法无法解决 "abaababaab" 的判断问题
+    }
+    public boolean repeatedSubstringPattern2(String s) {
+        int n = s.length();
+        int[] ints = buildNext(s.toCharArray());
+        int x = ints[n];//取出最后一位
+        return x != 0 && n%(n-x) == 0;
+    }
+    int[] buildNext(char[] pat){
+        int m = pat.length, j = 0;
+        int[] next = new int[m+1];//m+1 每位都是-1
+        int t = next[0] = -1;
+        while (j <= m - 1){
+            if (t<0 || pat[j] == pat[t]){
+                next[++j] = ++t;
+            }else {
+                t = next[t];
+            }
+        }
+        return next;
+    }
+    public boolean repeatedSubstringPattern3(String s) {
+        String str = s + s;
+        return str.substring(1, str.length() - 1).contains(s);
+    }
+
+    /**
+     * 关于KMP算法
+     */
+    @Test
+    public void test459() {//2 3 5 7 11
+        String input1 = "abab";//true ab
+        String input2 = "aba";//false
+        String input3 = "abcabcabcabc";//true
+        String input4 = "cgcgcg";
+        String input5 = "cgiagi";
+        String input6 = "cgicgicghcgi";
+        String input7 = "abaababaab";
+        System.out.println(repeatedSubstringPattern2(input7));
+    }
+
+    @Test
+    public void test1092() {
+        System.out.println(new Date().getTime());
+    }
+
+    /**
+     * #521 最长特殊序列 1 就是在A不在B的最长子串
+     * 找出两个字符串中一个字符串特有的最长子序列，返回长度
+     * 没有返回-1，空字符串是任意字符串的子序列，任意字符串是其自身的子序列
+     * 【例1】 aba , cdc ==>  3 两者均为自身的子序列且不是对方的子序列
+     * 【例2】 aaa , bbb ==>  3
+     * 【例3】 aaa , aaa ==>  -1
+     */
+    //暴力解法:生成两个字符串所有的子序列共2^n个，存储在hashmap中
+    public int findLUSlength(String a, String b) {
+        HashMap<String,Integer> map = new HashMap<>();
+        for (String str : new String[]{a,b}){
+
+        }
+        return 0;
+    }
+    @Test
+    public void test521() {
 
     }
 }
