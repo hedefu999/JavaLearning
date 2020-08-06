@@ -12,12 +12,29 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 
+/**
+ * 此处使用的asm可以换成其他类库的，这里使用的是JDK自带的
+ */
 public class TimeAgent {
     static class TimeAdviceAdapter extends AdviceAdapter{
         private String methodName;
         protected TimeAdviceAdapter(int api, MethodVisitor methodVisitor, int methodAccess, String methodName, String methodDesc){
             super(api, methodVisitor, methodAccess, methodName, methodDesc);
             this.methodName = methodName;
+        }
+
+        @Override
+        protected void onMethodEnter() {
+            //在方法入口处植入
+            if ("<init>".equals(methodName) || "<clinit>".equals(methodName)){
+                return;
+            }
+            super.onMethodEnter();
+        }
+
+        @Override
+        protected void onMethodExit(int i) {
+            super.onMethodExit(i);
         }
     }
     static class TimeClassVisitor extends ClassVisitor{
@@ -32,6 +49,7 @@ public class TimeAgent {
         }
     }
     static class TimeClassFileTransformer implements ClassFileTransformer{
+        //入参classFileBuffer表示原始的字节码，方法返回值表示真正要进行加载的字节码
         @Override
         public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
             if (className.startsWith("java")||className.startsWith("jdk")||className.startsWith("sun")||className.startsWith("com/sun")||className.startsWith("misc/javaagent/senior")){
@@ -48,6 +66,7 @@ public class TimeAgent {
 
     }
     public static void premain(String args, Instrumentation inst) {
+        //使用Instrumentation#addTransformer注册转换器
         inst.addTransformer(new TimeClassFileTransformer());
     }
 }

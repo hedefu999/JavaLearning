@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Spliterator;
-import java.util.Spliterator.OfInt;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
@@ -24,6 +23,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -484,34 +484,9 @@ public class Java8StreamAPI {
      * Spliterator不同于传统iterator的一点是其支持并行迭代
      */
     static class SpliteratorDemo{
-        static class DiffBetweenIteratorAndSpliterator{
-            public static void main(String[] args) {
-            /*
-            //1. 传统的iterator操作
-            //forEach在编译后会转换成iterator遍历操作
-             Iterator<Container> iterator = data.stream().iterator();
-             while (iterator.hasNext()){
-             System.out.println(iterator.next().getString());
-             }
-             //2. 使用 Spliterator#tryAdvance 进行遍历
-            Spliterator<Container> spliterator = data.stream().spliterator();
-            while (spliterator.tryAdvance(System.out::println));
-             */
-
-                //3. forEachRemaining和trySplit方法
-                Spliterator<Student> spliterator1 = data.stream().spliterator();
-                Spliterator<Student> spliterator2 = spliterator1.trySplit();
-                if (spliterator2 != null){
-                    spliterator2.forEachRemaining(System.out::println);
-                }
-                System.out.println("=-=-=-=-=-=-=-=-=");
-                spliterator1.forEachRemaining(System.out::println);
-                /*
-                 * 4分2了，各打印两个元素
-                 * spliterator由API内部调用，现有设计不满足时才考虑自定义split处理大数据集
-                 */
-            }
-        }
+        /**
+         * Spliterator的基础用法
+         */
         static class SpliteratorPrimaryUsage{
             public static void main(String[] args) {
                 int[] intArray = new int[]{1,2,3,4,5,6,7,8,9,10};
@@ -552,30 +527,93 @@ public class Java8StreamAPI {
                  */
             }
         }
-        static class CustomizedSpliterator{
+        static class OracleOfficialSpliteratorDemo{
             static class TaggedArraySpliterator<T> implements Spliterator<T>{
+                private final Object[] array;
+                private int origin;
+                private final int fence;
+
+                public TaggedArraySpliterator(Object[] array, int origin, int fence) {
+                    this.array = array;
+                    this.origin = origin;//index
+                    this.fence = fence;//最大index + 1
+                }
+
+                @Override
+                public void forEachRemaining(Consumer<? super T> action) {
+                    for (;origin < fence;origin += 2){
+                        String format = String.format("data = %d, tag = %s;", array[origin], array[origin + 1]);
+                        action.accept((T)format);
+                    }
+                }
 
                 @Override
                 public boolean tryAdvance(Consumer<? super T> action) {
-                    return false;
+                    if (origin < fence){
+                        action.accept((T)array[origin]);
+                        origin += 2;//成对存储，所以跳2
+                        return true;
+                    }else
+                        return false;
                 }
 
                 @Override
                 public Spliterator<T> trySplit() {
-                    return null;
+                    int low = origin;
+                    int mid = ((low + fence) >>> 1) & ~1;//通常(low+high)/2但不好控制结果的奇偶。末尾取0，向前取偶数。取偶数的原因是array中的数据是成对存储的
+                    if (low < mid){
+                        origin = mid;//使用后一般，前一般交给新创建的TaggedArraySpliterator
+                        return new TaggedArraySpliterator<>(array, low, mid);
+                    }else
+                        return null;
                 }
 
                 @Override
                 public long estimateSize() {
-                    return 0;
+                    return (fence - origin)/2;
                 }
 
                 @Override
                 public int characteristics() {
-                    return 0;
+                    return ORDERED|SIZED|IMMUTABLE|SUBSIZED;
+                }
+
+            }
+            static class TaggedArray<T>{
+                private final Object[] elements;
+                TaggedArray(T[] data, Object[] tags){
+                    int size = data.length;
+                    //data与tags数量上不一致抛出异常
+                    if (tags.length != size) throw new IllegalArgumentException();
+                    //将data与tags交替保存到elements中
+                    this.elements = new Object[2*size];
+                    for (int i = 0, j = 0; i < size; i++) {
+                        elements[j++] = data[i];
+                        elements[j++] = tags[i];
+                    }
+                }
+                public Spliterator<T> spliterator(){
+                    return new TaggedArraySpliterator<>(elements, 0, elements.length);
                 }
             }
+
+            public static void main(String[] args) {
+                Integer[] data = {1,2,3,4,5,6,7,8};
+                Character[] tags = {'A','B','C','D','E','F','G','H'};
+                TaggedArray<String> taggedArray = new TaggedArray(data,tags);
+                //使用流打印内容，根据parallel的bool值设置决定是否并行打印
+                // StreamSupport.stream(taggedArray.spliterator(), false).forEach(System.out::println);
+                /*
+                 * data = 1, tag = A;
+                 * data = 2, tag = B;
+                 * data = 3, tag = C;
+                 * ...
+                 */
+                StreamSupport.stream(taggedArray.spliterator(), true).forEach(System.out::println);
+                //打印顺序乱了，不知道意味着啥
+            }
         }
+
     }
 
     static class QuestionToResearch{
