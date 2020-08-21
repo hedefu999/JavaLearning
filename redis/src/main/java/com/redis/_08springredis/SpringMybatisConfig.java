@@ -28,7 +28,7 @@ public class SpringMybatisConfig {
     @Bean("dataSource")
     public static DataSource dataSource(){
         Properties props = new Properties();
-        props.setProperty("driverClassName","com.mysql.jdbc.Driver");
+        props.setProperty("driverClassName","com.mysql.cj.jdbc.Driver");
         props.setProperty("url","jdbc:mysql://localhost:3306/ssmr?useSSL=false");
         props.setProperty("username","root");
         props.setProperty("password","hedefu999");

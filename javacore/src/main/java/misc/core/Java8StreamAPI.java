@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.IntSummaryStatistics;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -635,4 +636,177 @@ public class Java8StreamAPI {
         }
     }
 
+    /**
+     * Collection.stream().forEach() 与 Collection.forEach() 的区别
+     */
+    static class WhatsTheDifferenceBetweenStreamForEach{
+        static List<String> globalList = Arrays.asList("A", "B", "C", "D");
+        static ArrayList<String> globalArrayList = new ArrayList<String>(){{
+            add("jack");
+            add("lucy");
+            add("daniel");
+            add("java");
+        }};
+        static Consumer<String> globalConsumer = System.out::print;
+        //差异1: stream.forEach在并行流下元素顺序会乱掉。
+        static class DifferenceOne{
+            public static void main(String[] args) {
+                for(String s : globalList) {
+                    System.out.print(s);
+                }
+                System.out.println();
+                //将lambda表达式赋值局部变量是怎么写的
+                //错误写法：Consumer<String> consumer = s -> { System.out::println };
+                // Consumer<String> consumer3 = s -> {System.out.println(s);};
+                globalList.forEach(globalConsumer);
+                System.out.println();
+                globalList.stream().forEach(globalConsumer);//.parallelStream()
+            }
+        }
+        //差异2: stream.forEach会忽略List中定义的iterator，而仅仅简单地顺序取元素。Collection.forEach在自定义List中的iterator
+        static class DifferenceTwo{
+            static class MyReverseList extends ArrayList<String> {
+                @Override
+                public Iterator<String> iterator() {
+                    int startIndex = this.size() - 1;
+                    List<String> list = this;
+                    Iterator<String> it = new Iterator<String>() {
+                        private int currentIndex = startIndex;
+                        @Override
+                        public boolean hasNext() {
+                            return currentIndex >= 0;
+                        }
+                        @Override
+                        public String next() {
+                            String next = list.get(currentIndex);
+                            currentIndex--;
+                            return next;
+                        }
+                        @Override
+                        public void remove() {
+                            throw new UnsupportedOperationException();
+                        }
+                    };
+                    return it;
+                }
+            }
+            public static void main(String[] args) {
+                List<String> myList = new MyReverseList();
+                myList.addAll(globalList);
+                for (String str : myList){
+                    System.out.print(str);
+                }
+                System.out.println();
+                //下面两个是一样的
+                myList.forEach(globalConsumer);
+                myList.stream().forEach(globalConsumer);
+                /*
+                  上述两种遍历的差异见源码：java.util.ArrayList.forEach，可见其内部是直接对本地数组做fori遍历
+                  而增强foreach是调内部类Iterator不断get(index++)取元素，get底层才是对数组操作
+                  这大概就是forEach性能优于foreach
+                * */
+            }
+        }
+        /*
+        差异3: 移除元素上的差异，foreach时执行ArrayList#remove操作直接抛出ConcurrentModificationException异常(fail-fast机制)
+            而forEach并不保证ConcurrentModificationException能被抛出来，所以不可以依赖此异常
+        * */
+        static class DifferenceThree{
+            static void removeItemInforeach(){
+                // globalList.remove("A");//众所周知 UnsupportedOperationException
+                // globalArrayList.remove("daniel"); 提前remove掉就不会抛异常了
+                for (String item : globalArrayList){
+                    System.out.println(item + " " + globalList.size());
+                    if (item.equals("jack")){
+                        // globalArrayList.remove("daniel");//ConcurrentModificationException
+                        // globalArrayList.set(2,"hello"); set不会引起啥问题
+                    }/*
+                       jack 4
+                       ConcurrentModificationException */
+                }
+                globalArrayList.stream().forEach(s -> {
+                    System.out.println(s + " " + globalList.size());
+                    if (s != null && s.equals("jack")) {
+                        // globalArrayList.remove("daniel");
+                        // globalArrayList.set(2,"world"); set操作都没啥问题，但在并行流下set元素会因并发问题引起未知结果
+                    }/* 打印结果表明:
+                       jack 4
+                       lucy 4
+                       java 4
+                       null 4
+                       ConcurrentModificationException */
+                    System.out.println();
+                });
+            }
+            static void removeItemByIterator(){
+                Iterator<String> iterator = globalArrayList.iterator();
+                for (String item : globalArrayList){
+                    if (item.equals("jack")){
+                        // iterator.remove();//IllegalStateException
+                    }
+                }
+                //这才是正统的移除元素的方式
+                while (iterator.hasNext()){
+                    String next = iterator.next();
+                    if (next.equals("jack")){
+                        iterator.remove();
+                    }
+                }
+            }
+            public static void main(String[] args) {
+                removeItemInforeach();
+            }
+        }
+        /*
+          性能差异：
+        * */
+        static class EffectivenessComparison{
+            @Data @AllArgsConstructor
+            static class User{
+                private String name;
+                private String id;
+            }
+            private static void testForeach(List<User> userList) {
+                for (User user : userList) {
+                    user.hashCode();
+                }
+            }
+            private static void testLambda(List<User> userList) {
+                userList.forEach(user -> user.hashCode());
+            }
+            private static List<User> initList(int size) {
+                List<User> userList = new ArrayList<>();
+                for (int i = 0; i < size; i++) {
+                    userList.add(new User("user" + i, String.valueOf(i)));
+                }
+                return userList;
+            }
+            public static void main(String[] args) {
+                List<User> userList = initList(10000);
+                for (int i = 1; i < 11; i++) {
+                    System.out.println("--------------------第" + i + "次");
+                    long t1 = System.nanoTime();
+                    testLambda(userList);
+                    long t2 = System.nanoTime();
+                    testForeach(userList);
+                    long t3 = System.nanoTime();
+                    System.out.println("lambda---" + (t2 - t1) / 1000 + "μs");
+                    System.out.println("增强for--" + (t3 - t2) / 1000 + "μs");
+                }
+                /**
+                 * 多次重复遍历，按微秒记，两种遍历方式都是耗时越来越少，第一次遍历streamForEach要比enforcedForEach慢很多，
+                 * 两次遍历后streamForEach一直比enforcedForEach快
+                 * |  +
+                 * |     +
+                 * |  -     +
+                 * |     -   -  +   -
+                 * |               +   -
+                 * —— —— —— —— —— —— ——
+                 * +表示lambda的stream#foreach， - 表示增强foreach
+                 */
+            }
+
+        }
+
+    }
 }

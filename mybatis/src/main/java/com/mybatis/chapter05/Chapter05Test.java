@@ -5,10 +5,9 @@ import com.mybatis.chapter05.model.*;
 import com.mybatis.utils.SqlSessionFactoryUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.TransactionIsolationLevel;
-import org.apache.ibatis.transaction.Transaction;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,19 +49,17 @@ public class Chapter05Test {
         System.out.println(workCard.getDepartment());
     }
 
-
     /** -=-=-=-=-=- 专题研究 业务操作中常见的不存在就新增一条，在并发操作时发生重复插入记录的问题，如何从技术上解决？ =-=-=-=-= **/
     /**
-     * create table work_card (
-     *   id         int auto_increment primary key,
-     *   emp_id     int         null,
-     *   real_name  varchar(20) null,
-     *   department varchar(20) null,
-     *   constraint work_card_emp_id_uindex
-     *   unique (emp_id)
-     * );
+     create table work_card (
+     id         int auto_increment primary key,
+     emp_id     int         null,
+     real_name  varchar(20) null,
+     department varchar(20) null,
+     constraint work_card_emp_id_uindex
+     unique (emp_id)
+     );
      */
-
     static class InsertBeforeQueryTask implements Runnable{
         private String configFileRPath;
         private String jdbcFileRPath;
@@ -306,7 +303,43 @@ public class Chapter05Test {
          */
     }
 
-
+    /**-=-=-=-=-=-=-=-=-= 批量更新的3种方式 =-=-=-=-=-=-=-=*/
+    /**
+     * batch update方法，数据库连接配置必须带上&allowMultiQueries=true
+     */
+    List<WorkCard> workCards = new ArrayList<WorkCard>(){{
+        add(new WorkCard(null, 2, null, "tianqin3"));
+        add(new WorkCard(null, 45, null, "tianyu3"));
+        add(new WorkCard(null,643,null,"tianzheng3"));
+    }};
+    @Test
+    public void testBatchUpdate4BatUpdate() {
+        WorkCardMapper workCardMapper = SqlSessionFactoryUtils.getMapper2(WorkCardMapper.class,"jdbc.properties",true);
+        int affectedRows = workCardMapper.batchUpdate2BatUpdateWorkCards(workCards);
+        System.out.println(affectedRows);
+    }
+    /**
+     * case when写法 这种写法不受数据库连接配置的影响
+     */
+    @Test
+    public void testCaseWhen4BatUpdate() {
+        WorkCardMapper workCardMapper = SqlSessionFactoryUtils.getMapper2(WorkCardMapper.class,"jdbc.properties",true);
+        int affectedRows = workCardMapper.caseWhen2BatUpdateWorkCards(workCards);
+        System.out.println(affectedRows);
+    }
+    /**
+     * join写法
+     */
+    @Test
+    public void testJoin4BatUpdate() {
+        WorkCardMapper workCardMapper = SqlSessionFactoryUtils.getMapper2(WorkCardMapper.class,"jdbc.properties",true);
+        int affectedRows = workCardMapper.join2BatUpdateWorkCards2(workCards);
+        System.out.println(affectedRows);
+    }
+    /**
+     * 上述三种写法的性能对比：
+     * JOIN > Batch Update > Case When ,更新数据量越大，差异越明显【未测试】
+     */
 
 
 }

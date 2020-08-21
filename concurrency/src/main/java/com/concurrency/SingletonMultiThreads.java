@@ -248,7 +248,7 @@ public class SingletonMultiThreads {
                         String url = "jdbc:mysql://localhost:3306/ssmr";
                         String userName = "root";
                         String userPass = "hedefu999";
-                        String sqlDriver = "com.mysql.jdbc.Driver";
+                        String sqlDriver = "com.mysql.cj.jdbc.Driver";
                         Class.forName(sqlDriver);
                         connection = DriverManager.getConnection(url,userName,userPass);
                         System.out.println(connection == null);

@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   
   <groupId>com</groupId>
-  <artifactId>javalearning</artifactId>
+  <artifactId>JavaLearning</artifactId>
   <packaging>pom</packaging>
   <version>1.0-SNAPSHOT</version>
   <modules>
@@ -19,7 +19,6 @@
       <module>concurrency</module>
       <module>algorithm</module>
       <module>distribution</module>
-      <module>changingedu</module>
       <module>changingedu</module>
   </modules>
   <properties>

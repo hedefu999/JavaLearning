@@ -24,7 +24,7 @@ public class TransacManageConfig implements TransactionManagementConfigurer {
             return dataSource;
         }
         Properties props = new Properties();
-        props.setProperty("driverClassName","com.mysql.jdbc.Driver");
+        props.setProperty("driverClassName","com.mysql.cj.jdbc.Driver");
         props.setProperty("url","jdbc:mysql://localhost:3306/ssmr");
         props.setProperty("username","root");
         props.setProperty("password","hedefu999");

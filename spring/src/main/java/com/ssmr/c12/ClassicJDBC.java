@@ -13,7 +13,7 @@ public class ClassicJDBC {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ssmr","root","hedefu999");
             ps = conn.prepareStatement("select id,`name`,age,note from role where id = ?");
             //Statement statement = conn.createStatement();

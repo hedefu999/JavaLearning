@@ -31,4 +31,42 @@
     select id , emp_id as empId, real_name as realName , department from work_card
     where emp_id = #{empId} for update
   </select>
+
+  <update id="batchUpdate2BatUpdateWorkCards">
+    <foreach collection="workCards" item="workCard" open="" separator=";" close="">
+      update work_card
+      set department = #{workCard.department}
+      where emp_id = #{workCard.empId}
+    </foreach>
+  </update>
+  <update id="caseWhen2BatUpdateWorkCards">
+    update work_card
+    set department = (
+        case
+        <foreach collection="workCards" item="workCard" open="" separator="" close="">
+          when emp_id = #{workCard.empId} then #{workCard.department}
+        </foreach>
+        end
+    )where emp_id in
+    <foreach collection="workCards" item="workCard" open="(" separator="," close=")">
+      #{workCard.empId}
+    </foreach>
+  </update>
+  <update id="join2BatUpdateWorkCards">
+    update work_card a join
+    <foreach collection="workCards" item="workCard" open="(" separator="UNION" close=")">
+      select #{workCard.empId} as emp_id, #{workCard.department} as department
+    </foreach>
+    b using(emp_id) <!--using(emp_id,department)将连接不到任何记录-->
+    set a.department = b.department
+  </update>
+  <update id="join2BatUpdateWorkCards2">
+    update work_card a right join
+    <foreach collection="workCards" item="workCard" open="(" separator="UNION" close=")">
+      select #{workCard.empId} as empId, #{workCard.department} as department
+    </foreach>
+    b on a.emp_id = b.empId
+    set a.department = b.department
+  </update>
+
 </mapper>

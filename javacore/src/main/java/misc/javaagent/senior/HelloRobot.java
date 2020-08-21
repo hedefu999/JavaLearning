@@ -3,6 +3,8 @@ package misc.javaagent.senior;
 import java.util.concurrent.TimeUnit;
 
 public class HelloRobot {
+    public HelloRobot() {
+    }
     public static void main(String[] args) {
         TimeHolder.start(args.getClass().getName()+".main");
         HelloRobot helloRobot = new HelloRobot();
@@ -13,7 +15,7 @@ public class HelloRobot {
         TimeHolder.start(this.getClass().getName() + ".sayHello");
         System.out.println("hi, people");
         try {
-            TimeUnit.SECONDS.sleep((long)(Math.random()*200));
+            TimeUnit.SECONDS.sleep((long)(Math.random()*2));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }finally {

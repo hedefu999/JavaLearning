@@ -54,7 +54,7 @@ public class SqlSessionFactoryUtils {
                 return null;
             }
             PooledDataSource dataSource = new PooledDataSource();
-            dataSource.setDriver("com.mysql.jdbc.Driver");
+            dataSource.setDriver("com.mysql.cj.jdbc.Driver");
             dataSource.setUsername(props.getProperty("db.username"));
             dataSource.setPassword(props.getProperty("db.password"));
             dataSource.setUrl(props.getProperty("db.url"));

@@ -4,7 +4,7 @@
   
   <!--使用两种方式配置properties-->
   <properties resource="jdbc.properties">
-    <property name="db.driver" value="com.mysql.jdbc.Driver"/>
+    <property name="db.driver" value="com.mysql.cj.jdbc.Driver"/>
     <property name="db.url" value="jdbc:mysql://localhost:3306/chapter5"/>
     <!--由于优先级较低，被properties文件中的同名配置覆盖-->
     <property name="db.username" value="hedefu"/>

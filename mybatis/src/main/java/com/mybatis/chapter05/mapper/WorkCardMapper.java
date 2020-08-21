@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 public interface WorkCardMapper {
     int simpleInsert(WorkCard workCard);
     int insertIfNotExists(WorkCard workCard);
@@ -21,4 +23,11 @@ public interface WorkCardMapper {
     int updateByPrimaryKey(@Param("workCard") WorkCard workCard);
     @Update("update work_card set real_name = concat(real_name, ',', #{workCard.realName}),department = #{workCard.department} where id = #{workCard.id}")
     int appendRealNameAndUpdateDepartById(@Param("workCard") WorkCard workCard);
+
+    int batchUpdate2BatUpdateWorkCards(@Param("workCards") List<WorkCard> workCards);
+
+    int caseWhen2BatUpdateWorkCards(@Param("workCards") List<WorkCard> workCards);
+
+    int join2BatUpdateWorkCards(@Param("workCards") List<WorkCard> workCards);
+    int join2BatUpdateWorkCards2(@Param("workCards") List<WorkCard> workCards);
 }
