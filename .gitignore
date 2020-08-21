@@ -8,4 +8,7 @@
 novc/
 *.class
 *.log
+*.jpg
+*.png
+*.ico
 temp*/

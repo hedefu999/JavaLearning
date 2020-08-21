@@ -3,10 +3,9 @@ package common;
 import org.junit.Test;
 
 /**
- * Java封装了String方便操作
- * 本科课程C++上机题包括这些封装了的api，现在完全实现一遍，了当年之遗憾
+ * Java API自实现之String
  */
-public class SimpleCharArrayBasicAPIImpl {
+public class StringAPIImpl {
     /**
      * Java String的indexOf方法源码简化版：
      * @param source  在哪个字符串中查找

@@ -44,7 +44,41 @@ public class _03JavaMemoryModel {
         }
     }
 
+    /**
+     * 3.6.5 关于final域应用从构造函数中的溢出的后果
+     */
+    static class FinalReferenceEscapeExample{
+        static class FinalRefEscapeObj{
+            final int i;
+            static FinalRefEscapeObj obj;
+            public FinalRefEscapeObj(){
+                i = 1; //1 写final域
+                obj = this; //2 this引用在此逃逸
+            }
+            public static void writer(){
+                new FinalRefEscapeObj();
+            }
+            public static void reader(){
+                if (obj != null){
+                    int temp = obj.i;
+                    System.out.println(Thread.currentThread().getName()+"读取到 temp = "+temp);
+                }
+            }
+        }
+        public static void main(String[] args) {
+            Thread threadA = new Thread(() -> FinalRefEscapeObj.reader());
+            threadA.setName("AAA");
+            Thread threadB = new Thread(() -> FinalRefEscapeObj.writer());
+            threadB.setName("BBB");
 
+            threadA.start();
+            threadB.start();
+            /*
+             * 并未出现final域读取到不为1的情况，与书中有点出入
+             */
+        }
+
+    }
 
 
 
