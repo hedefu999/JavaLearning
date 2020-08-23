@@ -12,3 +12,4 @@ novc/
 *.png
 *.ico
 temp*/
+*DailyTest.java

@@ -67,9 +67,11 @@ public class _01DynamicProgramming {
         System.out.println(fibnacciDPUltimateEdition(4));
     }
     /*
-     * 上述借助fibnacci数列介绍了动态规划的一个重要特性：重叠子问题的消除。
-     * fibonacci严格来说算不上动态规划，因为不涉及求最值
-     * 动态规划的另一个重要特性：最优子结构。下面就来演示重叠子问题的消除方法
+     上述借助fibnacci数列介绍了动态规划的一个重要特性：重叠子问题的消除。
+     fibonacci严格来说算不上动态规划，因为不涉及求最值
+     动态规划的另一个重要特性：最优子结构。下面就来演示重叠子问题的消除方法
+
+     默写总结：普通递归、带备忘录的递归、填充备忘录的动态规划、精简备忘录的动态规划
      */
 
     /**
@@ -363,12 +365,103 @@ public class _01DynamicProgramming {
       # 购买股票的最佳时间II
      多次买卖一支股票达到赚取最大利润，必须在再次购买前出售股票
      */
+    //按照问题I的穷举暴力解法，问题II的暴力解法是个无穷枚举
+    public int stockMultiBuyAndSellFiercely(int[] prices){
+        for (int buy = 0; buy < prices.length; buy++) {
+            for (int sell = buy+1; sell < prices.length; sell++) {
+                //两层for循环只是一次买卖
+                if (sell == 1){
+                    //0买1卖，此时再从1买(第二次买卖)
+                    for (int buy2 = 1; buy2 < prices.length; buy2++) {
+                        for (int sell2 = buy2+1; sell2 < prices.length; sell2++) {
+                            //第三次买卖再考虑
+                        }
+                    }
+                }
+                if (sell == 2){
+                    //0买2卖，此时再从2向后买（第二次买卖）
+                    for (int buy2 = 2; buy2 < prices.length; buy2++) {
+                        for (int sell2 = buy2+1; sell2 < prices.length; sell2++) {
+                            //第三次买卖
+                        }
+                    }
+                }
+                // ... if的所有情况还要继续列举下去
+            }
+        }
+        return 0;
+    }
+    //上述暴力解法在测试用例无限延长时就成了无穷穷举，但测试用例不会真的无限，而且在一次买卖后问题规模总是变小了，所以可以使用递归写出暴力解
+    public int stockMultiBuyAndSellReversely(int[] prices){
+        int result = 0;
+        for (int buy = 0; buy < prices.length; buy++) {
+            for (int sell = buy+1; sell < prices.length; sell++) {
+                int[] newPrices = Arrays.copyOfRange(prices, sell, prices.length);
+                int profitFromBottom = stockMultiBuyAndSellReversely(newPrices);
+                int currentProfit = profitFromBottom + (prices[sell] - prices[buy]);
+                //取第二层for循环中的最大值
+                result = result>currentProfit?result:currentProfit;
+            }
+        }
+        return result;
+    }
+    //对递归写法进一步优化
+    public int improvedMultiBuyAndSell(int[] prices){
+        int[] memo = new int[prices.length];
+        helper4ImprovedMultiBuyAndSell(0,memo,prices);
+        return memo[0];
+    }//递归都可以加个备忘录做个判断，以减少计算
+    private int helper4ImprovedMultiBuyAndSell(int start, int[] memo, int[] prices){
+        if (start >= prices.length) return 0;
+        if (memo[start] != 0) return memo[start];
+        int res = 0;
+        int curMin = prices[start];
+        for (int sell = start + 1; sell < prices.length; sell++) {
+            //记录各种卖出情况前的最小价格作为买入价格，以便计算最大收益，这样可以省略掉一层遍历，跟股票问题1的改进方案一致
+            curMin = curMin < prices[sell] ? curMin : prices[sell];
+            //改变遍历的起始点，相当于prices截短了
+            int tmp = helper4ImprovedMultiBuyAndSell(sell+1, memo, prices) + prices[sell] - curMin;
+            res = res > tmp?res:tmp;
+        }
+        memo[start] = res;
+        return res;
+    }
 
+    /*
+     上述依然无法通过全部测试用例，在prices很长时会因递归深度导致内存溢出
+     递归深度来自于memo的大小dp(0)依赖dp(1)或dp(2)或dp(3)...的结果，不像fibonacci可以依赖前两个结果
+     */
+
+    /**
+     * 贪心算法
+     * 基于动态规划之上的一种特殊方法,既然可以预知未来（知道下一个时间结点的股价）能赚就多赚点
+     * 只要下一个时间点比现在股价高，就进行一次买入卖出
+     */
+    public int greedySolutionInMaxProfit(int[] prices){
+        int maxProfit = 0;
+        for (int i = 1; i < prices.length; i++) {
+             if (prices[i] > prices[i-1]){
+                 maxProfit += prices[i] - prices[i-1];
+             }
+        }
+        return maxProfit;
+    }
     @Test
     public void test367(){
-        int[] prices = {7,1,5,3,6,4};//7
-        int[] prices2 = {1,2,3,4,5};//4
+        int[] prices = {7,1,5,3,6,4};//7:1-5,3-6
+        int[] prices2 = {1,2,3,4,5};//4:1-5
         int[] prices3 = {7,6,4,3,1};//0
+        int result = improvedMultiBuyAndSell(prices);
+        System.out.println(result);
+    }
+
+    /**
+      购买股票的最佳时间III
+        限定最大交易数，一次交易分为买入卖出
+     test case 1: [2,4,1] times=2 maxprofit = 2
+     test case 2: [3,2,6,5,0,3] k=2
+     */
+    static class BestTime2BuyStock{
 
     }
 
