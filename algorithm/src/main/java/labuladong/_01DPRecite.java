@@ -132,18 +132,52 @@ public class _01DPRecite {
         }
         return 0;
     }
-    //纸牌解法(假设都是正数)
+
+    /**
+     纸牌解法(假设都是正数)
+     从左到右放纸牌，小的才可以叠上去，否则要另起一堆。堆的数量才是递增字序列的最大长度
+     10 5 7 101
+     9 3    18
+     2
+
+     如果从小到大堆叠，会出来一个毫无用处的堆。。。
+     10   9  2  5
+     101 18  3
+             7
+
+        7
+        5  18  101
+     3  2   9   10   好像这样写可以求最大递减子序列的长度
+
+     */
     int maxLengthOfLISByMultiStack(int[] nums){
         int[] stack = new int[nums.length];
+        int stackSize = 0;
         for (int i = 0; i < nums.length; i++) {
-
+            int curr = nums[i];
+            int left = 0, right = stackSize;
+            while (left < right){
+                int middle = (left+right)/2;
+                if (curr < stack[middle]){
+                    right = middle;//比middle上的元素小可能最后还要放在middle上所以不用减1
+                }else {
+                    left = middle+1;
+                }
+            }
+            if (curr > stack[right] && stack[right] != 0){
+                stack[right+1]= curr;
+                stackSize++;
+            }else {
+                stack[right] = curr;
+            }
         }
+        return stackSize+1;
     }
 
     @Test
     public void test118() {
         int[] nums = {10,9,2,5,3,7,101,18};
-        System.out.println(maxlengthOfLIS(nums));
+        System.out.println(maxLengthOfLISByMultiStack(nums));
     }
 
 
