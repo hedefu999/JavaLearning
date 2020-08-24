@@ -459,11 +459,21 @@ public class _01DynamicProgramming {
       购买股票的最佳时间III
         限定最大交易数，一次交易分为买入卖出
      test case 1: [2,4,1] times=2 maxprofit = 2
-     test case 2: [3,2,6,5,0,3] k=2
+     test case 2: [3,2,6,5,0,3] times=2
      */
     static class BestTime2BuyStock{
 
     }
+    @Test
+    public void test468() {
+
+    }
+
+    /**
+     购买股票的最佳时间IV
+        带资金冻结1天（卖出股票后，无法在第二天买入股票），不限交易次数
+     test case 1：[1,2,3,0,2] output=3
+     */
 
 
 

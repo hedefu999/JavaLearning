@@ -20,10 +20,12 @@ gitbook链接   [labuladong的算法小抄](https://labuladong.gitbook.io/algo/)
 [从最长递增子序列学会如何推状态转移方程](https://mp.weixin.qq.com/s/7QFapCuvi-2nkh6gREcR9g)
 
 [动态规划套路：最大子数组和](https://mp.weixin.qq.com/s/nrULqCsRsrPKi3Y-nUfnqg)
-- [动态规划之正则表达式](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247484513&idx=1&sn=e5fc3cce76c1b916195e1793122c28b8&chksm=9bd7fa69aca0737fe704ea5c6da28f47b9e3f0961df2eb40ef93a7d507ace8def1a18d013515&scene=158#rd)
+- [动态规划之正则表达式](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247484513&idx=1&sn=e5fc3cce76c1b916195e1793122c28b8&chksm=9bd7fa69aca0737fe704ea5c6da28f47b9e3f0961df2eb40ef93a7d507ace8def1a18d013515&scene=158#rd) 
+
 [LeetCode 股票问题的一种通用解法](https://mp.weixin.qq.com/s/TrN7mMdLEPCmT5mOXzgP5A)
-```****
-怎么看出重叠子问题，前文 动态规划之正则表达式 有介绍，显然一个子数组切片可以通过多条递归路径得到，所以子问题一定有重叠。
+```
+重叠子问题的特征：一个子数组切片可以通过多条递归路径得到
+本文重点研究递归这种通用解法，不是最优的，在测试用例特别大时OOM。改进算法见下一篇
 ```
 [团灭 LeetCode 股票买卖问题](https://mp.weixin.qq.com/s/lQEj_K1lUY83QtIzqTikGA)
 

@@ -113,7 +113,38 @@ public class _01DPRecite {
     /**
      默写 最长递增子序列（LIS） 的解法
         1. 动态规划解法：changing state：长度;base case:0号元素结尾的是1；1号元素结尾的是..;state transfer formula:dp[i] = dp[preLow]+1;
+        2. 纸牌堆叠：可分堆，小牌压大牌（可任意建堆的汉诺塔游戏）
      */
+    int maxlengthOfLIS(int[] nums){
+        int[] dpTable = new int[nums.length];
+        dpTable[0] = 1;
+        for (int i = 1; i < nums.length; i++) {
+            int j = i;
+            for (; j >= 0; j--) {
+                if (nums[j] < nums[i]){//不可<=
+                    dpTable[i] = dpTable[j] + 1;
+                    break;
+                }
+            }
+            if (j < 0){
+                dpTable[i] = 1;
+            }
+        }
+        return 0;
+    }
+    //纸牌解法(假设都是正数)
+    int maxLengthOfLISByMultiStack(int[] nums){
+        int[] stack = new int[nums.length];
+        for (int i = 0; i < nums.length; i++) {
+
+        }
+    }
+
+    @Test
+    public void test118() {
+        int[] nums = {10,9,2,5,3,7,101,18};
+        System.out.println(maxlengthOfLIS(nums));
+    }
 
 
     /**
