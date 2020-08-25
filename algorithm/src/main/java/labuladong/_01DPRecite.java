@@ -179,11 +179,50 @@ public class _01DPRecite {
         int[] nums = {10,9,2,5,3,7,101,18};
         System.out.println(maxLengthOfLISByMultiStack(nums));
     }
-
-
     /**
      默写 股票问题I II III 的递归与动态规划解法
      */
+    //股票问题I - 7,1,5,3,6,4 交易一次的最大利润,固定卖出时间求解
+    int stock1Max(int[] prices){
+        int min = prices[0];
+        int maxProfit = 0;
+        int[] dpTable = new int[prices.length];
+        for (int i = 0; i < prices.length; i++) {
+            int curr = prices[i];
+            dpTable[i] = curr - min;//记录maxProfit为最大值，dpTable都不需要
+            if (min > curr) min = curr;
+        }
+        return dpTable[3];
+    }
+    //股票问题II - 多次交易累积最大收益
+    int stock2Max(int[] prices){
+        int sum = 0;
+        for (int i = 1; i < prices.length; i++) {
+            if (prices[i] > prices[i-1]){
+                sum += (prices[i] - prices[i-1]);
+            }
+        }
+        return sum;
+    }
+    //股票问题II - 暴力穷举的递归解法
+    int stock2MaxRecursively(int[] prices){
+        for (int i = 0; i < prices.length; i++) {
+
+        }
+    }
+    int helper(int[] prices, int buy){
+        for (int i = buy; i < prices.length; i++) {
+            for (int j = i+1; j < prices.length; j++) {
+
+            }
+        }
+    }
+
+    @Test
+    public void test186() {
+        int[] prices = {7,1,5,3,6,4};
+        System.out.println(stock2Max(prices));
+    }
 
 
 
