@@ -550,6 +550,7 @@ public class _01DynamicProgramming {
 
         /**
          leetcode用了一个极度长的测试用例，显然是不允许用递归了
+         在提供更好解法前先看第IV题
          */
 
 
@@ -566,6 +567,71 @@ public class _01DynamicProgramming {
         带资金冻结1天（卖出股票后，无法在第二天买入股票），不限交易次数
      test case 1：[1,2,3,0,2] output=3
      */
+    static class BestTime2BuyStockWithCoolDown{
+        public static int helper0(int[] prices, int[] memo, int start2buy){
+            if (start2buy >= prices.length - 1) return 0;
+            if (memo[start2buy] != 0) return memo[start2buy];
+            int maxprofit = Integer.MIN_VALUE;
+            for (int i = start2buy; i < prices.length; i++) {
+                for (int j = i+1; j < prices.length; j++) {
+                    int currProfit = prices[j] - prices[i];
+                    int bottomProfit = helper(prices, memo, i+2);
+                    maxprofit = Math.max(currProfit+bottomProfit, maxprofit);
+                }
+                memo[i] = maxprofit;
+            }
+            return maxprofit;
+        }
+        public static int helper(int[] prices, int[] memo, int start2buy){
+            if (start2buy >= prices.length - 1) return 0;
+            if (memo[start2buy] != 0) return memo[start2buy];
+            int maxprofit = 0;
+            for (int i = start2buy; i < prices.length; i++) {
+                int currmaxprofit = 0;
+                for (int j = i+1; j < prices.length; j++) {
+                    int currProfit = prices[j] - prices[i];
+                    if (currProfit < 0) continue;
+                    int bottomProfit = helper(prices, memo, i+2);
+                    currmaxprofit = Math.max(currProfit+bottomProfit, currmaxprofit);
+                }
+                memo[i] = currmaxprofit;
+                maxprofit = Math.max(currmaxprofit, maxprofit);
+            }
+            return maxprofit;
+        }
+        public static int helper2(int[] prices, int[] memo, int start2buy){
+            if (start2buy >= prices.length) return 0;
+            if (memo[start2buy] != 0) return memo[start2buy];
+            int maxprofit = Integer.MIN_VALUE;
+            for (int i = start2buy; i < prices.length; i++) {
+                for (int j = i+1; j < prices.length; j++) {
+                    int currProfit = prices[j] - prices[i];
+                    if (currProfit < 0) currProfit = 0;
+                    int bottomProfit = helper(prices, memo, i+2);
+                    maxprofit = Math.max(currProfit+bottomProfit, maxprofit);
+                }
+                memo[i] = maxprofit;
+            }
+            return maxprofit == Integer.MIN_VALUE?0:maxprofit;
+        }
+        public static int helper3(int[] prices, int[] memo, int start2buy){
+            if (start2buy >= prices.length) return 0;
+            if (memo[start2buy] != -1) return memo[start2buy];
+            int res = 0, currMin = prices[start2buy];
+            for (int i = start2buy + 1; i < prices.length; i++) {
+                currMin = Math.min(currMin, prices[i]);
+                res = Math.max(res, helper3(prices, memo, i+1)+(prices[i]-currMin));
+            }
+            memo[start2buy] = res;
+            return res;
+        }
+        public static void main(String[] args) {
+            int[] prices2 = {2,1};
+            int[] prices = {1,2,3,0,2};
+            int[] memo = new int[prices.length];
+            System.out.println(helper3(prices,memo,0));
+        }
+    }
 
 
 
