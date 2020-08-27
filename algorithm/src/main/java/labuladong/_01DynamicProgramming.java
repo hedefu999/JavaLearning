@@ -320,8 +320,11 @@ public class _01DynamicProgramming {
         }
         return max;
     }
-    //前面是通过固定买入的i来逐个计算卖出的j下的利润 TC = O(N^2)
-    //可以先固定卖出的时间（第一次遍历时记录最小值，这样买入的最小值永远是在卖出时间之前），还可以省掉一次遍历，成为O(N)
+
+    /**
+     * 前面是通过固定买入的i来逐个计算卖出的j下的利润 TC = O(N^2)
+     * 可以先固定卖出的时间（第一次遍历时记录最小值，这样买入的最小值永远是在卖出时间之前），还可以省掉一次遍历，成为O(N)
+     */
     public int fromEnd2Start(int[] prices){
         if (prices.length == 0){
             return 0;//提交时发现测试用例还有空数组，所以加了这个判断
@@ -568,70 +571,75 @@ public class _01DynamicProgramming {
      test case 1：[1,2,3,0,2] output=3
      */
     static class BestTime2BuyStockWithCoolDown{
-        public static int helper0(int[] prices, int[] memo, int start2buy){
-            if (start2buy >= prices.length - 1) return 0;
-            if (memo[start2buy] != 0) return memo[start2buy];
-            int maxprofit = Integer.MIN_VALUE;
-            for (int i = start2buy; i < prices.length; i++) {
-                for (int j = i+1; j < prices.length; j++) {
-                    int currProfit = prices[j] - prices[i];
-                    int bottomProfit = helper(prices, memo, i+2);
-                    maxprofit = Math.max(currProfit+bottomProfit, maxprofit);
-                }
-                memo[i] = maxprofit;
+        //自己的解法漏洞太多，递归的bug太难改
+        public static int maxProfit(int[] prices){
+            int[] memo = new int[prices.length];
+            for (int i = 0; i < memo.length; i++) {
+                memo[i] = -1;
             }
-            return maxprofit;
-        }
-        public static int helper(int[] prices, int[] memo, int start2buy){
-            if (start2buy >= prices.length - 1) return 0;
-            if (memo[start2buy] != 0) return memo[start2buy];
-            int maxprofit = 0;
-            for (int i = start2buy; i < prices.length; i++) {
-                int currmaxprofit = 0;
-                for (int j = i+1; j < prices.length; j++) {
-                    int currProfit = prices[j] - prices[i];
-                    if (currProfit < 0) continue;
-                    int bottomProfit = helper(prices, memo, i+2);
-                    currmaxprofit = Math.max(currProfit+bottomProfit, currmaxprofit);
-                }
-                memo[i] = currmaxprofit;
-                maxprofit = Math.max(currmaxprofit, maxprofit);
+            int maxProfit = 0;
+            for (int i = 0; i < prices.length-1; i++) {
+                int currProfit = stockBuyWithCooldownHelper(prices, memo, i);
+                maxProfit = Math.max(maxProfit, currProfit);
             }
-            return maxprofit;
+            return maxProfit;
         }
-        public static int helper2(int[] prices, int[] memo, int start2buy){
+        public static int stockBuyWithCooldownHelper(int[] prices, int[] memo, int start2buy){
             if (start2buy >= prices.length) return 0;
-            if (memo[start2buy] != 0) return memo[start2buy];
-            int maxprofit = Integer.MIN_VALUE;
-            for (int i = start2buy; i < prices.length; i++) {
-                for (int j = i+1; j < prices.length; j++) {
-                    int currProfit = prices[j] - prices[i];
-                    if (currProfit < 0) currProfit = 0;
-                    int bottomProfit = helper(prices, memo, i+2);
-                    maxprofit = Math.max(currProfit+bottomProfit, maxprofit);
-                }
-                memo[i] = maxprofit;
+            if (memo[start2buy] != -1) return memo[start2buy];//memo里存的是多次带冻结的最大盈利
+            int maxProfit = 0;
+            for (int sell = start2buy+1; sell < prices.length; sell++) {
+                int currProfit = prices[sell] - prices[start2buy];
+                if (currProfit < 0) continue;
+                int bottomProfit = stockBuyWithCooldownHelper(prices, memo, sell+2);
+                maxProfit = Math.max(maxProfit, currProfit+bottomProfit);
             }
-            return maxprofit == Integer.MIN_VALUE?0:maxprofit;
+            memo[start2buy] = maxProfit;
+            return maxProfit;
+        }
+
+        //教程给出的递归解法
+        public static int maxProfit2(int[] prices){
+            int[] memo = new int[prices.length];
+            for (int i = 0; i < memo.length; i++) {
+                memo[i] = -1;
+            }
+            return helper3(prices, memo, 0);
         }
         public static int helper3(int[] prices, int[] memo, int start2buy){
             if (start2buy >= prices.length) return 0;
             if (memo[start2buy] != -1) return memo[start2buy];
             int res = 0, currMin = prices[start2buy];
-            for (int i = start2buy + 1; i < prices.length; i++) {
-                currMin = Math.min(currMin, prices[i]);
-                res = Math.max(res, helper3(prices, memo, i+1)+(prices[i]-currMin));
+            //在start2buy ~ sell之间进行一次交易，最大利润应怎么算？  就是记录区间内的最低点
+            for (int sell = start2buy + 1; sell < prices.length; sell++) {
+                currMin = Math.min(currMin, prices[sell]);
+                res = Math.max(res, helper3(prices, memo, sell+2)+(prices[sell]-currMin));
             }
             memo[start2buy] = res;
             return res;
         }
         public static void main(String[] args) {
-            int[] prices2 = {2,1};
-            int[] prices = {1,2,3,0,2};
-            int[] memo = new int[prices.length];
-            System.out.println(helper3(prices,memo,0));
+            int[] prices1 = {1,2,3,0,2};//3
+            int[] prices2 = {2,1};//0
+            int[] prices3 = {2,1,4};//3
+            int[] prices4 = {6,1,6,4,3,0,2};//7
+            System.out.println(maxProfit(prices1));
         }
     }
+    /**
+     * 股票问题V
+     * 带固定手续费、不限次数的股票交易
+     */
+    static class StockBuyWithHandFee{
+        public int maxProfit(int[] prices){
+            return 0;
+        }
+        public static void main(String[] args) {
+            int[] prices = {1,3,2,8,4,9};
+
+        }
+    }
+
 
 
 
