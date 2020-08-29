@@ -301,7 +301,7 @@ public class _01DynamicProgramming {
         System.out.println(maxSubArray(nums));
     }
 
-    /*-=-=-=-=-=-= 系列股票问题 =-=-=-=-=-=-=*/
+    /** -=-=-=-=-=-= 系列股票问题 =-=-=-=-=-=-= */
     /**
       # 购买股票的最佳时间I
      一支股票在i天的价格为prices[i]
@@ -551,12 +551,6 @@ public class _01DynamicProgramming {
             return maxProfit;
         }
 
-        /**
-         leetcode用了一个极度长的测试用例，显然是不允许用递归了
-         在提供更好解法前先看第IV题
-         */
-
-
         public static void main(String[] args) {
             int[] prices0 = {7,6,4,3,1};
             int[] prices = {3,2,6,5,0,3,9,6,15};
@@ -570,75 +564,13 @@ public class _01DynamicProgramming {
         带资金冻结1天（卖出股票后，无法在第二天买入股票），不限交易次数
      test case 1：[1,2,3,0,2] output=3
      */
-    static class BestTime2BuyStockWithCoolDown{
-        //自己的解法漏洞太多，递归的bug太难改
-        public static int maxProfit(int[] prices){
-            int[] memo = new int[prices.length];
-            for (int i = 0; i < memo.length; i++) {
-                memo[i] = -1;
-            }
-            int maxProfit = 0;
-            for (int i = 0; i < prices.length-1; i++) {
-                int currProfit = stockBuyWithCooldownHelper(prices, memo, i);
-                maxProfit = Math.max(maxProfit, currProfit);
-            }
-            return maxProfit;
-        }
-        public static int stockBuyWithCooldownHelper(int[] prices, int[] memo, int start2buy){
-            if (start2buy >= prices.length) return 0;
-            if (memo[start2buy] != -1) return memo[start2buy];//memo里存的是多次带冻结的最大盈利
-            int maxProfit = 0;
-            for (int sell = start2buy+1; sell < prices.length; sell++) {
-                int currProfit = prices[sell] - prices[start2buy];
-                if (currProfit < 0) continue;
-                int bottomProfit = stockBuyWithCooldownHelper(prices, memo, sell+2);
-                maxProfit = Math.max(maxProfit, currProfit+bottomProfit);
-            }
-            memo[start2buy] = maxProfit;
-            return maxProfit;
-        }
-
-        //教程给出的递归解法
-        public static int maxProfit2(int[] prices){
-            int[] memo = new int[prices.length];
-            for (int i = 0; i < memo.length; i++) {
-                memo[i] = -1;
-            }
-            return helper3(prices, memo, 0);
-        }
-        public static int helper3(int[] prices, int[] memo, int start2buy){
-            if (start2buy >= prices.length) return 0;
-            if (memo[start2buy] != -1) return memo[start2buy];
-            int res = 0, currMin = prices[start2buy];
-            //在start2buy ~ sell之间进行一次交易，最大利润应怎么算？  就是记录区间内的最低点
-            for (int sell = start2buy + 1; sell < prices.length; sell++) {
-                currMin = Math.min(currMin, prices[sell]);
-                res = Math.max(res, helper3(prices, memo, sell+2)+(prices[sell]-currMin));
-            }
-            memo[start2buy] = res;
-            return res;
-        }
-        public static void main(String[] args) {
-            int[] prices1 = {1,2,3,0,2};//3
-            int[] prices2 = {2,1};//0
-            int[] prices3 = {2,1,4};//3
-            int[] prices4 = {6,1,6,4,3,0,2};//7
-            System.out.println(maxProfit(prices1));
-        }
-    }
     /**
      * 股票问题V
      * 带固定手续费、不限次数的股票交易
      */
-    static class StockBuyWithHandFee{
-        public int maxProfit(int[] prices){
-            return 0;
-        }
-        public static void main(String[] args) {
-            int[] prices = {1,3,2,8,4,9};
+    //相关解法见_01DPRecite.java
+    /**-=-=-=-=-=- 股票问题的状态机解法 -=-=-=-=-=-=-=*/
 
-        }
-    }
 
 
 
