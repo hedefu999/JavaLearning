@@ -413,7 +413,7 @@ public class _01DynamicProgramming {
         int[] memo = new int[prices.length];
         helper4ImprovedMultiBuyAndSell(0,memo,prices);
         return memo[0];
-    }//递归都可以加个备忘录做个判断，以减少计算
+    }//递归都可以加个备忘录做个判断，以减少计算  TC = O(kN^2)
     private int helper4ImprovedMultiBuyAndSell(int start, int[] memo, int[] prices){
         if (start >= prices.length) return 0;
         if (memo[start] != 0) return memo[start];
@@ -570,8 +570,133 @@ public class _01DynamicProgramming {
      */
     //相关解法见_01DPRecite.java
     /**-=-=-=-=-=- 股票问题的状态机解法 -=-=-=-=-=-=-=*/
+    /**
+     ## 总结系列股票问题：
+     1-仅一次交易；2-不限交易次数；3-限制交易次数；4-带交易冷冻期；5-交易含手续费；
+     递归方式比较符合人的思路，但排bug极度困难。这里使用状态进行穷举
+     > 明确 状态 与 选择：
+     对于股票的选择有 - 买入(buy) 卖出(sell) 无操作(rest)
+     选择的限制：sell必须在buy之后，rest分为buy后的rest和sell后的rest。如果有交易次数限制，buy还要在剩余交易次数>0的前提下操作
+     状态：第几天i,i∈[0,n-1]、0-i天的总交易次数k,k∈[1,K]、当前的持有状态0/1
+     用一个三维数组记录/遍历/存储这三种状态 dp[i][k][0 or 1]
+     for i from 0 n
+        for k from 1 K
+            for s in 0,1
+                dp[i][k][s] = max(buy,sell,rest)
+     目的在于求解dp[n-1][K][0]:最后一天，交易了K次，所能获得的最大利润
+     对于状态 0 - 1 绘制状态机的状态转移图
+        |------- → buy → -------|
+        0 ----|          |----- 1
+        ↑ ---rest       rest--- ↑
+        ↑----- ←  sell ← ------ ↑
 
+     >写出状态转移方程：
+     自顶向下地倒推
+     1. 今天空仓的最大收益 = 昨天空仓的最大收益 / 昨天持有的最大收益 + 今天卖出后的总收益
+        dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+     2. 今天持有的最大收益 = 昨天持有今天选择观望的最大收益 / 昨天未持有的情况下的maxProfit - 今天买入的价格
+            -- 一个疑问：今天持有的最大收益取昨天持有的最大收益做判断，这里没有考虑股价下跌的情况？ 最大收益指卖出交易后的收益，一直持有收益不变，直到卖出时才影响最大收益
+        dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+        （
+            注意k表示总交易次数，所以今天买入的情况下是k，昨天的总交易次数就是k-1。也可以选择在sell时+1
+            dp[i][k+1][0] = max(dp[i-1][k+1][0], dp[i-1][k][1] + prices[i])
+         ）
 
+     >定义base case
+     dp[-1][k][0] = 0; i<0无意义，置为0
+     dp[-1][k][1] = Integer.MIN_VALUE; 未开始，置为负无穷
+     dp[i][0][0] = 0; k=0表示不允许交易
+     dp[i][0][1] = Integer.MIN_VALUE; 不允许交易的情况下持有，不可能的情况
+     */
+
+    /**
+     ## 只允许一次交易
+     dp[i][1][0] = max(dp[i-1][1][0], dp[i-1][1][1]+prices[i]);
+     dp[i][1][1] = max(dp[i-1][1][1], dp[i-1][0][0]-prices[i]) = max(dp[i-1][1][1], -prices[i]);
+     k这个维度可以去掉，化简成：
+     dp[i][0] = max(dp[i-1][0], dp[i-1][1]+prices[i]);
+     dp[i][1] = max(dp[i-1][1], -prices[i]);
+     上述状态方程可直接转化成代码：
+     */
+    static class StockMaxProfitIStatusMachineSolution{
+        static int solution(int[] prices){
+            int length = prices.length;
+            int[][] dp = new int[length][2];
+            //只有一个变量i，可以只使用一层遍历
+            dp[0][0] = 0; dp[0][1] = -prices[0];
+            for (int i = 1; i < length; i++) {
+                dp[i][0] = Math.max(dp[i-1][0],dp[i-1][1] + prices[i]);
+                dp[i][1] = Math.max(dp[i-1][1], -prices[i]);
+            }
+            return dp[length-1][0];
+        }
+        //dp的优化大概就只剩空间复杂度的优化了,类似与fibnacci数列求第index个元素时采用的优化方法
+        static int solution2(int[] prices){
+            int dp_i_0 = 0, dp_i_1 = Integer.MIN_VALUE;
+            for (int i = 0; i < prices.length; i++) {
+                dp_i_0 = Math.max(dp_i_0, dp_i_1 + prices[i]);
+                dp_i_1 = Math.max(dp_i_1, -prices[i]);
+            }
+            return dp_i_0;
+        }
+        public static void main(String[] args) {
+            /* 即使打印出两个变量的变化值也难以看懂上述算法做了什么
+             dp_i_0  0     0   0   3   4  8
+             dp_i_1 -InF  -3  -2  -2  -2  -2
+             */
+            System.out.println(solution2(TestCases.prices0));
+        }
+    }
+
+    /**
+      ## 不限交易次数，k = Integer.MAX_VALUE
+        dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1]+prices[i])
+        dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0]-prices[i])
+                    = max(dp[i-1][k][1], dp[i-1][k][0]-prices[i]) //k= +∞,认为k≈k-1
+        k不变又可以被省略掉
+        dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i])
+        dp[i][1] = max(dp[i-1][1], dp[i-1][0]-prices[i])
+     */
+    static class StockMaxProfitIIStatusMachineSolution{
+        static int solution(int[] prices){
+            //int[][] dp = new int[prices.length][2];
+            //dp[0][0] = 0;dp[0][1]= 0;dp[1][0]=0;
+            int dp_i_0 = 0, dp_i_1 = Integer.MIN_VALUE;//初始值不好定看for运行一次结果是否正确
+            for (int i = 0; i < prices.length; i++) {
+                dp_i_0 = Math.max(dp_i_0, dp_i_1 + prices[i]);
+                dp_i_1 = Math.max(dp_i_1, dp_i_0 - prices[i]);
+            }
+            return dp_i_0;
+        }
+        public static void main(String[] args) {
+            System.out.println(solution(TestCases.prices0));
+        }
+    }
+
+    /**
+     ## 限制交易次数，k有限的正自然数
+        dp[i][k][0] = max(dp[i-1][k][0],dp[i-1][k][1]+prices[i])
+        dp[i][k][1] = max(dp[i-1][k][1],dp[i-1][k-1][0]-prices[i])
+     */
+    static class StockMaxProfitIIIStatusMachineSolution{
+        int solution(int[] prices, int K){
+            int[][][] dp = new int[prices.length][K+1][2];
+            int dp_i_k_0 = 0,dp_i_k_1 = 0,dp_i_k_minus_1_0=0;
+            dp[0][0][0]=0;dp[0][0][1]=Integer.MIN_VALUE;
+            dp[0][1][0]=0;dp[0][1][1]=0;//-prices[0]
+            dp[1][0][0]=0;dp[1][0][1]=Integer.MIN_VALUE;
+            for (int i = 1; i < prices.length; i++) {
+                for (int j = 1; j <= K; j++) {
+                    //dp_i_k_0 = Math.max(dp_i_k_0, dp_i_k_1+prices[i]);
+                    //dp_i_k_1 = Math.max(dp_i_k_1,dp_i_k_minus_1_0 - prices[i]);
+                    //dp_i_k_minus_1_0 = Math.max(dp_i_k_minus_1_0, )???
+                    dp[i][j][0] = Math.max(dp[i-1][j][0], dp[i-1][j][1]+prices[i]);
+                    dp[i][j][1] = Math.max(dp[i-1][j][1], dp[i-1][j-1][0]-prices[i]);
+                }
+            }
+            return dp[prices.length-1][K][0];
+        }
+    }
 
 
 
