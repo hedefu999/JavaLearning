@@ -17,6 +17,11 @@ public class BasicCService {
     @Autowired
     private UserMapper userMapper;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)
+    public void insertUser(User user){
+        userMapper.insertUser(user);
+    }
+
     @Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void updateREQUIREDNormal(){
         User user = new User();

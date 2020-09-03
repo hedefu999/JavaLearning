@@ -22,7 +22,8 @@ public class PropagationJunitTest {
         //propagation.testREQUIREDTxUpNotify();
         //propagation.testNESTEDFunction();
         //propagation.wrongWayNESTEDFunction();
-        propagation.hybridSelfInvokeAndOtherRequired();
+        // propagation.hybridSelfInvokeAndOtherRequired();
+        propagation.testTwoREQUIRESNEWinNormalMethod();
     }
 
     @Autowired
