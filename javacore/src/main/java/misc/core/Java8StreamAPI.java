@@ -320,6 +320,7 @@ public class Java8StreamAPI {
         public static void testCollectorsToMap() {
             //collect太常用，这里只列举几个坑
             data.add(new Student("spy5", 160, 320.00,""));
+            data.add(new Student(null, 160, 320.00,""));
             //间谍spy因number重复导致hashMapkey重复，从而导致下面一行的写法抛出merge相关的异常！异常的定义见Collectors.throwingMerger
             // Map<Integer, Student> containerMap = data.stream().collect(Collectors.toMap(item -> item.getNumber(), item -> item));
 
@@ -330,7 +331,12 @@ public class Java8StreamAPI {
                     item -> item,
                     (existValue, puttingValue) -> existValue,
                     HashMap::new));
-            System.out.println(complicateAPIMap);
+            //下述写法的几个特点：1.这个返回类型是HashMap会泛型推断出错，无法编译；2.兼容key冲突；3.List中有一个元素的value为null会抛出NPE，原因见Map的merge函数
+            Map<Integer, String> complicateAPIMap2 = data.stream().collect(Collectors.toMap(
+                    item -> item.getNumber(),
+                    item -> item.getName(),
+                    (existValue, puttingValue) -> existValue));
+            System.out.println(complicateAPIMap2);
             Map<Integer, Student> containerMap = data.stream().collect(HashMap::new, (map, item) -> map.putIfAbsent(item.getNumber(), item), new BiConsumer<HashMap<Integer, Student>, HashMap<Integer, Student>>() {
                 @Override
                 public void accept(HashMap<Integer, Student> integerStudentHashMap, HashMap<Integer, Student> integerStudentHashMap2) {

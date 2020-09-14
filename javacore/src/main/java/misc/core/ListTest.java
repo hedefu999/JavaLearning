@@ -78,10 +78,23 @@ public class ListTest {
             }
             System.out.println(users);
         }
+    }
 
-        @Test
-        public void test68() {
-
+    @Test
+    public void test84() {
+        List<String> list = new ArrayList<>();
+        list.add("zhangsan");
+        list.add("lisi");
+        list.add("wangwu");
+        list.add("1");
+        list.add("2");
+        list.add("3");
+        //应该使用iterator移除元素，在遍历的时候
+        for (String item : list) {
+            if (item.startsWith("2")) {
+                list.remove(item);
+            }
+            //但发现了另一个奇怪的问题，remove名字总是ConcurrentException,但remove 1不会出问题，只有1 2 两个元素在时remove 2会出错，如果有3垫底就能移除2
         }
 
     }

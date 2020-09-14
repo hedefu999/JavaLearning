@@ -3,6 +3,7 @@ package com.ssmr.txpractice.propagation;
 import com.ssmr.txpractice.mapper.RoleMapper;
 import com.ssmr.txpractice.mapper.StudentMapper;
 import com.ssmr.txpractice.mapper.UserMapper;
+import com.ssmr.txpractice.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,19 @@ public class PropagationService {
     private BasicBService basicBService;
     @Autowired
     private BasicCService basicCService;
+    /**
+      method_no_txManager(){
+        a_method_REQUIRES_NEW_normal();
+        b_method_REQUIRES_NEW_exception();
+      }
+     问题：a_method会被回滚吗？
+     答案：不会，user正常插入
+     */
+    public void testTwoREQUIRESNEWinNormalMethod(){
+        basicCService.insertUser(new User(null, "jack", "12333",12));
+        log.info("执行下一个将抛出异常的方法");
+        basicAService.updateREQUIREDException();
+    }
 
     /**
      * 验证REQUIRED的事务异常透传效果：即便是通过trycatch捕获，外层事务也会被回滚
