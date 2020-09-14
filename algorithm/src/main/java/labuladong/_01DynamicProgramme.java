@@ -1,12 +1,15 @@
 package labuladong;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class _01DynamicProgramming {
+public class _01DynamicProgramme {
     /**
      * # 从fibonacci数列引出动态规划
      * index      1 2 3 4 5 6  7
@@ -657,8 +660,8 @@ public class _01DynamicProgramming {
         dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i])
         dp[i][1] = max(dp[i-1][1], dp[i-1][0]-prices[i])
      */
-    static class StockMaxProfitIIStatusMachineSolution{
-        static int solution(int[] prices){
+    static class StockMaxProfitInfinityKDPSolution {
+        static int solutionWithInfinityK(int[] prices){
             //int[][] dp = new int[prices.length][2];
             //dp[0][0] = 0;dp[0][1]= 0;dp[1][0]=0;
             int dp_i_0 = 0, dp_i_1 = Integer.MIN_VALUE;//初始值不好定看for运行一次结果是否正确
@@ -668,92 +671,313 @@ public class _01DynamicProgramming {
             }
             return dp_i_0;
         }
+        //支持任意冻结天数，任意冻结天数的无法从空间复杂度上进行优化
+        static int solutionWithInfinityKAnyCoolDown(int[] prices, int cooldown){
+            if(prices.length == 0) return 0;
+            int[][] dp = new int[prices.length][2];
+            for (int i = 0; i < prices.length; i++) {
+                if (i < 1){
+                    dp[i][0] = 0;
+                    dp[i][1] = -prices[i];
+                }else if (i<cooldown+1){
+                    dp[i][0] = Math.max(dp[i-1][0],dp[i-1][1]+prices[i]);
+                    dp[i][1] = Math.max(dp[i-1][1],-prices[i]);
+                }else {
+                    dp[i][0] = Math.max(dp[i-1][0],dp[i-1][1]+prices[i]);
+                    dp[i][1] = Math.max(dp[i-1][1],dp[i-cooldown-1][0]-prices[i]);
+                }
+
+            }
+            return dp[prices.length-1][0];
+        }
+        //固定手续费，这种写法不支持带冻结
+        static int solutionWithInfinityK(int[] prices, int fee){
+            int dp_i_0 = 0, dp_i_1 = -prices[0];//初始值不好定看for运行一次结果是否正确
+            int temp;
+            for (int i = 0; i < prices.length; i++) {
+                temp = dp_i_0;
+                dp_i_0 = Math.max(dp_i_0, dp_i_1 + prices[i]-fee);
+                dp_i_1 = Math.max(dp_i_1, temp - prices[i]);
+            }
+            return dp_i_0;
+        }
         public static void main(String[] args) {
-            System.out.println(solution(TestCases.prices0));
+            System.out.println(solutionWithInfinityKAnyCoolDown(TestCases.prices7,1));
         }
     }
 
     /**
-     ## 限制交易次数，k有限的正自然数
+     ## 限制交易次数，k有限的正自然数,用于累计交易次数
         dp[i][k][0] = max(dp[i-1][k][0],dp[i-1][k][1]+prices[i])
         dp[i][k][1] = max(dp[i-1][k][1],dp[i-1][k-1][0]-prices[i])
      */
     static class StockMaxProfitIIIStatusMachineSolution{
-        int solution(int[] prices, int K){
+
+        static int solutionWithKIncrease(int[] prices,int K){
+            //当前时间点上的2个「状态」：持有/不持有；「动作」有3个：买入、卖出、观望；
             int[][][] dp = new int[prices.length][K+1][2];
-            int dp_i_k_0 = 0,dp_i_k_1 = 0,dp_i_k_minus_1_0=0;
-            dp[0][0][0]=0;dp[0][0][1]=Integer.MIN_VALUE;
-            dp[0][1][0]=0;dp[0][1][1]=0;//-prices[0]
-            dp[1][0][0]=0;dp[1][0][1]=Integer.MIN_VALUE;
+            //base cases的初始化要考虑K很小很大的情况，所以应在遍历中进行，防止出现IndexOutofBoundary
+            //注意K所在的维度数组大小是K+1
+            //严谨的话，dp[0][0][1]=Integer.MIN
+            //这样base case的处理就简单了
+            for (int i = 0; i < K+1; i++) {
+                //之所以处理的base case都是i=0的，是因为状态转移方程中出现了i-1
+                dp[0][i][1] = -prices[0];
+            }
             for (int i = 1; i < prices.length; i++) {
-                for (int j = 1; j <= K; j++) {
-                    //dp_i_k_0 = Math.max(dp_i_k_0, dp_i_k_1+prices[i]);
-                    //dp_i_k_1 = Math.max(dp_i_k_1,dp_i_k_minus_1_0 - prices[i]);
-                    //dp_i_k_minus_1_0 = Math.max(dp_i_k_minus_1_0, )???
+                for (int j = 1; j < K+1; j++) {
+                    //按照买入时累加交易次数
                     dp[i][j][0] = Math.max(dp[i-1][j][0], dp[i-1][j][1]+prices[i]);
                     dp[i][j][1] = Math.max(dp[i-1][j][1], dp[i-1][j-1][0]-prices[i]);
                 }
             }
             return dp[prices.length-1][K][0];
         }
+
+        /*
+          优化空间复杂度的方案是取 第一次买入卖出和第二次买入卖出
+          仅支持K较小，甚至可以说K>=3这种优化方案就不可实现了
+          dp[i][j][0] = Math.max(dp[i-1][j][0], dp[i-1][j][1]+prices[i]);
+          dp[i][j][1] = Math.max(dp[i-1][j][1], dp[i-1][j-1][0]-prices[i]);
+         */
+        static int solutionWithKIncreaseImprove2(int[] prices, int K){
+            int dp_i_0_0 = 0,dp_i_1_0=0,dp_i_1_1=-prices[0],dp_i_2_0=0,dp_i_2_1=-prices[0];
+            for (int i = 1; i < prices.length; i++) {
+                dp_i_1_0 = Math.max(dp_i_1_0, dp_i_1_1+prices[i]);
+                dp_i_1_1 = Math.max(dp_i_1_1, dp_i_0_0-prices[i]);
+                dp_i_2_0 = Math.max(dp_i_2_0, dp_i_2_1+prices[i]);
+                dp_i_2_1 = Math.max(dp_i_2_1, dp_i_1_0-prices[i]);
+            }
+            return dp_i_2_0;
+        }
+        public static void main(String[] args) {
+            System.out.println(solutionWithKIncrease(TestCases.prices9, 4));
+        }
+        //一种讨巧的写法
+        public int maxProfitWithNonPrinciple(int[] prices){
+            int buy1 = Integer.MAX_VALUE, buy2 = Integer.MAX_VALUE;
+            int sell1 = 0, sell2 = 0;
+            for (int i = 0; i < prices.length; i++) {
+                buy1 = Math.min(buy1, prices[i]);
+                sell1 = Math.max(sell1, prices[i] - buy1);
+                buy2 = Math.min(buy2, prices[i] - sell1);
+                sell2 = Math.max(sell2, prices[i] - buy2);
+            }
+            return sell2;
+        }
+
     }
 
+    static class StockMaxProfitVIAnyKStatusMachineSolution{
+        static int maxProfit_anyK(int[] prices, int K){
+            //如果不允许当天买入当天卖出，那么prices.length天最多交易prices.length-1次
+            //如果不允许连着买入卖出，那么判断条件是 K>prices.length/2
+            if (K > prices.length-1){
+                return StockMaxProfitInfinityKDPSolution.solutionWithInfinityK(prices);
+            }
+            return StockMaxProfitIIIStatusMachineSolution.solutionWithKIncrease(prices, K);
+        }
 
+        public static void main(String[] args) {
+            int res = maxProfit_anyK(TestCases.prices9, 4);
+            System.out.println(res);
+        }
+    }
 
-    /*-=-=-=-=-=-=-=-=- 系列背包问题 -=-=-=-=-*/
+    /*-=-=-=-=-=-=- 正则表达式匹配 =-=-=-=-=-=-=-=-*/
     /**
-     * # 0-1背包问题
-     * 0-1的含义就是物品不可分割，要么放进背包，要么不放
-     * 一个可装载重量为W的背包和N个物品，每个物品有重量和价值两个属性。
-     * 其中第i个物品的重量 wt[i]，价值为val[i]，现在让你用这个背包装物品，最多能装的价值是多少？
+      # 正则表达式匹配
+      字符串s和一个字符模式p，实现支持'.'和'*'的正则表达式匹配
+      '.'匹配任意单个字符，'*'匹配零个或多个前面的元素
+      测试用例：
+     s               p           res
+     aa             a*          true
+     aab            c*a*b       true
+     ab             .*          true
+     mississippi    mis*is*p*.  false
      */
-    /*
-    ## 分析
-    一维动态规划就是：第i个物品的可放入的总价值，在没有重量限制的情况下就是前一个i-1判读结果加上当前
-    二维动态规划就是：第i个物品要放，看第i-1个物品在总容量为减去当前物品后余量的情况下的最大价值，加上当前价值。
-                    第i个物品不放，取第i-1个物品的最大价值
-                    比较上述两种情况，作为当前最大价值
-    此问题中
-    「状态」有两个：背包容量、可选择物品，所以dp数组是一个二维数组。
-    「选择」有两个：装进背包和不装
-        dp[i][j]定义：对当前第i个物品，背包总容量为j，可以装入的最大价值。
+    static class RegularExpressDynamicProcess{
+        //使用指针判断两个字符串是否完全匹配
+        static boolean isPatternMatchString(String s, String p, int i){
+            if (i>=s.length() || i>=p.length()){
+                return true;
+            }
+            return s.charAt(i) == p.charAt(i) && isPatternMatchString(s,p,++i);
+        }
+        /*
+        指针位置检查
+        . 匹配当前任意一个char
+        * 匹配前面任意次数的char
+        当前指针位置上的char是否相等
+        -- 上述判断有一个优先级
+        * */
+        static boolean mysolution2(String s, String p, int si, int pi){
+            /* 终点情况又分多种
+            si到头，pi到头，直接返回true
+            si没到头，pi到头，返回false
+            si到头，pi没到头，返回false
+            bug: a - ab* 这种si到头，pi不到头的，要放行
+            */
+            //if (si >= s.length() || pi >= p.length()){
+            //    return si>=s.length() && pi>=p.length();
+            //}
+            if (pi >= p.length()){
+                return si>=s.length();
+            }
+            /*使用p消耗s - 共下述几种情况
+                1 char-char 两个char是否相等
+                2 char* pi一次扫描两个，如果特征char在s里则si++，s在si的char不匹配触发pi+2，si不动
+                2.5 char*char a*a 匹配 aaa
+                3 .*  si直接到头，判断pi+2是否到头，举例 ab 与 .*c 的匹配判断
+                4 .EOF/.char  类似char-char si++ pi++ 但不比较是否相等
+                5 SOF* 这种情况不考虑
+            * */
 
-     「base case」：dp[0][...] = dp[...][0] = 0
-     将第i个物品装入背包：dp[i][j] = dp[i-1][j-wt[i-1]] + val[i-1]
-     第i个物品不放入背包：dp[i][j] = dp[i-1][j]
-     这样先写出dpTable
-       0 1 2 3 第i个物品
-     0 0 0 0 0
-     1 0 0 2 2 二维数组表示在试验到第i个物品，总容量是j的情况下的最大容量
-     2 0 4 4 4
-     3 0 4 6 6
-     4 0 4 6 6 背包总容量
-     */
-    public int bag0to1(int N, int W, int[] wt, int[] val){
-        int[][] dp = new int[N+1][W+1];//index会从0到N,0表示什么都不装，所以数组初始行数是N+1
-        for (int i = 1; i <= N; i++) {
-            for (int j = 1; j <= W; j++) {
-                //先判断当前物品是否直接超过总容量
-                if (j-wt[i-1] < 0){
-                    dp[i][j] = dp[i-1][j];
+            int type = 0;
+            boolean starFollowed = pi + 1 < p.length() && p.charAt(pi + 1) == '*';
+            if(p.charAt(pi) == '.'){
+                if (starFollowed){
+                    type=2;
                 }else {
-                    //要放进这个物品：总容量减去当前要放进的物品的质量，去查dpTable，加上当前物品的价值
-                    //不放进此物品：取上一个物品的最大val判断结果
-                    //对上述两个值做判断，取最大
-                    dp[i][j] = Math.max(dp[i-1][j-wt[i-1]]+val[i-1],dp[i-1][j]);
+                    type=4;
                 }
+            }else if (starFollowed){
+                type = 2;
+            }else {
+                type=1;
+            }
+            boolean firstMatch = si < s.length() && s.charAt(si) == p.charAt(pi) || p.charAt(pi) == '.';
+            switch(type){
+                case 1:
+                    //bug_fix: si<s.length要判断
+                    if (!firstMatch) return false;
+                    else {si++;pi++;}
+                    break;
+                case 2:
+                    //boolean atLeastOne = false;
+                    //while (si<s.length() && s.charAt(si) == p.charAt(pi)){
+                    //    si++;atLeastOne = true;
+                    //}
+                    //此写法面对a*c*a匹配aaa这种需要回归检查的无法实现
+                    //if (atLeastOne && pi+2 < p.length() && p.charAt(pi+2) == p.charAt(pi)){
+                    //    pi+=3;
+                    //}else {
+                    //    pi+=2;
+                    //}
+
+
+                    //bug: 消耗与非消耗都要判断
+                    //终极bug-str5判断错误，放弃。。。
+                    if (firstMatch){
+                        return mysolution(s, p, si, pi+2) || si+1 == s.length() || mysolution(s, p, si+1, pi);
+                    }else {
+                        return mysolution(s, p, si, pi+2);
+                    }
+                case 3:
+                    //avca - a*.*a;  ab - .*c
+                    return pi+2 == p.length();
+                case 4:
+                    si++;pi++;
+                    break;
+                default:
+                    throw new RuntimeException("这是算法不是业务代码！");
+            }
+            return mysolution(s, p, si, pi);
+        }
+        //博客上提供的写法
+        static boolean matchPatternAndString2(String s, String p, int i, int j){
+            if (j>=p.length()){
+                return i>=s.length();
+            }
+            char pchar = p.charAt(j);
+            boolean first_match = (i < s.length()) && ( pchar == s.charAt(i) || pchar == '.');
+            boolean star_followed = j+1 < p.length() && p.charAt(j+1) == '*';
+            if (star_followed){
+                /*
+                 char* 匹配一个字符时由于考虑到char*char这种情况，并且char*char还可以是char*char2*char,所以char*并不一定消耗s的字符
+                 所以可以用一个或来判断 match(i,j+2) || match(i+1,j)
+                 */
+                return matchPatternAndString2(s,p,i,j+2) || first_match && matchPatternAndString2(s, p, i+1, j);
+            }else {
+                return first_match && matchPatternAndString2(s, p, i+1, j+1);
             }
         }
-        return dp[N][W];
+        /*
+        si pi为key做备忘录可以简化递归
+        todo 堆栈溢出，有bug
+        * */
+        @Data @AllArgsConstructor
+        static class Key{
+            private int i;
+            private int j;
+        }
+        static boolean RegExpWithMemo(String s, String p){
+            Map<Key,Boolean> memo = new HashMap<>();
+            return RegExpWithMemoHelper(s, p, 0, 0,memo);
+        }
+        static boolean RegExpWithMemoHelper(String s, String p, int i, int j,Map<Key,Boolean> memo){
+            Key currKey = new Key(i, j);
+            if (memo.containsKey(currKey)) return memo.get(currKey);
+            if (j == p.length()) return i==s.length();
+            boolean firstMatch = i<s.length() && p.charAt(j)==s.charAt(i) || p.charAt(j)=='.';
+            boolean res = false;
+            if (j+2<=p.length() && p.charAt(j+1) == '*'){
+                res = RegExpWithMemoHelper(s, p, i, j+2, memo) || firstMatch && RegExpWithMemoHelper(s, p, i+1, j, memo);
+            }else {
+                res = firstMatch && RegExpWithMemoHelper(s, p, i+1, j+1, memo);
+            }
+            memo.put(currKey, res);
+            return res;
+        }
+        /*
+        重叠子问题 如何看出来，从而应用动态规划
+        对于斐波那契的求解：
+        fbnacci(i) 依赖
+            fbnacci(i-1) #A
+            fbnacci(i-2) #B
+        对于任意k<i,k>0, fbnacci(i-k)可以有多种方式到达，如k个#A，k/2个#B加#A组成零头，所以一定存在重叠子问题
+        从正则表达式的递归求解中使用的递归调用，可以看出
+        regexp(i,j)依赖
+            regexp(i,j+2)  #A
+            regexp(i+1,j)  #B
+            regexp(i+1,j+1) #C
+        那么对于求解regexp(i,j)到reg(i+2,j+2)就存在 #A#B#B 和 #C#C 两条路径，存在重叠子问题
+        但这里的路径带有条件
+        * */
+        static boolean mysolution(String s, String p, int si, int pi){
+            return RegExpWithMemo(s, p);
+        }
+        public static void main(String[] args) {
+            String str = "aaabbc", ptn = "aa6bbc";//false
+            String str1 = "mississippi", ptn1 = "mis*is*ip*.";//true
+            String str2 = "aab", ptn2 = "c*a*b";//true
+            String str3 = "hector", ptn3 = "hectorbre";//false
+            String str4 = "mississippi", ptn4 = "mis*is*p*.";//false
+            String str5 = "ab", ptn5 = ".*c";//false
+            String str6 = "aaa", ptn6 = "a*a";//true
+            String str7 = "aaa", ptn7 = "ab*a*c*a";//true
+            String str8 = "aa", ptn8 = "a*";//true
+            String str9 = "a", ptn9 = "ab*";//true
+            String str10 = "aaa", ptn10 = "aaaa";//false
+            String str11 = "bbbba", ptn11 = ".*a*a";
+            String str12 = "a", ptn12 = "a*a";
+            Assert.assertTrue(!mysolution(str,ptn,0,0));
+            Assert.assertTrue(mysolution(str1,ptn1,0,0));
+            Assert.assertTrue(mysolution(str2,ptn2,0,0));
+            Assert.assertTrue(!mysolution(str3,ptn3,0,0));
+            Assert.assertTrue(!mysolution(str4,ptn4,0,0));
+            Assert.assertTrue(!mysolution(str5,ptn5,0,0));
+            Assert.assertTrue(mysolution(str6,ptn6,0,0));
+            Assert.assertTrue(mysolution(str7,ptn7,0,0));
+            Assert.assertTrue(mysolution(str8,ptn8,0,0));
+            Assert.assertTrue(mysolution(str9,ptn9,0,0));
+            Assert.assertTrue(!mysolution(str10,ptn10,0,0));
+            Assert.assertTrue(mysolution(str11,ptn11,0,0));
+            Assert.assertTrue(mysolution(str12,ptn12,0,0));
+        }
     }
-    @Test
-    public void test307(){
-        int N = 3,W = 4;
-        int[] wt = {2,1,3};
-        int[] val = {4,2,3};
-        //dp[i] 第i个物品
-        System.out.println(bag0to1(N,W,wt,val));
-    }
+
+
 
 
 

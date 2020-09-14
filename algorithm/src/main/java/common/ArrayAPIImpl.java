@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class ArrayAPIImpl {
 
     //Arrays里提供了一个二分查找方法
-    //我的自实现见 @see labuladong._01DynamicProgramming.helper(int, int[], int)
+    //我的自实现见 @see labuladong._01DynamicProgramme.helper(int, int[], int)
     @Test
     public void test12(){
         int[] top2 = {1,2,4,4,5,7,9};
