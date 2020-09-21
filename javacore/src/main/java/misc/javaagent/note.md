@@ -1,5 +1,5 @@
 # 关于java agent
-
+[refto](https://developer.aliyun.com/article/763389?spm=a2c6h.12873581.0.dArticle763389.4605322cEfG1ce)
 ## 简易DEMO
 
 - 准备源码 HelloWorld HelloAgent ，并编译成class文件
@@ -29,3 +29,11 @@ hello world
 ```
 ## 进阶DEMO 使用ASM植入代码
 在JVM加载类时，为类的每个方法加上统计方法调用耗时的代码
+
+验证方案待定
+
+## 实践：使用javaagent实现btrace的功能
+agent对指定的方法进行字节码的修改，采集方法的入参和返回值。通过socket将请求和返回发送到
+
+
+

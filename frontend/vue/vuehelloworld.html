@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vue示例</title>
+
+</head>
+<body>
+    <div id = "app">
+        <ul>
+            <li v-for="item in books">
+                {{item.name}}
+            </li>
+        </ul>
+        <input type="text" v-model="name" placeholder="你的名字">
+        <h1>你好，{{name}}</h1>
+    </div>
+<h3>_生命周期钩子</h3>
+    <div id="container2"><span>{{animal}}</span></div>
+<h3>_实时修改变量</h3>
+    <div id="realTimeChangeVar">时间 date ：{{date}}</div>
+<h3>v-html可用于展示html内容，{{}}会作为纯文本展示</h3>
+    <div id="vhtmlusage"> <span v-html="link"></span> <br> <span>{{link}}</span>
+<h3>v-pre可以跳过元素及其子元素的编译过程，显示{{varName}}而不进行替换</h3>
+        <span v-pre>{{link}}</span>
+    </div>
+<h3>{{这里可以进行一些简单的运算}}</h3>
+    <div id="simpleCalcInMoustache">{{number/10}} {{isOk?'确定':'取消'}} {{text.split(',').reverse().join(',')}}</div>
+<h2>Vue过滤器</h2>
+</body>
+<!--放在head中引入vue可以早一点初始化，避免{{}}被当作纯文本解析-->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script>
+    var app = new Vue({
+        el: '#app', //el用于指定一个页面中已存在的DOM元素来挂载Vue实例，可以是HTMLElement, 也可以是CSS选择器
+        //如 el:document.getElementById('app'); el:document.getElementById('#app')
+        //可以通过app.$el来访问元素
+        data: {
+            books: [
+                {name: 'java编程思想'},
+                {name: 'javascript编程思想'},
+                {name: 'js高级设计'}
+            ],
+            name: ' '
+        }
+    });
+    var app2 = new Vue({
+        el:'#container2',
+        data:{animal:'cat'},
+        created:function () {
+            console.log('created函数： animal = ',this.animal)
+            // console.log(this.animal);
+        },
+        mounted:function () {
+            console.log(this.$el);//把id为app的div打印出来
+        }
+    });
+    /*
+    //可以这样访问app对象里的属性
+    console.log(app.name);
+    //也可以将name绑定到下面的遍历namevar上，形成双向绑定，这样当namevar变化时，app中的name随之改变
+    var namevar = 'jack';
+    * */
+    var realTimeChangeVar = new Vue({
+        el:'#realTimeChangeVar',
+        data:{date:new Date()},
+        mounted:function () {
+            var _this = this;//声明一个变量指向Vue实例this，保证作用域一致
+            this.timer = setInterval(function () {
+                //todo 时间格式化
+                _this.date = new Date();
+            },1000);
+        },
+        beforeDestroy:function(){
+            if (this.timer){
+                clearInterval(this.timer);//在实例销毁前清除定时器
+            }
+        }
+    });
+    // $('#realTimeChangeVar')
+    var vhtmlusage = new Vue({
+        el:'#vhtmlusage',
+        data:{link:'<a href="#">这是一个链接</a>'}
+    });
+    var simpleCalcInMoustache = new Vue({
+        el:'#simpleCalcInMoustache',
+        data:{
+            number:100, isOk:false, text:'天天向上,好好学习'
+        }
+    });
+</script>
+</html>
