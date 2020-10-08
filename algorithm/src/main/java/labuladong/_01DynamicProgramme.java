@@ -647,7 +647,7 @@ public class _01DynamicProgramme {
              dp_i_0  0     0   0   3   4  8
              dp_i_1 -InF  -3  -2  -2  -2  -2
              */
-            System.out.println(solution2(TestCases.prices0));
+            System.out.println(solution2(TestCasesAndUtils.prices0));
         }
     }
 
@@ -702,7 +702,7 @@ public class _01DynamicProgramme {
             return dp_i_0;
         }
         public static void main(String[] args) {
-            System.out.println(solutionWithInfinityKAnyCoolDown(TestCases.prices7,1));
+            System.out.println(solutionWithInfinityKAnyCoolDown(TestCasesAndUtils.prices7,1));
         }
     }
 
@@ -751,7 +751,7 @@ public class _01DynamicProgramme {
             return dp_i_2_0;
         }
         public static void main(String[] args) {
-            System.out.println(solutionWithKIncrease(TestCases.prices9, 4));
+            System.out.println(solutionWithKIncrease(TestCasesAndUtils.prices9, 4));
         }
         //一种讨巧的写法
         public int maxProfitWithNonPrinciple(int[] prices){
@@ -779,7 +779,7 @@ public class _01DynamicProgramme {
         }
 
         public static void main(String[] args) {
-            int res = maxProfit_anyK(TestCases.prices9, 4);
+            int res = maxProfit_anyK(TestCasesAndUtils.prices9, 4);
             System.out.println(res);
         }
     }
