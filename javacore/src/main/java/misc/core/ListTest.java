@@ -1,8 +1,10 @@
 package misc.core;
 
+import com.domain.UserDto;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
@@ -96,6 +98,16 @@ public class ListTest {
             }
             //但发现了另一个奇怪的问题，remove名字总是ConcurrentException,但remove 1不会出问题，只有1 2 两个元素在时remove 2会出错，如果有3垫底就能移除2
         }
+    }
 
+    @Test
+    public void test103() {
+        List<UserDto> userDtos = UserDto.userDtos;
+        Iterator<UserDto> iterator = userDtos.iterator();
+        System.out.println(userDtos);
+        iterator.next();iterator.next();
+        iterator.remove();
+        System.out.println(userDtos);
+        System.out.println(iterator.next());
     }
 }
