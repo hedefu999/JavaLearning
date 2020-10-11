@@ -35,15 +35,17 @@ gitbook链接   [labuladong的算法小抄](https://labuladong.gitbook.io/algo/)
 动态规划转移方程做点改动可以通杀系列股票问题
 ```
 [经典动态规划：0-1 背包问题](https://mp.weixin.qq.com/s/RXfnhSpVBmVneQjDSUSAVQ)
-[经典动态规划：0-1背包问题的变体](https://mp.weixin.qq.com/s/OzdkF30p5BHelCi6inAnNg)
+[经典动态规划：0-1 背包问题的变体 - 子集背包问题](https://mp.weixin.qq.com/s/OzdkF30p5BHelCi6inAnNg)
 ```
 二维动态规划数组如何降维 - 注意ij内外层遍历和sum倒序遍历防止数字重复使用的问题
 ```
 [经典动态规划：完全背包问题](https://mp.weixin.qq.com/s/zGJZpsGVMlk-Vc2PEY4RPw)
 
+[最小编辑距离](https://mp.weixin.qq.com/s/uWzSvWWI-bWAV3UANBtyOw)
 
+[KMP算法](https://mp.weixin.qq.com/s/r9pbkMyFyMAvmkf4QnL-1g)
 
-
+[高楼扔鸡蛋]()
 
 [我作了首诗，保你闭着眼睛也能写对二分查找](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247485044&idx=1&sn=e6b95782141c17abe206bfe2323a4226&chksm=9bd7f87caca0716aa5add0ddddce0bfe06f1f878aafb35113644ebf0cf0bfe51659da1c1b733&scene=21#wechat_redirect)
 
