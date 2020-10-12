@@ -1,4 +1,4 @@
-package misc.core;
+package misc.newjavaapi;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

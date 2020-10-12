@@ -41,6 +41,8 @@ gitbook链接   [labuladong的算法小抄](https://labuladong.gitbook.io/algo/)
 ```
 [经典动态规划：完全背包问题](https://mp.weixin.qq.com/s/zGJZpsGVMlk-Vc2PEY4RPw)
 
+[最长公共子序列](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247484486&idx=1&sn=0bdcb94c6390307ea32427757ec0072c)
+
 [最小编辑距离](https://mp.weixin.qq.com/s/uWzSvWWI-bWAV3UANBtyOw)
 
 [KMP算法](https://mp.weixin.qq.com/s/r9pbkMyFyMAvmkf4QnL-1g)

@@ -1,6 +1,8 @@
 package com.concurrency.javadxcbchxjs;
 
 /**
+  # 《java多线程编程核心技术》一书
+ 
  * @title 线程状态/生命周期转换研究
 线程状态定义见 enum java.lang.Thread.State，注意：没有running这个状态定义
 NEW 至今尚未启动的线程处于这种状态

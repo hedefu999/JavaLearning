@@ -1,9 +1,9 @@
-package misc.core;
+package misc.newjavaapi;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
-import misc.core.Java8StreamAPI.Student;
+import misc.newjavaapi.Java8StreamAPI.Student;
 import org.junit.Test;
 
 import java.io.FileInputStream;
@@ -12,7 +12,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
