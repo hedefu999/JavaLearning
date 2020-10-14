@@ -14,6 +14,7 @@ import java.util.IntSummaryStatistics;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Spliterator;
@@ -48,9 +49,8 @@ public class Java8StreamAPI {
         public static Student DEFAULT = new Student("",0,0.0,"");
         private String name;
         private Integer number;
-        private Double aDouble;
+        private Double balance;
         private String city;
-
         public static Comparator NUMBER_COMPARATOR = new Comparator<Student>() {
             @Override
             public int compare(Student o1, Student o2) {
@@ -59,22 +59,39 @@ public class Java8StreamAPI {
         };
         @Override
         public String toString() {
-            return "Container{" +
-                    "string='" + name + '\'' +
-                    ", number=" + number +
-                    ", aDouble=" + aDouble +
-                    '}';
+            return "Student{" + "name='" + name + '\'' + ", number=" + number + ", balance=" + balance + ", city='" + city + '\'' + '}';
         }
     }
-    static List<Student> data = new ArrayList<>();
-    static {
-        data.add(new Student("jack1",12,123.3,"shanghai"));
-        data.add(new Student("java2",21,1.8,"beijing"));
-        data.add(new Student("car3",1200,151.2,"newyork"));
-        data.add(new Student("jinsi",134,45.6,"newyork"));
-        data.add(new Student("soldier4", 160, 32.00,"shanghai"));
-        data.add(new Student("carl", 7740, 3.0,"newyork"));
+    static List<Student> data = new ArrayList<Student>(){{
+        add(new Student("jack",12,123.3,"shanghai"));
+        add(new Student("java",21,1.8,"beijing"));
+        add(new Student("car",1200,151.2,"newyork"));
+        add(new Student("alice",134,45.6,"newyork"));
+        add(new Student("solman", 160, 32.00,"shanghai"));
+        add(new Student("carlo", 7740, 3.0,"newyork"));
+    }};
+
+    /**
+     * #002-HowToGetStream
+     */
+    static class HowToGetStream{
+        public static void main(String[] args) {
+            Stream<String> hugeCityStream = Stream.of("beijing", "shanghai", "guangzhou");
+            String[] countries = {"china","america","russia","japan"};
+            Stream<String> countryStream = Arrays.stream(countries);
+
+            List<String> strList = new ArrayList<>();
+            Stream<String> strListStream = strList.stream();
+
+            Map<Long,String> map = new HashMap<>();
+            // map.stream()
+            Stream<Entry<Long, String>> mapEntryStream = map.entrySet().stream();
+        }
     }
+
+    /**
+     * 流操作的分类 #003-StreamOpsFeatures
+     */
     static class StreamOpsFeatures{
         public static void main(String[] args) {
             System.out.println(data); //E
@@ -92,15 +109,16 @@ public class Java8StreamAPI {
          外层的E F行显示data源数据没有发生改变
          */
     }
+
     /**
-     * 查找
+     * filter #004-StreamMatchFindFilterDemo
      * Collectors#allMatch 是否全部匹配
      * anyMatch 是否存在一个或多个满足条件
      * noneMatch = !allMatch
      * findFirst 找到第一个满足条件的item, filter(xxx).findFirst()
      * findAny 在并行流中效率高于串行流，在串行流中 = findFirst
      */
-    static class TestFind{
+    static class StreamMatchFindFilterDemo{
         public static void main(String[] args) {
             boolean gt7000 = data.stream().anyMatch(stu -> stu.getNumber() > 7000);
             boolean wangExist = data.stream().anyMatch(student -> student.getName().contains("wang"));
@@ -113,157 +131,28 @@ public class Java8StreamAPI {
     }
 
     /**
-     * 规约
+     * #005-CommonMap
      *
      */
-    @Test
-    public void test8() {
-        //求和,注意stream的数学计算不能用于金融业务，需要转BigDecimal
-        double result;
-        data.stream().mapToDouble(Student::getADouble).sum();
-        // result = data.stream().map(item -> new BigDecimal(item.getADouble())).reduce(BigDecimal::doubleValue).sum();
-        data.stream().mapToDouble(Student::getADouble).max().ifPresent(System.out::println);
-        data.stream().mapToDouble(Student::getADouble).min().getAsDouble();
-        result = data.stream().mapToDouble(Student::getADouble).average().getAsDouble();
-        System.out.println(result);
-    }
-
-    @Test
-    public void testReduece() {
-        /**
-         * reduce方法参数有多种
-         * 只有一个BinaryOperator接口入参的
-         * @see java.util.stream.Stream#reduce(java.util.function.BinaryOperator) 返回 Optional<T>
-         * BinaryOperator接口的声明是 public interface BinaryOperator<T> extends BiFunction<T,T,T>
-         *     其中声明了两个静态方法 minBy 和 maxBy
-         *
-         */
-        Integer integer = Stream.of(1, 2, 3, 4).reduce(Integer::sum).orElse(0);
-        Integer result = Stream.of(2, 5, 4, 3).reduce((left, right) -> {
-            logger.info("current: left = {}, right = {}", left, right);
-            // left += right;
-            // return left;
-            right += left;
-            return right;
-        }).orElse(0);
-        System.out.println(result);
-
-        /**
-         * 上面的intStream不可复用！否则报IllegalStateException: stream has already been operated upon or closed
-         * @see Stream#reduce(T identity, java.util.function.BinaryOperator<T> accumulator) 返回泛型T
-         * identity用于指定stream循环的初始值,当stream中没有元素时，就直接返回这个identity
-         * 带有identity入参的方法返回的就不是Optional
-         */
-        Integer result2 = Stream.of(2, 5, 4, 3).reduce(3, (sum, item) -> {
-            logger.info("current: sum = {}, item = {}", sum, item);
-            sum += item;
-            return sum;//注意返回的是中间结果
-        });
-        System.out.println(result2);
-
-        Integer result3 = new ArrayList<Integer>().stream().reduce(0, (sum, item) -> {
-            logger.info("current: sum = {}, item = {}", sum, item);
-            sum += item;
-            return sum;//注意返回的是中间结果
-        });
-        System.out.println(result3);
-
-        Integer result4 = new ArrayList<Integer>().stream().reduce((sum, item) -> {
-            logger.info("current: sum = {}, item = {}", sum, item);
-            sum += item;
-            return sum;//注意返回的是中间结果
-        }).orElse(0);
-        System.out.println(result4);
-        /**
-         * 最复杂入参的reduce，方法签名
-         * @see java.util.stream.Stream#reduce(U identity, java.util.function.BiFunction<U, ? super T, U> accumulator, java.util.function.BinaryOperator<U> combiner)
-         * 包含一个累加器accumulator和一个合成器combiner,combiner用于将accumulator的结果合并起来。应用于并行流，详细测试见并行流 ParallelStreamDemo
-         * 这个方法直接返回结果，而不是Optional
-         */
-        Integer multiplyResult2 = Stream.of(1,2,3,4,5).reduce(1,(total, item) -> total*item*2,(left, right) -> left*right);
-        Integer multiplyResult = Stream.of(1,2,3,4,5).reduce(1, new BiFunction<Integer, Integer, Integer>() {
-            @Override
-            public Integer apply(Integer totalMulti, Integer item) {
-                logger.info("accumulator：totalMulti = {}, item = {}", totalMulti, item);
-                return totalMulti * (item * 2);
-            }
-        }, new BinaryOperator<Integer>() {
-            @Override
-            public Integer apply(Integer left, Integer right) {
-                logger.info("combiner：left = {}, right = {}", left, right);
-                return left * right;
-            }
-        });
-        System.out.println(multiplyResult);
-
-        double bigDecimalResult = Stream.of(12.8, 13.87, 15.99, 23.0).map(BigDecimal::new).reduce(BigDecimal.ZERO, BigDecimal::add).doubleValue();
-        System.out.println(bigDecimalResult);//65.66
-    }
-
-    /**
-     * 并行流
-     */
-    static class ParallelStreamDemo{
-        /**
-         * 并行流可以显著提高流处理的速度
-         * 应用到并行流的任何操作都必须符合缩减操作的三个约束条件：无状态、不干预、关联性
-         */
-        static class ParallelStreamStart{
-            public static void main(String[] args) {
-                List<Integer> ints = Arrays.asList(1,2,3,4,5,6);
-                ints.parallelStream().reduce((a,b) -> a+b).ifPresent(System.out::println);
-                Optional<Integer> multiply = ints.parallelStream().reduce((a,b) -> a*b);
-                if (multiply.isPresent())
-                    logger.info("计算总乘积：{}", multiply.get());//720
-                Integer parallelResult = ints.parallelStream().reduce(1, (a, b) -> a * b, (a, b) -> a * b);
-                logger.info("乘积是：{}", parallelResult);//720
-                //对集合中的每个元素扩大2倍后计算累乘积
-                Integer multiplyResult = Stream.of(1,2,3,4,5).parallel().reduce(1, new BiFunction<Integer, Integer, Integer>() {
-                    @Override
-                    public Integer apply(Integer totalMulti, Integer item) {
-                        logger.info("{}: accumulator：totalMulti = {}, item = {}", Thread.currentThread().getName(), totalMulti, item);
-                        return totalMulti * (item * 2);
-                    }
-                }, new BinaryOperator<Integer>() {
-                    @Override
-                    public Integer apply(Integer left, Integer right) {
-                        logger.info("{}: combiner：left = {}, right = {}", Thread.currentThread().getName(), left, right);
-                        return left * right;
-                    }
-                });
-                System.out.println(multiplyResult);
-                /** 并行流特性总结：
-                 * accumulator每次都会使用identity作为a参与运算
-                 * accumulator本身是并发取数的，所以从List取数操作的顺序是无序的
-                 * accumulator与combiner的各自到执行也是并发的，收集的同时在进行累积操作
-                 * 进行流式处理的List中有n个元素，accumulator执行n次，combiner执行(n-1)次
-                 */
-                //并行流里进行最大值比较效率更高？
-                int intMax = data.stream().parallel().mapToInt(Student::getNumber).max().orElse(0);
-                System.out.println(intMax);
-            }
-        }
-        /**
-         * 如果集合或数组中的元素是有序的，对应的流也是有序的，鉴于无序流可以提升点性能，所以可以主动要求使用无序流unordered()???
-         * 如果希望并行流操作时也保持顺序，可使用forEachOrdered()方法
-         */
-        static class ParallelStreamAdvanceFeature{
-            public static void main(String[] args) {
-                data.stream().map(Student::getName).forEach(System.out::println);
-                System.out.println("=-=-=-= 默认并行流是无序的 =-=-=-=");
-                data.stream().parallel().map(Student::getName).forEach(System.out::println);
-                System.out.println("=-=-=-= 指定有序（原始顺序）的并行流 =-=-=-=");
-                data.stream().parallel().map(Student::getName).forEachOrdered(System.out::println);
-                System.out.println("=-=-=-= 指定无序,似乎没啥效果 =-=-=-=");
-                data.stream().unordered().map(Student::getName).forEach(System.out::println);
-            }
+    static class CommonMapAndFlatMapDemo{
+        public static void main(String[] args) {
+            //求和,注意stream的数学计算不能用于金融业务，需要转BigDecimal
+            double result;
+            result = data.stream().mapToDouble(Student::getBalance).sum();
+            System.out.println(result);
+            // result = data.stream().map(item -> new BigDecimal(item.getBalance())).reduce(BigDecimal::doubleValue).sum();
+            data.stream().mapToDouble(Student::getBalance).max().ifPresent(System.out::println);
+            result = data.stream().mapToDouble(Student::getBalance).min().getAsDouble();
+            System.out.println(result);
+            result = data.stream().mapToInt(Student::getNumber).average().getAsDouble();
+            System.out.println(result);
         }
     }
 
     /**
-     * 映射流
+     * #006-FlatMap
      */
-    static class MapStreamDemo{
+    static class StreamFlatMapDemo{
         @Data @AllArgsConstructor
         static class Teacher{
             private String name;
@@ -300,9 +189,9 @@ public class Java8StreamAPI {
              */
             List<Student> students = Arrays.asList(teacherLee, teacherWang).stream().flatMap(teacher -> teacher.getStudents().stream()).collect(Collectors.toList());//.distinct().forEach(System.out::println);
 /**
-             * 使用映射流提取所有Student的number，去重的同时转为数字放到list里
-             * 使用到 flatMapToInt mapToInt
-             */
+ * 使用映射流提取所有Student的number，去重的同时转为数字放到list里
+ * 使用到 flatMapToInt mapToInt
+ */
             List<Integer> studentNumerTags = Arrays.asList(teacherLee, teacherWang).stream().flatMapToInt(
                     teacher -> teacher.getStudents().stream().mapToInt(item -> Integer.parseInt(item.getTypeNumber())))
                     .distinct().collect(ArrayList::new,ArrayList::add, ArrayList::addAll);
@@ -311,43 +200,152 @@ public class Java8StreamAPI {
     }
 
     /**
-     * 收集操作：流映射转换好后通常要收集起来返回
+     * #007-StreamReduceDemo
+     */
+    static class StreamReduceDemo{
+        static void testFirstKindOfReduce(){
+            /**
+             * reduce方法参数有多种
+             * 只有一个BinaryOperator接口入参的
+             * @see java.util.stream.Stream#reduce(java.util.function.BinaryOperator) 返回 Optional<T>
+             * BinaryOperator接口的声明是 public interface BinaryOperator<T> extends BiFunction<T,T,T>
+             *     其中声明了两个静态方法 minBy 和 maxBy
+             */
+            Integer integer = Stream.of(1, 2, 3, 4).reduce(Integer::sum).orElse(0);
+            Integer result = Stream.of(2, 5, 4, 3).reduce((left, right) -> {
+                logger.info("current: left = {}, right = {}", left, right);
+                // left += right;
+                // return left;
+                right += left;
+                return right;
+            }).orElse(0);
+            System.out.println(result);
+        }
+        static void testSecondKindOfReduce(){
+            /**
+             * @see Stream#reduce(T identity, java.util.function.BinaryOperator<T> accumulator) 返回泛型T
+             * identity用于指定stream遍历的初始值,当stream中没有元素时，就直接返回这个identity
+             * 带有identity入参的方法返回的就不是Optional
+             */
+            Integer result2 = Stream.of(2, 5, 4, 3).reduce(3, (sum, item) -> {
+                sum += item;
+                logger.info("summing, current: sum = {}, item = {}", sum, item);
+                return sum;//留意第一行日志
+            });
+            System.out.println(result2);
+
+            Integer result3 = new ArrayList<Integer>(0).stream().reduce(3, (sum, item) -> {
+                logger.info("current: sum = {}, item = {}", sum, item);
+                sum += item;
+                return sum;//注意返回的是中间结果
+            });
+            System.out.println(result3);
+        }
+        static void testFullParamsReduce(){
+            /**
+             * 最复杂入参的reduce，方法签名
+             * @see java.util.stream.Stream#reduce(U identity, java.util.function.BiFunction<U, ? super T, U> accumulator, java.util.function.BinaryOperator<U> combiner)
+             * 包含一个累加器accumulator和一个合成器combiner,combiner用于将accumulator的结果合并起来。应用于并行流，详细测试见并行流 ParallelStreamDemo
+             * 这个方法直接返回结果，而不是Optional
+             */
+            Integer multiplyResult2 = Stream.of(1,2,3,4,5).reduce(10, (total, item) -> total*item*2, (left, right) -> left*right);
+            Integer multiplyResult = Stream.of(1,2,3,4,5).reduce(10, new BiFunction<Integer, Integer, Integer>() {
+                @Override
+                public Integer apply(Integer totalMulti, Integer item) {
+                    logger.info("accumulator：totalMulti = {}, item = {}", totalMulti, item);
+                    return totalMulti * (item * 2);
+                }
+            }, new BinaryOperator<Integer>() {
+                @Override
+                public Integer apply(Integer left, Integer right) {
+                    logger.info("combiner：left = {}, right = {}", left, right);
+                    return left * right;
+                }
+            });
+            System.out.println(multiplyResult);
+            //下述是企业级开发中常用的BigDecimal在流中的计算
+            double bigDecimalResult = Stream.of(12.8, 13.87, 15.99, 23.0).map(BigDecimal::new).reduce(BigDecimal.ZERO, BigDecimal::add).doubleValue();
+            System.out.println(bigDecimalResult);//65.66
+        }
+        public static void main(String[] args) {
+            // testFirstKindOfReduce();
+            // testSecondKindOfReduce();
+            testFullParamsReduce();
+        }
+    }
+
+    /**
+     * #008-ParallelStreamDemo
+     */
+    static class ParallelStreamDemo{
+        /**
+         * 并行流可以显著提高流处理的速度
+         * 应用到并行流的任何操作都必须符合缩减操作的三个约束条件：无状态、不干预、关联性
+         */
+        static List<Integer> ints = Arrays.asList(1,2,3,4,5,6);
+        static class ParallelStreamStart{
+            static void firstMeetParallelStream(){
+                ints.parallelStream().reduce(Integer::sum).ifPresent(System.out::println);
+                Optional<Integer> multiply = ints.parallelStream().reduce((a,b) -> a*b);
+                multiply.ifPresent(result -> logger.info("计算总乘积：{}", result));
+                Integer parallelResult = ints.parallelStream().reduce(1, (a, b) -> a * b, (a, b) -> a * b);
+                logger.info("乘积是：{}", parallelResult);//720
+            }
+            static void concurrencyFeaturesOfParallelStream(){
+                //对集合中的每个元素扩大2倍后计算总和
+                Integer summary = Stream.of(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16).parallel().reduce(0, new BiFunction<Integer, Integer, Integer>() {
+                    @Override
+                    public Integer apply(Integer identity, Integer item) {
+                        logger.info("{}: accumulator：identity = {}, item = {}", Thread.currentThread().getName(), identity, item);
+                        return identity + item;
+                    }
+                }, new BinaryOperator<Integer>() {
+                    @Override
+                    public Integer apply(Integer left, Integer right) {
+                        logger.info("{}: combiner：left = {}, right = {}", Thread.currentThread().getName(), left, right);
+                        return left + right;
+                    }
+                });
+                System.out.println(summary);
+                /** 并行流特性总结：
+                 * accumulator每次都会使用identity参与运算
+                 * accumulator本身是并发取数的，所以从List取数操作的顺序是无序的
+                 * accumulator与combiner的各自到执行也是并发的，收集的同时在进行累积操作
+                 * 进行流式处理的List中有n个元素(一个元素看作一个任务)，accumulator执行n次，combiner执行(n-1)次
+                 */
+            }
+            /**
+             * 如果集合或数组中的元素是有序的，对应的流也是有序的，鉴于无序流可以提升点性能，所以可以主动要求使用无序流unordered()???
+             * 如果希望并行流操作时也保持顺序，可使用forEachOrdered()方法
+             */
+            static void advanceFeaturesOfStream(){
+                //并行流里进行最大值比较效率更高
+                int intMax = data.stream().parallel().mapToInt(Student::getNumber).max().orElse(0);
+                System.out.println(intMax);
+
+                data.stream().map(Student::getName).forEach(System.out::println);
+                System.out.println("=-=-=-= 默认并行流是无序的 =-=-=-=");
+                data.stream().parallel().map(Student::getName).forEach(System.out::println);
+                System.out.println("=-=-=-= 指定有序（原始顺序）的并行流 =-=-=-=");
+                data.stream().parallel().map(Student::getName).forEachOrdered(System.out::println);
+                System.out.println("=-=-=-= 指定无序,似乎没啥效果 =-=-=-=");
+                data.stream().unordered().map(Student::getName).forEach(System.out::println);
+            }
+            public static void main(String[] args) {
+                firstMeetParallelStream();
+                // concurrencyFeaturesOfParallelStream();
+                /* advanceFeaturesOfStream(); */
+            }
+        }
+    }
+
+    /**
+     * #009-CollectorsAPI
      * Stream提供了两种collect方法,collect是一个终端操作
      * - <R, A> R collect(Collector<? super T, A, R> collector);
      * - <R> R collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator, BiConsumer<R, R> combiner);
      */
     static class CollectOperationDemo{
-        public static void testCollectorsToMap() {
-            //collect太常用，这里只列举几个坑
-            data.add(new Student("spy5", 160, 320.00,""));
-            data.add(new Student(null, 160, 320.00,""));
-            //间谍spy因number重复导致hashMapkey重复，从而导致下面一行的写法抛出merge相关的异常！异常的定义见Collectors.throwingMerger
-            // Map<Integer, Student> containerMap = data.stream().collect(Collectors.toMap(item -> item.getNumber(), item -> item));
-
-            //duplicate key 解决方案 1:
-            //只能返回newValue（表示替换为新值）和null（表示移除这个重复的key）
-            HashMap<Integer, Student> complicateAPIMap = data.stream().collect(Collectors.toMap(
-                    item -> item.getNumber(),
-                    item -> item,
-                    (existValue, puttingValue) -> existValue,
-                    HashMap::new));
-            //下述写法的几个特点：1.这个返回类型是HashMap会泛型推断出错，无法编译；2.兼容key冲突；3.List中有一个元素的value为null会抛出NPE，原因见Map的merge函数
-            Map<Integer, String> complicateAPIMap2 = data.stream().collect(Collectors.toMap(
-                    item -> item.getNumber(),
-                    item -> item.getName(),
-                    (existValue, puttingValue) -> existValue));
-            System.out.println(complicateAPIMap2);
-            Map<Integer, Student> containerMap = data.stream().collect(HashMap::new, (map, item) -> map.putIfAbsent(item.getNumber(), item), new BiConsumer<HashMap<Integer, Student>, HashMap<Integer, Student>>() {
-                @Override
-                public void accept(HashMap<Integer, Student> integerStudentHashMap, HashMap<Integer, Student> integerStudentHashMap2) {
-                    logger.info("串行流也会走到这里？？？");
-                }
-            });
-            System.out.println(containerMap.size());
-            ArrayList<Integer> noDuplicateIds = data.stream().map(Student::getNumber).collect(Collectors.collectingAndThen(Collectors.toSet(), ArrayList::new));
-            System.out.println(noDuplicateIds);
-        }
-
         public static void testJoining() {
             String sbuffer = data.stream().map(Student::getName).collect(Collectors.joining());
             String namesWithConnector = data.stream().map(Student::getName).collect(Collectors.joining(",", ":", ";"));//:jack1,java2,car3,soldier4;
@@ -387,7 +385,7 @@ public class Java8StreamAPI {
             //显然，使用自定义Comparator会另代码看起来很奇怪，而且编译器无法推测类型
             Student maxNumStu = data.stream().collect(Collectors.reducing(BinaryOperator.maxBy(Comparator.comparing(Student::getNumber)))).get();
             Integer minNumber = data.stream().collect(Collectors.minBy(Comparator.comparing(Student::getNumber))).get().getNumber();//reducing动作可以去掉
-            Integer minNum = data.stream().min(Comparator.comparing(Student::getNumber).thenComparingDouble(Student::getADouble)).orElse(Student.DEFAULT).getNumber();//还可以进一步简化
+            Integer minNum = data.stream().min(Comparator.comparing(Student::getNumber).thenComparingDouble(Student::getBalance)).orElse(Student.DEFAULT).getNumber();//还可以进一步简化
             System.out.println(maxNumStu);
             System.out.println(minNumber);
             System.out.println("学生最小number = " + minNum);
@@ -405,7 +403,6 @@ public class Java8StreamAPI {
             Double numberAverage = data.stream().collect(Collectors.averagingInt(Student::getNumber));
             logger.info("summing = {}, summarize = {}, numberAverage = {}", numberSum, numberSummarize, numberAverage);
         }
-
         /**
          * 分组
          * Collectors.groupingBy方法类似SQL的group by
@@ -436,19 +433,18 @@ public class Java8StreamAPI {
 
 
         /**
-         * 是男人就调stream api 9层，效果有点像SQL筛选数据
+         * #010-geekOperation
+         * stream api的 "九"重天，效果像SQL筛选数据，代码将追求奇技淫巧
          * collectingAndThen
          * groupingBy
          */
-        public static void testOther() {
+        static void geekOperation() {
             /**
              //1. 生成一个不可变List
              List<Student> immutableStus = data.stream().collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
              immutableStus.iterator().remove();//UnsupportedOperationException
             */
-            /** -=-=-=-=-=-=-=-= 到这里，代码使用java8 stream 将追求奇技淫巧 -=-=-=-=-=-=-=-=-=*/
-
-            //4. 找到每个城市里学生number最大的学生，按cityName - stuName组成map返回，你能给出几种写法？
+            //需求： 找到每个城市里学生number最大的学生，按cityName - stuName组成map返回，你能给出几种写法？
             //法 1
             Map<String,String> cityMaxStuNumberNameMap = data.stream().collect(
                     Collectors.groupingBy(Student::getCity,
@@ -467,22 +463,62 @@ public class Java8StreamAPI {
             );
             System.out.println(cityMaxStuNumberNameMap2);
 
-            //5. 将一个城市里number最大和最小的两个学生组成List作为value与cityName作为key组成map返回，如何用一行代码实现！
+
+            //需求： 将一个城市里number最大和最小的两个学生组成List作为value与cityName作为key组成map返回，如何用一行代码实现！
             Map<String, List<Student>> cityNameMaxMinStudentsMap = data.stream()
                     .collect(Collectors.toMap(Student::getCity, stu -> Arrays.asList(stu, stu),
                             (l1,l2) -> Arrays.asList(
                                     (l1.get(0).getNumber()>l2.get(0).getNumber()? l2: l1).get(0),
                                     (l1.get(1).getNumber()<l2.get(1).getNumber()? l2: l1).get(1))));
-            //有点问题，在一个城市只有一个学生的情况下会导致list中有两个重复的数据，无可厚非
+            //有点问题，在一个城市只有一个学生的情况下会导致list中有两个重复的数据
             System.out.println(cityNameMaxMinStudentsMap);
 
         }
+
+        /**
+         * java8 下慎用Collectors.toMap
+         * 将Student的number作为key，Student作为value组成map返回
+         */
+        static void findFeaturesOfCollectorsToMap() {
+            data.add(new Student("spy", 160, 320.00,""));
+            //spy因number重复导致hashMap key重复，从而导致下面一行的写法抛出merge相关的异常！异常的定义见Collectors.throwingMerger
+            // Map<Integer, Student> containerMap = data.stream().collect(Collectors.toMap(item -> item.getNumber(), item -> item));
+
+            //解决方案 1:
+            //只能返回newValue（表示替换为新值）和null（表示移除这个重复的key）
+            HashMap<Integer, Student> complicateAPIMap = data.stream().collect(Collectors.toMap(
+                    item -> item.getNumber(),
+                    item -> item,
+                    (existValue, puttingValue) -> existValue,
+                    HashMap::new));
+            //下述写法的几个特点：1.这个返回类型是HashMap会泛型推断出错，无法编译；2.兼容key冲突；3.List中有一个元素的value为null会抛出NPE，原因见Map的merge函数
+            Map<Integer, String> complicateAPIMap2 = data.stream().collect(Collectors.toMap(
+                    item -> item.getNumber(),
+                    item -> item.getName(),
+                    (existValue, puttingValue) -> existValue));
+
+            //最佳实践：
+            Map<Integer, Student> containerMap2 = data.stream().collect(HashMap::new, (map, item) -> map.putIfAbsent(item.getNumber(), item), HashMap::putAll);
+            containerMap2 = data.stream().collect(HashMap::new, (map, item) -> map.putIfAbsent(item.getNumber(), item), new BiConsumer<HashMap<Integer, Student>, HashMap<Integer, Student>>() {
+                @Override
+                public void accept(HashMap<Integer, Student> integerStudentHashMap, HashMap<Integer, Student> integerStudentHashMap2) {
+                    integerStudentHashMap.putAll(integerStudentHashMap2);
+                    logger.info("串行流不会打印这一行");
+                }
+            });
+            System.out.println(containerMap2);
+            // ArrayList<Integer> noDuplicateIds = data.stream().map(Student::getNumber).collect(Collectors.collectingAndThen(Collectors.toSet(), ArrayList::new));
+            // System.out.println(noDuplicateIds);
+        }
+
         public static void main(String[] args) {
             // testGroupingBy();
-            // testOther();
             // testPartitioningBy();
             // testCountSumAndSummarize();
-            testCollectorsToMap();
+            // testCollectorsToMap();
+
+            // geekOperation();
+            findFeaturesOfCollectorsToMap();
         }
     }
 
