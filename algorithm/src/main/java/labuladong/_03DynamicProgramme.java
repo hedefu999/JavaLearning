@@ -8,13 +8,94 @@ import java.util.Map;
 
 public class _03DynamicProgramme {
     /**
-     # 最长公共子序列 Longest Common Subsequence,LCS
+     # 1143 最长公共子序列 Longest Common Subsequence,LCS,与最小编辑距离解题思路接近
+     字符串长度限制1000，只含有小写英文字母
      babcde 与 ace 的 LCS 是 ace
+     sghregsa - gegad = 4
+     sghregsa - goiuiybhn = 2
+     abc - abc = 3
+     abc - def = 0
+        "" s g h r e g s a
+     "" ?  0 0 0 0 0 0 0 0
+     g  0  0 1 1 1 1 1 1 1
+     e  0  0 1 1 1 2 2 2 2
+     g  0  0 1 1 1 2 3 3 3
+     a  0
+     d  0
+     sghj+b gha+j result = calc(2,) = 3
+     sghre+g - ge+g = 2+1(后面新增加的g是否在前面字符串匹配的ge之后，str.substring(str.lastIndexof(e)).contains(g)? )
+     dp[i][j] = dp[i-1][j] + str.substring(str.lastIndexof(e)).contains(g)?1:0;
+     上面这种查找的方法在 s+g - ge+g 情形下不适用
 
+     正确的思路是：sghj+b gha+j result = b跟j相等吗，相等的话sghj跟gha计算的结果+1，不相等取 （sghjb与gha，sghj与ghaj，sghj与gha）的值，取最大（由于sghj与gha的LCS肯定不会查过其他两个，所以可以不参与计算）
+        这样 dp[i][j] 并不是从 dp[i-1][j] 上 +1 的
+     字符串类的动态规划问题，通常都是跟前面三个角上的数据进行计算获得
+     dp[i-1][j-1] dp[i-1][j]
+     dp[i][j-1]   dp[i][j]
      */
-    /**
-     # 最长公共前缀
-     */
+    static class LongestCommonSubSequence{
+        static int LCSDpSolution(String s1,String s2){
+            char[] chars1 = s1.toCharArray();
+            char[] chars2 = s2.toCharArray();
+            int[][] dp = new int[chars2.length+1][chars1.length+1];
+            for (int i = 0; i <= chars2.length; i++) {
+                dp[i][0] = 0;
+            }
+            for (int i = 0; i <= chars1.length; i++) {
+                dp[0][i] = 0;
+            }
+            for (int i = 1; i <= chars2.length; i++) {
+                for (int j = 1; j <= chars1.length; j++) {
+                    //s+g - ge+g 情况下会重复计算字符串，而且查找已经混乱了
+                    int plusOne = 0;
+                    char preChar = i>2?chars2[i-2]:0;
+                    for (int k = j-1; k>=0 && chars1[k]!=preChar; k--) {
+                        if (chars1[k] == chars2[i-1]){
+                            plusOne = 1;
+                            break;
+                        }
+                    }
+                    dp[i][j] = dp[i-1][j]+plusOne;
+                }
+            }
+            return dp[chars2.length][chars1.length];
+        }
+        static int LCSDpSolution2(String s1,String s2){
+            char[] chars1 = s1.toCharArray();
+            char[] chars2 = s2.toCharArray();
+            StringBuilder lcs = new StringBuilder();
+            int[][] dp = new int[chars2.length+1][chars1.length+1];
+            for (int i = 0; i <= chars2.length; i++) {
+                dp[i][0] = 0;
+            }
+            for (int i = 0; i <= chars1.length; i++) {
+                dp[0][i] = 0;
+            }
+            int current = 0;
+            for (int i = 1; i <= chars2.length; i++) {
+                for (int j = 1; j <= chars1.length; j++) {
+                    if (chars1[j-1] == chars2[i-1]){
+                        dp[i][j] = dp[i-1][j-1] + 1;
+                        if (dp[i][j] > current){ //如何把lcs打印出来，跟最小编辑距离的编辑路径的寻找很相似
+                            lcs.append(chars1[j-1]);
+                            current+=1;
+                        }
+                    }else {
+                        dp[i][j] = Math.max(dp[i-1][j],dp[i][j-1]);
+                    }
+                }
+            }
+            System.out.println("lcs = "+lcs);
+            return dp[chars2.length][chars1.length];
+        }
+
+        public static void main(String[] args) {
+            String s1 = "babcde", s2 = "ace";
+            String t1 = "sghregsa", t2 = "gegad";
+            Assert.assertTrue(LCSDpSolution2(s1,s2) == 3);
+            Assert.assertTrue(LCSDpSolution2(t1,t2) == 4);
+        }
+    }
 
 
     /**

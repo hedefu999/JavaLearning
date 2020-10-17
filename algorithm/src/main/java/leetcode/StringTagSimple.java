@@ -1,5 +1,6 @@
 package leetcode;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -202,6 +203,62 @@ public class StringTagSimple {
         String[] strs2 = {"dog","racecar","car"};
         System.out.println(longestCommonPrefix3(strs));
     }
+
+    /**
+     #14 最长公共前缀
+     输入是一个字符串数组
+     flower flow flight -> fl
+     dog racecar car -> ""
+     */
+    static class LongestCommonPrefix{
+        //这是横向扫描，也可以不断charAt进行纵向扫描
+        static String longestCommonPrefix(String[] strs) {
+            if (strs.length == 0) return "";//{}
+            if (strs.length == 1) return strs[0];//{"a"}
+            char[] commonPrefix = strs[0].toCharArray();
+            if (commonPrefix.length == 0) return "";//{"","a"}
+            int prefixIndex = commonPrefix.length;
+            for (int i = 1; i < strs.length; i++) {
+                char[] str = strs[i].toCharArray();
+                if (str.length < prefixIndex) prefixIndex = str.length;
+                for (int j = 0; j < prefixIndex; j++) {
+                    if (commonPrefix[j] != str[j]){
+                        prefixIndex = j;
+                        break;
+                    }
+                }
+                if (prefixIndex == 0) return "";//优化
+            }
+            return strs[0].substring(0,prefixIndex);
+        }
+        /*
+         LCP问题满足分治的特征：结合律 LCP(str0...strn) = LCP(LCP(str0,strmiddle),LCP(strmiddle+1,strn))
+        * */
+
+        public static void main(String[] args) {
+            String[] strs = {"flower","flow","flight"};
+            String[] strs2 = {"dog","racecar","car"};
+            //真的恶心，后面7个测试用例来一个代码出个bug，leco搞出来7个提交执行出错
+            String[] strs3 = {"","a"};
+            String[] strs4 = {};
+            String[] strs5 = {""};
+            String[] strs6 = {"a"};
+            String[] strs7 = {"ab","a"};
+            String[] strs8 = {"aaa","aa","aaa"};
+            String[] strs9 = {"c","acc","ccc"};
+            Assert.assertTrue(longestCommonPrefix(strs).equals("fl"));
+            Assert.assertTrue(longestCommonPrefix(strs3).equals(""));
+            Assert.assertTrue(longestCommonPrefix(strs2).length() == 0);
+            Assert.assertTrue(longestCommonPrefix(strs4).equals(""));
+            Assert.assertTrue(longestCommonPrefix(strs5).equals(""));
+            Assert.assertTrue(longestCommonPrefix(strs6).equals("a"));
+            Assert.assertTrue(longestCommonPrefix(strs7).equals("a"));
+            Assert.assertTrue(longestCommonPrefix(strs8).equals("aa"));
+            Assert.assertTrue(longestCommonPrefix(strs9).equals(""));
+
+        }
+    }
+
 
     /**
      * 反转整数. 32位整数的取值范围 -2^31 - 2^31-1，即
