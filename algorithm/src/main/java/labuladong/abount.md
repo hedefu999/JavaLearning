@@ -47,8 +47,11 @@ gitbook链接   [labuladong的算法小抄](https://labuladong.gitbook.io/algo/)
 
 [KMP算法](https://mp.weixin.qq.com/s/r9pbkMyFyMAvmkf4QnL-1g)
 
-[动态规划之子序列问题解题模板](https://mp.weixin.qq.com/s?src=11&timestamp=1602920263&ver=2649&signature=NPL-Jl6Qt1e3P702UFwLsruBlGV36G98dlfhsAY3XDhzZFCbyjEuolTDUxT2ztz54GU8SzoWmkl0h2YdEkc9aC-hk4NLF9Ei0hfyeC3JlPTI1Hvh71buu*KOVZKG5wzd&new=1) #516
-[动态规划之博弈问题](https://mp.weixin.qq.com/s?src=11&timestamp=1602920208&ver=2649&signature=NPL-Jl6Qt1e3P702UFwLsruBlGV36G98dlfhsAY3XDi8lWV4lpjVZzOzo3JL-*e5aQNtgCyS*Ly89e9YuqJszgW6P81Zo8DQh53fseDMT0Tbw8yQ1kjnZtwea0nIb9w6&new=1)
+[动态规划之子序列问题解题模板-最长回文子序列](https://mp.weixin.qq.com/s?src=11&timestamp=1602920263&ver=2649&signature=NPL-Jl6Qt1e3P702UFwLsruBlGV36G98dlfhsAY3XDhzZFCbyjEuolTDUxT2ztz54GU8SzoWmkl0h2YdEkc9aC-hk4NLF9Ei0hfyeC3JlPTI1Hvh71buu*KOVZKG5wzd&new=1) #516
+```
+复述时研究下马拉车算法
+```
+[动态规划之博弈问题](https://labuladong.gitbook.io/algo/dong-tai-gui-hua-xi-lie/dong-tai-gui-hua-zhi-bo-yi-wen-ti)
 [动态规划之四键键盘](https://labuladong.gitbook.io/algo/dong-tai-gui-hua-xi-lie/dong-tai-gui-hua-zhi-si-jian-jian-pan)
 [四键键盘问题](https://mp.weixin.qq.com/s?src=11&timestamp=1602920031&ver=2649&signature=DZ5HoJ-WdukqzYQCuWS*emvIlQKtlyMCacFM0UN9YBQLmmtzHOj326dmrNLHegtHKxgf9CeNRPBfQzZLJa4QkMfkqctfMFLqQlnzLxU2sGwUPugvVpjl7PtVJBXuVJLk&new=1)
 [打家劫舍问题](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247484800&idx=1&sn=1016975b9e8df0b8f6df996a5fded0af&chksm=9bd7fb88aca0729eb2d450cca8111abd8f861236b04125ce556171cb520e298ddec4d90823b3&scene=21#wechat_redirect)
