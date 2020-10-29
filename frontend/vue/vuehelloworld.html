@@ -5,10 +5,11 @@
     <title>Vue示例</title>
 
 </head>
-<body style="background-color:#244;color:#bbb;font-family:helvetica neue;">
+<body style="background-color:#dee;color:#222;font-family:helvetica neue;">
     <div id = "app">
         <ul><li v-for="item in books">{{item.name}}</li></ul>
-        <input type="text" v-model="name" placeholder="你的名字">
+        <input type="text" v-model="name" placeholder="输入你的名字">
+        <input type="text" @input="handleInput" placeholder="输入中文跟踪拼音阶段的输入">
         <h4>你好，{{name}}</h4>
     </div>
 <h3>_生命周期钩子</h3>
@@ -74,6 +75,7 @@
   <p>使用v-bind:style（简写作:style）可以给元素绑定内联样式，与:class类似，也有对象语法和数组语法</p>
   <p>CSS样式使用驼峰命名即可，浏览器会解析成横线‘-’连接的样式</p>
   <div id="bindStyle"><div :style="{'color':color,'fontSize':fontSize+'px'}">绑定内联样式</div></div>
+  <p>关于Vue语法糖 v-bind:message= 可以写作 :message=, v-on:click= 可以写作 @click=</p>
 
 <h2>第五章 内置指令</h2>
 <h3>基本指令</h3>
@@ -104,6 +106,10 @@
   <p>v-if与v-show对比</p>
   <p>两者都能切换元素的展示与隐藏；v-if是真正的条件渲染，会根据表达式决定DOM元素的重建和销毁，包括绑定的事件或子组件的处理，开销较大。v-show仅仅修改CSS样式，适合频繁展示隐藏切换的场景。</p>
 <h3>列表渲染指令v-for</h3>
+  <div id="vForeachPropInObject"><p>User对象的打印：</p><ul>
+    <li v-for="(value,key,index) in user">第{{index+1}}个属性{{key}}的值是{{value}}</li>
+  </ul></div>
+  <div id="vForEachInteger"><span v-for='n in 10'>{{n}} </span></div
   <p>v-for也可以使用item of items,替换in，这是javascript语法。<br>遍历元素时book index的先后顺序不能颠倒</p>
   <div id="vForInTemplate"><ul>
     <template v-for="(book,index) in books">
@@ -115,18 +121,626 @@
   <br>
   下述操作是不会触发试图更新的：1.通过索引设置元素 app.books[2]={...}; 2.修改数组长度 app.books.length=2;<br>
   设置元素可以使用vue的方法：Vue.set(app.books,3,{name:'...',author:'...'});
+  如果是在webpack中使用组件化的方式，默认未导入vue，此时应使用$set
+  this.$set(app.books, 3, {name:'',author:''})
   修改数组长度可以使用splice实现：app.books.splice(2);
   </p>
   </div>
-  <div id="vForeachPropInObject"><p>User对象的打印：</p><ul>
-    <li v-for="(value,key,index) in user">第{{index+1}}个属性{{key}}的值是{{value}}</li>
-  </ul></div>
-  <div id="vForEachInteger"><span v-for='n in 10'>{{n}} </span></div>
-</body>
+  <div id="filterAndSortArray">
+    <ul>
+      <template v-for="book in sortedBooks">
+        <li>书名：{{book.name}}, 作者：{{book.author}}</li>
+      </template>
+    </ul>
+  </div>
 <!--放在head中引入vue可以早一点初始化，避免{{}}被当作纯文本解析-->
+<h3>5.4 方法与事件</h3>
+<div id="basicVueOnClick">
+  点击次数：{{counter}}
+  <button @click="counter++">plus one</button>
+  <p>这里的@click相当于v-on:click</p>
+  <button @click="handleClick(2)">plus two</button>
+</div>
+<div id="vueVariableEvent">
+  <a href="http://www.baidu.com" @click.once="forbidClick('禁止点击',$event)">vue提供了变量$event用于访问原生DOM事件</a>
+  <h3>事件修饰符</h3>
+  <p>上述禁止点击使用了事件修饰符.once，表示事件仅生效一次，当再次点击上述链接时会跳转页面</p>
+  <p>vue支持下述修饰符：<br>@click.stop（阻止单击事件冒泡） <br>@submit.prevent（提交事件不再重载页面） <br>@click.capture（添加事件侦听器时使用事件捕获模式） <br>
+    @click.self（只当事件在该元素本身而非子元素触发时触发回调） <br>@click.once（只触发一次）<br>
+  </p>
+  <p>在表单元素上监听键盘事件，可以使用按键修饰符</p>
+  <!-- 只有在keyCode是13时调用vm.submit -->
+  <input @keyup.13=submit>
+  <!-- ctrl + s 实现保存 -->
+  <input @keyup.ctrl.83="handleSave"
+  <p>也可以自己定义配置具体按键：Vue.config.keyCodes.f1=112 <br>
+      按键的快捷名称有：.enter .tab .delete .esc .space .up .down .left .right .ctrl .alt .shift .meta(command/win)
+  </p>
+</div>
+
+<h2>第六章 表单与v-model</h2>
+<p>v-model用于在表单类元素上双向绑定数据</p>
+<strong>单选按钮</strong>
+<div id="oneradiobuttonformbind">
+  <input type="radio" :checked="picked">
+  <label>单个单选按钮表单绑定，是否选中依赖脚本中的数据</label>
+</div>
+<br>
+<div id="radiogroupformbind">
+  <input id="radiogroupformbind_html" type="radio" v-model="picked" value="html">
+  <label for="radiogroupformbind_html">HTML</label>
+  <br>
+  <input id="radiogroupformbind_js" type="radio" v-model="picked" value="js">
+  <label for="radiogroupformbind_js">JavaScript</label>
+  <br>
+  <input id="radiogroupformbind_css" type="radio" v-model="picked" value="css">
+  <label for="radiogroupformbind_css">CSS</label>
+  <br>
+  <span>您的选择是： {{picked}}</span>
+</div>
+<strong>复选框</strong>
+<div id="checkboxesformbind">
+  <label><input type="checkbox" v-model="checked" value="HTML">-HTML</label>
+  <br>
+  <label><input type="checkbox" v-model="checked" value="JS">-JavaScript</label>
+  <br>
+  <label><input type="checkbox" v-model="checked" value="CSS">-CSS</label>
+  <p>选择内容：{{checked}}, 复选框会向data里指定名称的一个数组里push元素</p>
+</div>
+<strong>下拉列表</strong>
+<div id="singleselectformbind">
+  <select v-model="selected" name="单选的下拉选框" multiple>
+    <!-- v-model优先取value中的值，没有value就取text的内容，multiple去掉就是单选 -->
+    <option value="html">HTML</option>
+    <option value="js">JavaScript</option>
+    <option value="css">CSS</option>
+  </select>
+  <p>您的选择是：{{selected}}</p>
+</div>
+<div id="dynamicselectformbind">
+  <select v-model="selected">
+    <option v-for="option in option_list" :value="option.value">{{option.name}}</option>
+  </select>
+  <strong>选择的选项是：{{selected}}  『select下拉列表难以定制，样式不好改，搜索等需求不能满足，所以实际开发都是用自定义的组件的』</strong>
+</div>
+<h3>表单元素绑定动态值</h3>
+<div id="dynamicbindformitemvalueradio">
+  <input type="radio" v-model="is_picked" :value="picked_value">
+  <span>{{is_picked}}</span><span>{{picked_value}}</span>
+  <p>选中时 is_picked=picked_value=123</p>
+</div>
+<div id="dynamicbindformitemvaluecheckbox">
+  <label>测试复选框：<input type="checkbox" v-model="toggle" :true-value="true_value" :false-value="false_value"></label>
+  <span>{{toggle}}</span><br><span>勾选时toggle = {{true_value}},取消勾选时toggle = {{false_value}}</span>
+</div>
+<div id="dynamicbindformitemvalueselect">
+  <select v-model="selected">
+    <option :value="{number:123}">123</option>
+  </select>
+  {{selected.number}}  ...不知道这么写有啥用
+</div>
+<h3>v-model的修饰符，用于控制数据同步的时机</h3>
+<div id="v-model-modifier-show">
+  <input type="text" v-model.lazy="message">
+  <span>.lazy表示在表单组件失焦或按回车时才进行更新: {{message}}</span>
+  <input type="number" v-model.number="message">
+  <span>.number修饰符将输入转换为number类型，用于number类型的输入框</span>
+  <input type="text" v-model.trim="message">
+  <span>自动过滤输入的首尾空格</span>
+</div>
+
+<h2>第七章 Component组件详解</h2>
+<p>组件-Component是vue最核心的功能，可提高代码重用性。自定义组件的名字一般都是小写的使用-链接的字符串，这种类似烤肉串的-连接的字符串就叫kebab-case</p>
+<div id="hellocomponent">
+  <my-component></my-component>
+</div>
+<p>书中提到HTML table中限制内部仅允许tr td th等元素，在table内直接使用组件无效，此时可以通过tbody is="component-name"来挂载组件</p>
+<p>JavaScript对象是引用关系，所以组件复用时使用的data一个组件发生变化，其他组件也会跟着变化，所以需要返回一个新的对象实现数据隔离</p>
+<div id="dataIsolationInComponents">
+  <my-component></my-component>
+  <br>
+  <my-component></my-component>
+</div>
+<p>组件间的通信，父组件通过props属性向子组件正向传递数据。子组件使用props声明需要从父级接收的数据。props数据只可以是字符串数组和对象</p>
+<div id="helloPropsBetweenComponnets">
+  <!-- DOM 也就是HTML里不能使用驼峰变量名，vue会提示这个错误：
+Prop "warningtext" is passed to component <Anonymous>, but the declared prop name is "warningText". Note that HTML attributes are case-insensitive and camelCased props need to use their kebab-case equivalents when using in-DOM templates. You should probably use "warning-text" instead of "warningText".
+ -->
+ <!-- command是演示父组件传递动态内容到子组件 -->
+  <compo-helloprops warning-text="呜——呜——警报，警报，有人入侵" :command='command'></compo-helloprops>
+  <label>发出应对指令：<input type="text" v-model="command"></label>
+</div>
+<div id="passDataInStringByVbind">
+  <compo-passdatainstring mydata="[1,2,3]"></compo-passdatainstring>
+  <compo-passdatainstring :mydata="[1,2,3]"></compo-passdatainstring>
+  <p>这个实例意在说明：第一个组件渲染得到7，第二个是3，使用v-bind（语法糖）才能转换到正确的类型</p>
+</div>
+<p>Vue组件间的通信可以分为父子组件通信、兄弟组件通信、跨级组件通信</p>
+<strong>父组件监听子组件的自定义事件</strong>
+<div id="childComponentPassEventToFather">
+  <span>总数：{{total}}</span>
+  <compo-childevent2parent @increase="handleGetTotal" @reduce="handleGetTotal"></compo-childevent2parent>
+  <p>子组件有两个按钮，分别实现+1和-1操作，在改变组件的data - counter后，通过$emit()传递事件给父组件，
+    父组件通过v-on:increase/decrease进行监听事件，同时监听传参，再交给handleGetTotal函数
+  v-on除了监听自定义事件外还可以监听DOM事件，使用.naive修饰符监听原生事件，监听此组件的根元素：
+  v-on:click.naive="handleClick"
+  </p>
+</div>
+<p>在自定义组件上使用v-model，由于v-model通常用于表单的input元素用于绑定数据，所以子组件通知父组件时使用的事件名是input</p>
+<p>注意自定义组件名称在DOM中不区分大小写，所以在js中注册大写的组件在DOM中会找不到</p>
+<div id="vmodelOnCustomizedComponent">
+  <span>组件使用v-model 总数：{{totalClick}} - </span>
+  <!-- 这里并没有在自定义组件上使用@input，而是直接使用v-model绑定了一个数据，这一写法也可以使用下面的自定义事件实现 -->
+  <compo-vmodelOnCompo v-model="totalClick"></compo-vmodelOnCompo>
+</div>
+<p>双向绑定的自定义输入:按钮触发v-model改变，通过v-model填充input和页面的胡子表达式,input输入内容触发输入事件</p>
+<div id="customizedinputcomponent">
+  <span>总数：{{summary}}</span>
+  <compo-customizedinput v-model="summary"></compo-customizedinput>
+  <button @click="handleReduce"> -1 </button>
+</div>
+<h3>非父子组件间的通信</h3>
+<p>非父子组件指同级或跨多级组件。在vue1.x中，除了$emit()方法外，还提供了$dispatch()和$broadcast()两个方法，前者用于向上级派发事件</p>
+<h4>使用特被创建的Vue对象进行消息中转 - 消息总线</h4>
+<div id="nonParentChildRelationComponentCommunication">
+  收到消息：{{message}}
+  <compo-npcrcc></compo-npcrcc>
+</div>
+<h4>子组件使用this.$parent直接访问父组件，父组件使用this.$children直接访问子组件 - 父链</h4>
+<p>可以递归向上或向下无限访问，直到根实例或最内层的组件。实际开发中不推荐这样直接操作父组件，父子组件还是推荐使用props和$emit来通信</p>
+<div id="parentChainComponentCommunication">
+  收到的消息：{{messageBody}}
+  <compo-parentchain></compo-parentchain>
+</div>
+<h4>使用特殊属性ref为子组件指定一个索引名称 - 子组件索引</h4>
+<p>子组件声明ref，父组件通过this.$refs.xxx访问具体的ref。
+$refs只在组件渲染完成后才填充，并且它是非响应式的，仅仅作为一个直接访问子组件的应急方案，应当避免在模板或计算属性中使用$refs</p>
+<div id="childcomponentindex">
+  <compo-childrenref ref="kidA"></compo-childrenref>
+  <button @click="handleRef">通过子组件索引操作子组件</button>
+</div>
+<!-- 下面这个例子用于证明vue能识别 自定义组件和html标签的ref属性 -->
+<div id="refincompoandhtml">
+  <p ref="p">段落内容</p>
+  <compo-refincompoandhtml ref="compo"></compo-refincompoandhtml>
+</div>
+<h3>插槽式内容定位展示 - slot</h3>
+<p>
+在子组件中定义slot的名字，这样父组件中使用的子组件的html元素声明slot就可以放到组件定义的模板的位置
+  组件组合使用，混合父组件的内容与子组件的模板时，会用到slot，此过程叫做内容分发transclusion
+props数据传递、event事件触发、slot内容分发 构成了 Vue组件的3个API来源，复杂的组件通常是由这3个部分构成的
+</p>
+<h4>单个slot和多个有命名的slot</h4>
+<hr>
+<div id="singleandmultislotusage">
+  <compo-singleandmultislotusage>
+    <strong slot="footer">footer底部信息</strong>
+    <strong slot="header">header顶部标题</strong>
+    <p>
+      这里如果不填任何内容就展示组件定义中的那个无名slot，
+      而且这里声明的元素的展示顺序受子组件中slot的顺序控制,
+      如果没有默认无名slot声明，这里的内容会被抛弃
+    </p>
+  </compo-singleandmultislotusage>
+</div>
+<hr>
+<h4>组件数据的作用域是在父组件上还是在子组件上</h4>
+<div id="childcompouseparent">
+  <compo-childcompouseparent  v-show="showChild"></compo-childcompouseparent>
+</div>
+<div id="childcompousechild">
+  <compo-childcompousechild></compo-childcompousechild>
+</div>
+<p>因此，slot分发的内容作用域就在父组件上</p>
+<h4>将子组件定义的变量放在父组件里使用 -- 使用slot-scope声明作用域</h4>
+<div id="scopeslot">
+  <compo-scopeslot>
+    <!-- template内可以通过临时变量props访问来自子组件插槽的数据msg -->
+    <template slot-scope="props">
+      <p>来自父组件的内容</p><p>{{props.msg}}</p>
+    </template>
+  </compo-scopeslot>
+</div>
+<div id="scopeslotusageinlist">
+  <!-- 此处的v-bind:books来自父组件 -->
+  <compo-scopeslotusageinlist v-bind:books="books">
+    <template slot="book" slot-scope="props">
+      <!-- props只是组件定义中的属性别名，通过此别名可以访问到book-name,不过在js中的kebab-case这里要转成camelcase访问。props代表每次遍历时包装book-name的对象。如果book里有很多属性，这里就可以自定义要展示哪些属性，实现同一个组件展示不同内容的目的 -->
+      <li>{{props.bookName}}</li>
+    </template>
+  </compo-scopeslotusageinlist>
+  <strong>上述组件相当于</strong>
+  <template v-for="book in books" v-bind:books="books">
+    <li>{{book.name}}</li>
+  </template>
+  <strong>同一组件同一组数据展示不同内容</strong>
+  <compo-scopeslotusageinlist v-bind:books="books">
+    <template slot="book" slot-scope="propss">
+      <li>{{propss.bookItem.name}} - {{propss.bookItem.author}}</li>
+    </template>
+  </compo-scopeslotusageinlist>
+</div>
+<h4>使用$slots访问slot插槽上插入的内容</h4>
+<p>$slot在业务中极少使用，在使用render函数进行独立组件开发时会使用</p>
+<div id="dollarslotsusage">
+  <compo-dollarslotsusage>
+    <i slot="header">标题</i>
+    <span>正文</span>
+    <i slot="footer">底部</i>
+  </compo-dollarslotsusage>
+</div>
+<h3>组件高级用法</h3>
+<h4>递归组件  用于开发具有未知层级的级联选择器、树形控件等</h4>
+<div id="recursivecomponent">
+  <compo-recursive v-bind:count="1"></compo-recursive>
+</div>
+<p>内联组件inline-template vue3.0已不再支持</p>
+<h4>动态组件</h4>
+<div id="dynamiccomponent">
+  <component :is="currentView"></component>
+  <button @click="handleChangeView('A')">切换到A</button>
+  <button @click="handleChangeView('B')">切换到B</button>
+  <button @click="handleChangeView('C')">切换到C</button>
+  <button @click="handleChangeView('D')">切换到主页</button>
+</div>
+<h4>异步组件（路由）</h4>
+<div id="asynccomponent">
+  <compo-async></compo-async>
+</div>
+<p>点击按钮时隐藏的div展示出来 <br>
+  Vue在观察到数据变化时并不直接更新DOM，而是开启一个队列，并缓冲在同一事件循环中发生的所有数据改变。在缓冲时会去除重复数据，避免不必要的计算和DOM操作。在下一个事件循环tick中执行实际的工作。
+</p>
+<div id="nexttick">
+  <div id="showorhidediv" v-if="showDiv">这是一段文本</div>
+  <button @click="getText">获取div内容</button>
+</div>
+
+
+
+
+
+</body>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
 <script>
+$(document).scrollTop($(document).height());//页面滚动到最底部
+// # 第七章
+//组件注册的两种方式：全局注册与局部注册
+Vue.component('my-component',{
+  template:'<div>这里是组件的内容</div>',
+  data:function(){
+    // 组件也可以使用data computed一类选项，注意data必须是一个有返回值的函数
+    return {message:'组件内容'}
+  }
+});
+var Child = {
+  template:'<div>局部注册组件的内容</div>'
+}
+var hellocomponent = new Vue({
+  el:'#hellocomponent',
+  components:{
+    'my_component':Child
+  }
+});
+//组件数据隔离
+var samedata = {counter:0};
+Vue.component('my-component',{
+  template:'<button @click="counter++">{{counter}}</button>',
+  data:function(){
+    // return samedata;
+    return {counter:0};//数据隔离效果
+  }
+});//注意组件注册与Vue实例声明的顺序不可颠倒
+var dataIsolationInComponents = new Vue({el:'#dataIsolationInComponents'});
+Vue.component('compo-helloprops',{
+  props:['warningText','command'],
+  template:'<div>安防系统：{{warningText}}<br>司令员：{{command}}</div>'
+});
+var helloPropsBetweenComponnets = new Vue({
+  el:'#helloPropsBetweenComponnets',
+  data:{command:''}
+});
+Vue.component('compo-passdatainstring',{
+  props:['mydata'],
+  template:'<div>{{this.mydata.length}}</div>'
+});
+var passDataInStringByVbind = new Vue({el:'#passDataInStringByVbind'});
+// 一个带数据验证的组件示例???
+Vue.component('compo-dataVerify',{
+  props:{
+    propA:Number,
+    propB:[String,Number],
+    propC:{type:Boolean,default:true},
+    propD:{type:Number,required:true},
+    propE:{type:Array,default:function(){return [];}},
+    propF:{validator:function(value){return value > 10;}}
+  }
+});
+Vue.component('compo-childevent2parent',{
+  template:'<div><button @click="handleIncrease"> + 1 </button><button @click="handleReduce"> - 1 </button></div>',
+  data:function(){
+    return {counter:0}
+  },
+  methods:{
+    handleIncrease:function(){
+      this.counter++;
+      this.$emit('increase',this.counter);
+    },
+    handleReduce:function(){
+      this.counter--;
+      this.$emit('reduce',this.counter);
+    }
+  }
+});
+var childComponentPassEventToFather = new Vue({
+  el:'#childComponentPassEventToFather',
+  data:{total:0},
+  methods:{handleGetTotal:function(total){this.total = total;}}
+});
+Vue.component('compo-vmodeloncompo',{
+  template:'<button @click="handleClick"> + 1 </button>',
+  data: function(){ return {counter:0}},
+  methods:{
+    handleClick:function(){
+      //注意此时通知父组件的事件名是input，这样就能传递数据到v-model上了
+      this.counter++;this.$emit('input',this.counter);
+    }
+  }
+});
+var vmodelOnCustomizedComponent = new Vue({
+  el:'#vmodelOnCustomizedComponent',
+  data:{totalClick:0}
+});
+Vue.component('compo-customizedinput', {
+  props:['value'],
+  // 语法糖 v-bind:value 可简写作 :value, 注意v-bind:value与v-bind的区别
+  //这个value似乎是不可自定义的，改个名字就不能正常双向绑定了，虽然部分功能可用
+  //实现这样一个双向绑定功能，需要做到：接收一个value属性，在有新的value时触发input事件
+  template:'<input v-bind:value="value" @input="updateSummary">',
+  methods:{
+    updateSummary:function(event){
+      this.$emit('input',event.target.value);
+    }
+  }
+});
+var customizedinputcomponent = new Vue({
+  el:'#customizedinputcomponent',
+  data:{summary:20},
+  methods:{
+    handleReduce:function(){
+      this.summary--;
+    }
+  }
+});
+var messageBus = new Vue({
+  data:{messageCount:0}
+});
+Vue.component('compo-npcrcc',{
+  template: '<button @click="handleEvent">传递事件</button>',
+  methods:{
+    handleEvent:function(){
+      var msg = '组件compo-npcrcc发出第' + messageBus.messageCount + '个消息';
+      messageBus.messageCount++;
+      messageBus.$emit('on-message2',msg);
+    }
+  }
+});
+var nonParentChildRelationComponentCommunication = new Vue({
+  el:'#nonParentChildRelationComponentCommunication',
+  data:{message:'空白'},
+  mounted:function(){
+    var _this = this;
+    messageBus.$on('on-message2',function(msg){
+      _this.message = msg;
+    })
+  }
+});
+Vue.component('compo-parentchain',{
+  template:'<button @click="handleEvent">通过父链直接修改数据</button>',
+  methods:{
+    handleEvent:function(){
+      this.$parent.messageBody = '组件compo-parentchain的第'+this.$parent.messageCount+'个消息';
+      this.$parent.messageCount++;
+    }
+  }
+});
+var parentChainComponentCommunication = new Vue({
+  el:'#parentChainComponentCommunication',
+  data:{messageBody:'空白',messageCount:0}
+});
+Vue.component('compo-childrenref',{
+  template:'<div>子组件</div>',
+  data:function(){
+    return {message:'子组件内容'}
+  }
+});
+var childcomponentindex = new Vue({
+  el:'#childcomponentindex',
+  methods:{
+    handleRef:function(){
+      var msg = this.$refs.kidA.message;
+      console.log(msg);
+    }
+  }
+});
+Vue.component('compo-refincompoandhtml',{
+  template:'<div>compo-refincompoandhtml</div>',
+});
+var refincompoandhtml = new Vue({
+  el:'#refincompoandhtml',
+  mounted:function(){
+    console.log('refincompoandhtml - ');
+    console.log(this.$refs.p);//<p>段落内容</p>
+    // console.log(this.$refs.compo);//打印出一个很复杂的对象
+  }
+});
+Vue.component('compo-childcompouseparent',{
+  template:'<div>子组件使用父组件的数据</div>',
+  data:function(){return {showChild:false}}
+});
+var childcompouseparent = new Vue({
+  el:'#childcompouseparent',
+  data:{showChild:true}
+});
+Vue.component('compo-childcompousechild',{
+  template:'<div v-show="showChild">子组件使用自己的数据</div>',
+  data:function(){return {showChild:true}}
+});
+var childcompousechild = new Vue({
+  el:'#childcompousechild',
+  data:{showChild:false}
+});
+Vue.component('compo-singleandmultislotusage',{
+  template:
+  '<div class="container">'+
+    '<div class="header"><slot name="header"></slot></div>'+
+    '<slot><p>注掉上面的p，此行将默认显示</p></slot>'+
+    '<div class="footer"><slot name="footer"></slot></div>'+
+  '</div>'
+});
+var singleandmultislotusage = new Vue({
+  el:'#singleandmultislotusage'
+});
+Vue.component('compo-scopeslot',{
+  template:
+      '<div class="container">'+
+        '<slot msg="来自子组件的msg内容"></slot>'+
+      '</div>'
+});
+var scopeslot = new Vue({
+  el:'#scopeslot'
+});
+Vue.component('compo-scopeslotusageinlist',{
+  props:{
+    books:{type:Array,default:function(){return [];}}
+  },
+  template:
+    '<ul>'+
+      '<slot name="book" v-for="book in books" v-bind:book-name="book.name" v-bind:book-item="book">'+
+        // 这里也可以写默认slot内容
+      '</slot>'+
+    '</ul>'
+});
+var scopeslotusageinlist = new Vue({
+  el:'#scopeslotusageinlist',
+  data:{
+    books:[
+      {name:'《汤普森钢琴基础教程 第一版》',author:'tompson'},
+      {name:'《Java并发编程基础》',author:'master'},
+      {name:'《基金投资指南》',author:'richman'}
+    ]
+  }
+});
+Vue.component('compo-dollarslotsusage',{
+  template:
+    '<div class="container">'+
+      '<div class="header"><slot name="header"></slot></div>'+
+      '<div class="main"><slot></slot></div>'+
+      '<div class="footer"><slot name="footer"></slot></div>'+
+    '</div>',
+  mounted:function(){
+    var header = this.$slots.header;
+    var main = this.$slots.default;
+    var footer = this.$slots.footer;
+    console.log(footer);//打印出一个复杂的VNode
+    console.log(footer[0].elm.innerHTML);//跟innerText一样
+  }
+});
+var dollarslotsusage = new Vue({el:'#dollarslotsusage'});
+Vue.component('compo-recursive',{
+  name:'compo-recursive',
+  props:{count:{type:Number,default:1}},
+  template:
+    '<div class="child">'+
+      '<compo-recursive v-bind:count="count+1" v-if="count<3"></compo-recursive>'+
+    '</div>'
+});
+var recursivecomponent = new Vue({el:'#recursivecomponent'});
+Vue.component('compoD',{template:'<span>欢迎！游客</span>'});
+var dynamiccomponent = new Vue({
+  el:'#dynamiccomponent',
+  components:{
+    compoA:{template:'<span>组件A</span>'},
+    compoB:{template:'<strong>组件B</strong>'},
+    compoC:{template:'<i>组件C</i>'},
+  },
+  data:{currentView:'compoD'},
+  methods:{
+    handleChangeView:function(compoSequence){
+      this.currentView = 'compo'+compoSequence;
+    }
+  }
+});
+Vue.component('compo-async', function(resolve, reject){
+  window.setTimeout(function(){
+    resolve({template:'<div>异步渲染组件</div>'});//这里可以做成从服务器下载组件
+  },2000);
+});
+var asynccomponent = new Vue({el:'#asynccomponent'});
+var nexttick = new Vue({
+  el:'#nexttick',
+  data:{showDiv:false},
+  methods:{
+    getText:function(){
+      this.showDiv = true;
+      var text = $('#showorhidediv').innerHTML;
+      console.log(text);//undefined
+    }
+  }
+});
+
+
+// # 第六章
+var oneradiobuttonformbind = new Vue({
+  el:'#oneradiobuttonformbind',
+  data:{picked:false}//默认设置为选中
+});
+var radiogroupformbind = new Vue({
+  el:'#radiogroupformbind',
+  data:{picked:'js'}
+});
+var checkboxesformbind = new Vue({
+  el:'#checkboxesformbind',
+  data:{
+    checked:['HTML','CSS']
+  }
+});
+var singleselectformbind = new Vue({
+  el:'#singleselectformbind',
+  data:{
+    list:['html','javascript','css'],
+    selected:['html'] //这里写成'html',vue会提示期望数组但得到一个string
+  }
+});
+var dynamicselectformbind = new Vue({
+  el:'#dynamicselectformbind',
+  data:{
+    selected:1,//这里写生[1]反而不能默认选择html
+    option_list:[
+      {name:'html',value:1},
+      {name:'javascript',value:2},
+      {name:'css',value:3}
+    ]
+  }
+});
+var dynamicbindformitemvalueradio = new Vue({
+  el:'#dynamicbindformitemvalueradio',
+  data:{is_picked:false,picked_value:123}
+});
+var dynamicbindformitemvaluecheckbox = new Vue({
+  el:'#dynamicbindformitemvaluecheckbox',
+  data:{toggle:false,true_value:1,false_value:2}
+});
+var dynamicbindformitemvalueselect = new Vue({
+  el:'#dynamicbindformitemvalueselect',
+  data:{selected:''}
+});
+var vmodelmodifiershow = new Vue({
+  el:'#v-model-modifier-show',
+  data:{message:''}
+});
+
+// # 开始
 var app = new Vue({
     el: '#app', //el用于指定一个页面中已存在的DOM元素来挂载Vue实例，可以是HTMLElement, 也可以是CSS选择器
     //如 el:document.getElementById('app'); el:document.getElementById('#app')
@@ -138,6 +752,11 @@ var app = new Vue({
             {name: 'js高级设计'}
         ],
         name: ' '
+    },
+    methods:{
+      handleInput:function(e){
+        this.name = e.target.value;
+      }
     }
 });
 var app2 = new Vue({
@@ -232,7 +851,7 @@ var vifShowElement = new Vue({
 var vbindMVVM = new Vue({
   el:'#vbindMVVM',
   data:{
-    imgUrl:'https://www.baidu3.com/img/flexible/logo/pc/result.png',
+    imgUrl:'https://www.baidu.com/img/flexible/logo/pc/result.png',
     url:'www.savewaterwhite.com'
   }
 });
@@ -400,5 +1019,44 @@ var vForeachPropInObject = new Vue({
 });
 //vue实例必须要生成，否则不会进行渲染
 var vForEachInteger = new Vue({el:'#vForEachInteger'});
+var GlobalBooks = [{name:'《Vue.js实战》',author:'lianghao'},{name:'《Java Programming》',author:'master'},{name:'《design patterns》',author:'professor'}];
+var filterAndSortArray = new Vue({
+  el:'#filterAndSortArray',
+  data:{books:GlobalBooks},
+  computed:{
+    filterBooks:function(){
+      return this.books.filter(function(book){
+        return !book.name.match(/Java/);
+      });
+    },
+    // vue 2.x废弃了1.x中内置的limitBy,filterBy,orderBy过滤器
+    sortedBooks:function(){
+      return this.books.sort(function(a,b){
+        return a.name.length < b.name.length;
+      });
+    }
+  }
+});
+var basicVueOnClick = new Vue({
+  el:'#basicVueOnClick',
+  data:{counter:0},
+  methods:{
+    handleClick:function(count){
+      // count = count || 1;
+      this.counter += 2;
+    }
+  }
+});
+var vueVariableEvent = new Vue({
+  el:'#vueVariableEvent',
+  methods:{
+    forbidClick:function(message, event){
+      event.preventDefault();
+      window.alert(message);
+    }
+  }
+});
+
+
 </script>
 </html>
