@@ -1,5 +1,6 @@
 package labuladong;
 
+import common.AlgorithmError;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -291,6 +292,7 @@ public class _03DynamicProgramme {
      dp[i][j-1]   dp[i][j]
      */
     static class LongestCommonSubSequence{
+        @AlgorithmError
         static int LCSDpSolution(String s1,String s2){
             char[] chars1 = s1.toCharArray();
             char[] chars2 = s2.toCharArray();
@@ -349,8 +351,8 @@ public class _03DynamicProgramme {
         public static void main(String[] args) {
             String s1 = "babcde", s2 = "ace";
             String t1 = "sghregsa", t2 = "gegad";
-            Assert.assertTrue(LCSDpSolution2(s1,s2) == 3);
-            Assert.assertTrue(LCSDpSolution2(t1,t2) == 4);
+            Assert.assertTrue(LCSDpSolution(s1,s2) == 3);
+            Assert.assertTrue(LCSDpSolution(t1,t2) == 4);
         }
     }
 
@@ -924,7 +926,7 @@ public class _03DynamicProgramme {
          上面的比较头尾跟近邻元素的差值的算法不能保证先手永远胜，表明这种取法不是最优的
          使用动态规划进行最优决策，这样两个人都能达到最聪明，即博弈
         * */
-        static class CommonDynamicProgramme{
+        static class StoneGameDynamicProgramme{
             /*
              对于石头堆 [3 9 1 2] 运用动态规划
              dp数组定义：
@@ -1089,10 +1091,5 @@ public class _03DynamicProgramme {
         }
     }
 
-    /**
-     # 494 目标和
-     */
-    static class TargetSumWays{
 
-    }
 }

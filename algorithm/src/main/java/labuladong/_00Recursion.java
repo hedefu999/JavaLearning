@@ -1,6 +1,6 @@
 package labuladong;
 
-import common.BinTreeNode;
+import common.TreeNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,19 +73,19 @@ public class _00Recursion {
         从左到右逐个取根结点，根节点左侧的作为左子树的结点集合，右侧的作为右子树结点集合
         结点集合再向下分配，作为子问题递归求解
         * */
-        static List<BinTreeNode>  generateBinaryTree(int n){
+        static List<TreeNode>  generateBinaryTree(int n){
             if (n == 0) return Collections.emptyList();
             return helper(1,n);
         }
         //helper返回的是所有可能的root结点集合
-        static List<BinTreeNode> helper(int low, int high){
-            if (low == high) return Collections.singletonList(new BinTreeNode(low));
+        static List<TreeNode> helper(int low, int high){
+            if (low == high) return Collections.singletonList(new TreeNode(low));
             if (low > high) return Collections.emptyList();
-            List<BinTreeNode> res = new ArrayList<>();
+            List<TreeNode> res = new ArrayList<>();
             for (int i = low; i < high; i++) {
-                for(BinTreeNode left : helper(low,i-1)){
-                    for (BinTreeNode right : helper(i+1,high)){
-                        BinTreeNode curr = new BinTreeNode(i);
+                for(TreeNode left : helper(low,i-1)){
+                    for (TreeNode right : helper(i+1,high)){
+                        TreeNode curr = new TreeNode(i);
                         curr.left = left;
                         curr.right = right;
                         res.add(curr);
@@ -102,17 +102,17 @@ public class _00Recursion {
         x  x 4   5
         xxx xx x x 6
         * */
-        static void printBinTree(BinTreeNode root){
+        static void printBinTree(TreeNode root){
             int depth = calcBinTreeDepth(root);
             printBinTreeHelper2(root,depth,false);
         }
-        static int calcBinTreeDepth(BinTreeNode root){
+        static int calcBinTreeDepth(TreeNode root){
             if (root == null) return 0;
             int depth = 0;
             depth = 1 + Math.max(calcBinTreeDepth(root.left),calcBinTreeDepth(root.right));
             return depth;
         }
-        static void printBinTreeHelper2(BinTreeNode root, int depth, boolean hasBrother){
+        static void printBinTreeHelper2(TreeNode root, int depth, boolean hasBrother){
             int pre = (int) Math.pow(2,depth-1);
             for (int i = 0; i < pre; i++) {
                 System.out.print(" ");
@@ -124,10 +124,10 @@ public class _00Recursion {
             printBinTreeHelper2(root == null?null:root.right, depth-1,false);
             System.out.println(" ");
         }
-        static void printBinaryTreeHelper(List<BinTreeNode> nodes, int depth){
+        static void printBinaryTreeHelper(List<TreeNode> nodes, int depth){
             if (nodes == null) return;
             int empty = 2^depth/nodes.size();
-            for (BinTreeNode node : nodes){
+            for (TreeNode node : nodes){
                 System.out.print(node.val);
                 for (int i = 0; i < empty; i++) {
                     System.out.print(" ");
@@ -138,13 +138,13 @@ public class _00Recursion {
          分层逐步求解. 失败
         * */
         public static void main(String[] args) {
-            List<BinTreeNode> binTreeNodes = generateBinaryTree(6);
-            BinTreeNode binNode = new BinTreeNode(1);
-            BinTreeNode binNode2 = new BinTreeNode(2);
-            BinTreeNode binNode3 = new BinTreeNode(3);
-            BinTreeNode binNode4 = new BinTreeNode(4);
-            BinTreeNode binNode5 = new BinTreeNode(5);
-            BinTreeNode binNode6 = new BinTreeNode(6);
+            List<TreeNode> binTreeNodes = generateBinaryTree(6);
+            TreeNode binNode = new TreeNode(1);
+            TreeNode binNode2 = new TreeNode(2);
+            TreeNode binNode3 = new TreeNode(3);
+            TreeNode binNode4 = new TreeNode(4);
+            TreeNode binNode5 = new TreeNode(5);
+            TreeNode binNode6 = new TreeNode(6);
             binNode.left = binNode2;
             binNode.right = binNode3;
             binNode3.left = binNode4;

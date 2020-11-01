@@ -1,12 +1,14 @@
 package labuladong;
 
+import common.TreeNode;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class _02DynamicProgramme {
+    static final Logger log = LoggerFactory.getLogger(_02DynamicProgramme.class);
+
 /*-=-=-=-=-=-=-=-=- 系列背包问题 -=-=-=-=-*/
     /**
      # 0-1背包问题
@@ -312,11 +314,204 @@ public class _02DynamicProgramme {
         }
     }
 
+    /**
+      系列打家劫舍问题
+     # 198
+     光顾一个数组内的房子，每个房子都有一定现金，相邻房屋装有防盗系统：如果两间相邻的房子在同一晚上被盗，将报警
+     房屋现金 money = {1,2,3,1} 计算不触动警报的情况下，一次收集到的最高金额
 
+     case 1: {1,2,3,1} - 4, 去1号和3号房子
+     case 2: {2,7,9,3,1} - 12,去1 3 5号房
+        纵向为房子数量
+          2  7  9  3  1
+     1-2  2  -  -  -  -
+     2-7  2  7  -  -  -
+     3-9  2  7 11  -  -
+     4-3  2  7 11  10 -
+     5-1  2  7 11  10 12
+    解法类似 最长递增子序列
+     */
+    static class HouseRobber{
+        /**
+          光顾的最后一个房子，房子数量 两个状态
+          思考顺序正过来是递归，倒过来是动态规划
+          递归思路：profits[i] = max(profit[i+1], money[i]+profit[i+2])
+         */
+        static int dpSolutionForI(int[] money){
+            int length = money.length;
+            int[] dp = new int[length];
+            //i表示房子数量，j表示最后光顾的房子，dp[i][j]表示收入
+            int result = 0;
+            for (int i = 0; i < length; i++) {
+                int max = 0;
+                for (int k = i-2; k >=0 ; k--) {
+                    max = Math.max(max, dp[k]);
+                }
+                dp[i] = money[i] + max;
+                result = Math.max(result, dp[i]);
+            }
+            return result;
+        }
+        //上述思路是最后一个房子一定盗，但如果仅考虑房子数量，最后一个不一定盗就可以少一层遍历
+        //根本的不同是对于dp数组的定义：dp[i]有前i个房子考虑如何采花
+        static int dpSolution2ForI(int[] money){
+            int length = money.length;
+            int[] dp = new int[length];
+            for (int i = 0; i < length; i++) {
+                int stealLast = money[i],stealPre = 0;
+                if (i>=1){
+                    stealPre = dp[i-1];
+                }
+                if (i>=2){
+                    stealLast += dp[i-2];
+                }
+                dp[i] = Math.max(stealPre,stealLast);//dp[i]依赖dp[i-1] dp[i-2]可以优化SC
+            }
+            return dp[length-1];
+        }
+        /**
+         窃格瓦拉 发现房屋数组首尾相连成了一个环，作何解？
+         case 0: {} 0
+         case 1: {2,3,2} 3
+         case 2: {1,2,3,1} 4
+         case 3: {1,2,3,4,2,1} 7
+         ERROR - 第i个房子一定盗窃，则从i-2...到2判断最大的profit 这种算法无法发现第end个房子不盗窃有更大收入的机会
+
+         关键思路：数组里最后一个房子到底去不去 不去-变成问题1 [0,length-2] 去-变成问题1 [1,length-3]
+         */
+        static int dpSolutionForII(int[] money){
+            int length = money.length;
+            if (length < 4){
+                int max = 0;
+                for (int i = 0; i < length; i++) {
+                    max = Math.max(max, money[i]);
+                }
+                return max;
+            }
+            int stealLast = dpSolutionForIIHelper(money,1,length-3);
+            int notstealLast = dpSolutionForIIHelper(money,0,length-2);
+            return Math.max(stealLast+money[length-1],notstealLast);
+        }
+        static int dpSolutionForIIHelper(int[] money, int start, int end){
+            int length = end - start +1;
+            int[] dp = new int[length];
+            for (int i = start; i <= end; i++) {
+                int stealLast = money[i], stealPre = 0;
+                if (i-1 >= start){
+                    stealPre = dp[i-start-1];
+                }
+                if (i-2 >= start){
+                    stealLast += dp[i-start-2];
+                }
+                dp[i-start] = Math.max(stealPre, stealLast);
+            }
+            return dp[length-1];
+        }
+        /**
+          时间来到2020年，窃格瓦拉出狱了，然而狱中修炼的他这次决定出国做高技术觅香工作，毕竟人往高处走
+         北欧的一个富人区，房子呈二叉树排列，同样两个相连的房屋被盗会报警
+         case1: {3,2,3,null,3,null,1}   3+3+1=7
+             3
+            / \
+           2   3
+            \   \
+             3   1
+         case2: {3,4,5,1,3,null,1}    4+5=9
+             3
+            / \
+           4   5
+          / \   \
+         1   3   1
+                   0
+             1           2
+          3    4      5    6
+         7 8  9 10  11 12      一个房子下面的序号是2n+1,2n+2这意味着
+         一个房子上面的房子是 ceil(i/2)-1
+         似乎不好动态规划
+         case3 {4,1,null,2,null,null,null,3}
+              4
+             1
+           2
+         3
+         既然树相邻的房子不能偷，那就像石头游戏，我隔层偷求和是否可以，比较偶数层与奇数层的和的大小
+         ERROR: case3就是对这种思路的致命一击，偷1 4 两层比 其他类型的两层收获多的多。。。
+         */
+        static void buildBinaryTree(int[] money, TreeNode root, int rootIndex){
+            int length = money.length;
+            int leftIndex = rootIndex * 2 + 1;
+            if (leftIndex < length && money[leftIndex] != 0){
+                TreeNode left = new TreeNode(money[leftIndex]);
+                root.left = left;
+                buildBinaryTree(money, left, leftIndex);
+            }
+            int rightIndex = rootIndex * 2 + 2;
+            if (rightIndex < length && money[rightIndex] != 0){
+                TreeNode right = new TreeNode(money[rightIndex]);
+                root.right = right;
+                buildBinaryTree(money, right, rightIndex);
+            }
+        }
+        static int recursiveSolutionForIIIHelper(TreeNode root){
+            if (root == null){
+                return 0;
+            }
+            int stealRoot = root.val +
+                    (root.left == null?0: recursiveSolutionForIIIHelper(root.left.left)) +
+                    (root.left == null?0: recursiveSolutionForIIIHelper(root.left.right)) +
+                    (root.right == null?0: recursiveSolutionForIIIHelper(root.right.left)) +
+                    (root.right == null?0: recursiveSolutionForIIIHelper(root.right.right));
+            int keepRoot = recursiveSolutionForIIIHelper(root.left) + recursiveSolutionForIIIHelper(root.right);
+            return Math.max(stealRoot,keepRoot);
+        }
+        static int recursiveSolutionForIII(int[] money){
+            TreeNode root = new TreeNode(money[0]);
+            buildBinaryTree(money,root,0);
+            return recursiveSolutionForIIIHelper(root);
+        }
+        //先让递归进到树的树叶上，但思考问题还是自上而下
+        //递归返回的结果是一个元组
+        static Pair<Integer,Integer> recursiveSolutionForIII2Helper(TreeNode root){
+            if (root == null){
+                return Pair.of(0,0);
+            }
+            Pair<Integer,Integer> left = recursiveSolutionForIII2Helper(root.left);
+            Pair<Integer,Integer> right = recursiveSolutionForIII2Helper(root.right);
+
+            int stealRoot = root.val + left.getLeft() + right.getLeft();
+            //root不偷，考虑偷left不偷right的组合大小？应该是left偷和不偷两种情况作为左侧分支的考虑结果，这里容易出错
+            int keepRoot = Math.max(left.getLeft(), left.getRight())+
+                            Math.max(right.getLeft(), right.getRight());
+            return Pair.of(keepRoot, stealRoot);//左侧数据是不偷，右侧是偷
+        }
+        static int recursiveSolutionForIII2(int[] money){
+            TreeNode root = new TreeNode(money[0]);
+            buildBinaryTree(money,root,0);
+            Pair<Integer, Integer> result = recursiveSolutionForIII2Helper(root);
+            return Math.max(result.getLeft(), result.getRight());
+        }
+        //除了递归遍历树，暂未发现有啥更好的算法
+        public static void main(String[] args) {
+            int[] case1 = {1,2,3,1};
+            int[] case2 = {2,7,9,3,1};
+            //Assert.assertTrue(dpSolution2ForI(case1) == 4);
+            //Assert.assertTrue(dpSolution2ForI(case2) == 12);
+            int[] case20 = {};
+            int[] case21 = {2,3,2};
+            int[] case22 = {1,2,3,1};
+            int[] case23 = {1,2,3,4,2,1};
+            Assert.assertTrue(dpSolutionForII(case20) == 0);
+            Assert.assertTrue(dpSolutionForII(case21) == 3);
+            Assert.assertTrue(dpSolutionForII(case22) == 4);
+            Assert.assertTrue(dpSolutionForII(case23) == 7);
+            int[] case30 = {3,2,3,0,3,0,1};//7
+            int[] case31 = {3,4,5,1,3,0,1};//9
+            System.out.println(recursiveSolutionForIII2(case31));
+        }
+    }
 
 /*-=-=-=-=-= 系列高楼扔鸡蛋问题 =-=-=-=--=-=*/
 
-
+//todo 力扣上说的后效性是啥？
 
 
 }

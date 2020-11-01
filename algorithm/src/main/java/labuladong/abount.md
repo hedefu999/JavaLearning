@@ -53,7 +53,7 @@ gitbook链接   [labuladong的算法小抄](https://labuladong.gitbook.io/algo/)
 ```
 [动态规划之博弈问题](https://labuladong.gitbook.io/algo/dong-tai-gui-hua-xi-lie/dong-tai-gui-hua-zhi-bo-yi-wen-ti)
 [动态规划之四键键盘](https://labuladong.gitbook.io/algo/dong-tai-gui-hua-xi-lie/dong-tai-gui-hua-zhi-si-jian-jian-pan)
-[四键键盘问题](https://mp.weixin.qq.com/s?src=11&timestamp=1602920031&ver=2649&signature=DZ5HoJ-WdukqzYQCuWS*emvIlQKtlyMCacFM0UN9YBQLmmtzHOj326dmrNLHegtHKxgf9CeNRPBfQzZLJa4QkMfkqctfMFLqQlnzLxU2sGwUPugvVpjl7PtVJBXuVJLk&new=1)
+
 [打家劫舍问题](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247484800&idx=1&sn=1016975b9e8df0b8f6df996a5fded0af&chksm=9bd7fb88aca0729eb2d450cca8111abd8f861236b04125ce556171cb520e298ddec4d90823b3&scene=21#wechat_redirect)
 [贪心算法之区间调度问题](https://mp.weixin.qq.com/s?src=11&timestamp=1602919821&ver=2649&signature=KCHFkvySbAJjuSyHEvkuRRS62dI5Bb8IYAdDSZokAPG0eIrt1Yj-*yHrsN8PURXBSjWGMBSF7*HXvxXGfqymdmOAwLAUxDbi7Hwz4O0FMysaXNzz6ABdHkZ2dqelf1v1&new=1)
 [高楼扔鸡蛋](https://mp.weixin.qq.com/s?src=11&timestamp=1602920440&ver=2649&signature=NPL-Jl6Qt1e3P702UFwLsruBlGV36G98dlfhsAY3XDiZnpWohskQ-72M5Hu7npaKZaWGi6Pw3Novh*SFrz4aYToeUcstSxu8Smez5KD5eGkCAFREtFJSATyvnK7VhOaV&new=1)
