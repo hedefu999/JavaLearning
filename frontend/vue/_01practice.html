@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>购物车Demo</title>
+<style type="text/css">
+  [v-cloak]{
+    display: none;
+  }
+  table{
+    border:1px solid #e9e9e9;
+    border-collapse: collapse;
+    border-spacing: 0;
+    empty-cells: show;
+  }
+  th,td{
+    padding:8px 16px;
+    border:1px solid #e9e9e9;
+    text-align: left;
+  }
+  th{
+    background: #f7f7f7;
+    color: #5c6b77;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  #empty_shopping_cart{
+    text-align: center;
+  }
+
+  /* 自定义导航栏组件样式 */
+  .tabs{color: #657180;}
+  .tabs-bar:after{
+    content:'...';
+    display: block;
+    width:100%;
+    height: 10px;
+    background: #d7dde4;
+    /* margin-top: -1px; */
+  }
+  .tabs-bar{
+    display: inline-block;
+    padding:4px 16px;
+    background: #fff;
+    margin-right: 6px;
+    border: 1px solid #d7dde4;
+    cursor: pointer;
+    position: relative;
+  }
+  .tabs-bar-acitve{
+    color:#3399ff;
+    border-top:1px solid #3399ff;
+    border-bottom: 1px solid #fff;
+  }
+  .tabs-bar-active:before{
+    content: 'xxx';
+    display: block;
+    background: #3399ff;
+
+  }
+  .tab-content{
+    background: green;
+  }
+
+</style>
+</head>
+<body style="background-color:#555; color:#fff;">
+
+<h3>购物车实例</h3>
+<div id="shoppingcart" v-cloak>
+  <template v-if="goods.length">
+    <table>
+      <thead><tr>
+        <th></th><th>商品名称</th><th>商品单价</th><th>购买数量</th><th>操作</th><th>选中<label for="selectAll">全选<input id="selectAll" type="checkbox" @click="checkAllGoodsLine()"/></label></th>
+      </tr></thead>
+      <tbody>
+        <!-- v-for = '(item, index) in data'>
+          <template v-for='items in item'>
+            <templates v-for='(itemss,indexs) in items'>...
+       -->
+        <tr id="goodstr" v-for="(item,index) in goods">
+          <td>{{index+1}}</td><td>{{item.name}}</td><td>{{item.price}}</td>
+          <td>
+            <!-- button上用了dianable，js代码里又判断了一次，如果不使用button而是div，就没有disnable属性了
+          所以为了防止修改html模板导致出现bug，这里在js代码中一定有判断 -->
+            <button @click="handleReduce(index)":disabled="item.count <= 1"> - </button>
+            {{item.count}}
+            <button @click="handleAdd(index)">+</button>
+          </td>
+          <td><button v-on:click="handleRemove(index)">移除</button></td><td><input class="goodlinecheckbox" type="checkbox" name="select" @click="checkOneLineGoods(index)"/></td>
+        </tr>
+      </tbody>
+    </table>
+    <div>总价：¥ {{totalPrice}} | 已选择：¥ {{selectedTotalPrice}}</div>
+  </template>
+  <div id="empty_shopping_cart" v-else>购物车为空</div>
+</div>
+
+<h3>二维数组的遍历</h3>
+<div id="two_dimension_array_foreach">
+  <div v-for='(catagory, index) in goods'>
+    <p>{{index}}:{{catagory.catagory_name}}</p>
+      <div v-for='(sku,index) in catagory.sku_list'>
+        <span>{{index}}: {{sku.name}} - ¥ {{sku.price}}</span>
+      </div>
+  </div>
+</div>
+<p>通常将vue.min.js和index.js写在body的最底部，如果写在head里，vue实例将无法创建，因此时DOM还没有被解析完成，除非通过异步事件或在事件DOMContentLoaded（IE是onreadystatechange）触发时再创建Vue实例，类似jQuery的$(document).ready()</p>
+
+<h3>数字输入框组件</h3>
+<p>需求描述：数字输入框只能输入数字，有两个快捷按钮可加减1，设置最值初值、数值改变时会触发一个自定义事件通知父组件</p>
+<div id="numberinputcomponent">
+  <compo-numberinput v-bind:max="20" v-bind:min="0"></compo-numberinput>
+</div>
+
+<h3>标签页组件</h3>
+<div id="tabscomponent">
+  <!-- v-model=“activeKey”相当于 v-bind:value="activeKey" v-on:input="activeKey" activeKey是内部数据的一个属性名 -->
+  <compo-tabs v-model="activeKey">
+    <compo-pane label="标签1" name="first">标签1的内容</compo-pane>
+    <compo-pane label="标签2" name="second">标签2的内容</compo-pane>
+    <compo-pane label="标签3" name="third">标签3的内容</compo-pane>
+  </compo-tabs>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script type="text/javascript">
+$(document).scrollTop($(document).height());//页面滚动到最底部
+//购物车
+var shoppingcart = new Vue({
+  el:'#shoppingcart',
+  data:{goods:[
+    {id:12315,name:'iPhone 12 XR Plus Pro',price:9888,count:2,selected:false},
+    {id:12356,name:'iPad Pro',price:8999,count:1,selected:false},
+    {id:22256,name:'MacBook Pro 16 plus extreme',price:24999,count:2,selected:false},
+    {id:31257,name:'Cannon v9866 XDR Professional',price:58999,count:1,selected:false}]},
+  computed:{
+    totalPrice:function(){
+      var total = 0;
+      for (var i = 0; i < this.goods.length; i++) {
+        var item = this.goods[i];
+        total += item.price * item.count;
+      }
+      return total.toString().replace(/\B(?=(\d{3})+$)/g,',');
+    },
+    selectedTotalPrice:function(){
+      var total = 0;
+      for (var i = 0; i < this.goods.length; i++) {
+        var item = this.goods[i];
+        if (item.selected) {
+          total += item.price * item.count;
+        }
+      }
+      return total.toString().replace(/\B(?=(\d{3})+$)/g,',');
+    }
+  },
+  methods:{
+    handleReduce:function(index){
+      if (this.goods[index].count === 1) return;
+      this.goods[index].count--;
+    },
+    handleAdd:function(index){
+      this.goods[index].count++;
+    },
+    handleRemove:function(index){
+      this.goods.splice(index,1);
+    },
+    checkOneLineGoods:function(index){
+      var status = event.target.checked;
+      if (!status) {
+        $('#selectAll').prop('checked',false);
+      }else {
+        var needCheckAll = true;
+        $('#goodstr .goodlinecheckbox').each(function(){
+          if (!$(this).is(':checked')) { //attr('xxx')是取自定义的xxx属性的
+            needCheckAll = false;
+            return;
+          }
+        });
+        $('#selectAll').prop('checked',needCheckAll);
+      }
+      this.goods[index].selected = status;
+    },
+    checkAllGoodsLine:function(){
+      var status = event.target.checked;
+      for (var i = 0; i < this.goods.length; i++) {
+        this.goods[i].selected = status;
+        $('#goodstr .goodlinecheckbox').prop('checked',status);//也可以 attr('checked','checked') / removeAttr('checked')
+      }
+    }
+  }
+});
+//二维数组遍历
+var two_dimension_array_foreach = new Vue({
+  el:'#two_dimension_array_foreach',
+  data:{
+    goods:[
+      {
+        catagory_name:'fruit',
+        sku_list:[
+          {name:'apple',price:9.9},
+          {name:'berry',price:19.9},
+          {name:'daisy',price:9.9}
+        ]
+      },
+      {
+        catagory_name:'digital',
+        sku_list:[
+          {name:'iphone 12',price:9999.00},
+          {name:'macbook pro',price:21999.00},
+          {name:'cannon eos r6',price:24999.00}
+        ]
+      }
+    ]
+}
+});
+// 数字输入框组件
+function isNumber (value) {
+  return(/(^[0-9]*$)/).test(value+'');
+}
+Vue.component('compo-numberinput',{
+  template:
+    '<div class="numberinput">'+
+      //语法糖 v-bind:value可简写作:value, v-on:change可简写作@change,这是一个自定义事件
+      '<input type="text" v-bind:value="currentNumber" v-on:change="handleChange" @keydown.up="handleUp" @keydown.down="handleDown"/>'+
+      '<button @click="handleDown" :disabled="currentNumber <= min"> -1 </button>'+
+      '<button @click="handleUp" :disabled="currentNumber >= max"> +1 </button>'+
+    '</div>',
+  props:{//props通常用于声明从父组件接收的数据
+    max:{
+      type:Number,
+      default:Infinity
+    },min:{
+      type:Number,
+      default:-Infinity
+    },value:{
+      type:Number,
+      default:0
+    },step:{
+      type:Number,
+      default:10
+    }
+  },
+  data:function(){
+    //也可以在这里检查输入的parentnumber是否越界
+    return {currentNumber:this.value}
+  },
+  // watch:{},官方文档不推荐使用watch，推荐computed
+  methods:{
+    updateNumber:function(newVal){
+      if (newVal > this.min && newVal < this.max) {
+        this.currentNumber = newVal;
+        // this.$emit('input',val);
+        this.$emit('on-change',newVal);//主动触发change事件，以便调用handleChange函数修改输入框的内容（这个动作就是v-model的功能，所以可以使用v-model达到同样效果）
+      }
+    },
+    handleDown: function(){
+      if (this.currentNumber <= this.min) return;
+      this.currentNumber -= 1;
+    },
+    handleUp:function(){
+      if (this.currentNumber + this.step > this.max) {
+        this.currentNumber = this.max;
+      }else {
+        this.currentNumber += this.step;
+      }
+    },
+    //handleChange由自定义事件 v-on:change 触发
+    //currentNumber没有使用v-model，是单向数据流，所以在event中传入的值合理时需要手动更新currentNumber
+    handleChange:function(event){
+      //此处的value是API层面，不是变量名，书中一堆value。。。
+      var newVal = event.target.value.trim();
+      // if ((/(^-?[0-9]+\.{1}\d+$) | (^-?[1-9][0-9]*$) | (^-?0{1}$)/).test(val)) {
+      if(isNumber(newVal)){
+        var newNumber = Number(newVal);
+        if (newNumber <= this.max && newNumber >= this.min) {
+          this.currentNumber = newNumber;//手动更新currentNumber
+        }else {
+          event.target.value = this.currentNumber;//重置input输入框中的内容为旧值，currentNumber保持不变
+        }
+      }else{
+        event.target.value = this.currentNumber;
+      }
+    }
+  },
+  //有v-model="parentnumber"就不需要再手动更新了
+  mounted:function(){
+    var init = this.$parent.parentnumber;//页面刚挂载时使用父组件的默认parentnumber，没有$parent取不到数据
+    this.updateNumber(init);
+  }
+});
+var numberinputcomponent = new Vue({
+  el:'#numberinputcomponent',
+  data:{parentnumber:5}
+});
+//标签页组件
+Vue.component('compo-tabs',{
+  template:
+    '<div class="tabs">\
+      <div class="tabs-bar">\
+        <div v-bind:class="tabCls[item]" v-for="(item,index) in navList" v-on:click="handleChange(index)"></div>\
+      </div>'+
+      '<div class="tabs-content"><slot></slot></div>'+
+    '</div>',
+    props:{value:{type:[String,Number]}},
+    data:function(){
+      return {currentValue:this.activeKey,navList:[]}
+    },
+    methods:{
+      getNaviTabs(){
+        return this.$children.filter(function(item){
+          var optionName = item.$options.name;//通过$options可以获取data外面的数据和方法
+          console.log(item.$options.alias);
+          return optionName === 'pane';//???
+        });
+      },
+      updateNav(){
+        this.vavList = [];
+        var _this = this;
+        var naviTabs = this.getNaviTabs();
+        naviTabs.forEach(function(pane, index){
+          _this.navList.push({
+            label:pane.label, name: pane.name||index
+          });//?????
+          if (!pane.name) {
+            pane.name = index;
+          }
+          if (index === 0) {
+            if (!_this.currentValue) {
+              _this.currentValue = pane.name || index;
+            }
+          }
+        });
+        this.updateStatus();
+      },
+      updateStatus(){
+        var tabs = this.getNaviTabs();
+        var _this = this;
+        tabs.forEach(function(tab){
+          return tab.show = (tab.name === _this.currentValue);
+        });
+      },
+      tabCls:function(item){
+        return ['tabs-tab',{'tabs-tab-active':(item.name === this.currentValue)}];
+      },
+      handleChange:function(index){
+        var nav = this.navList[index];
+        var name = nav.name;
+        this.currentValue = name;
+        this.$emit('input',name);
+        this.$emit('on-click',name);
+      }
+    },
+    //watch是一个对象不是方法，所以不能写在methods里
+    watch:{value:function(val){console.log("value changed!");},currentValue:function(){}}
+});
+Vue.component('compo-pane',{
+  name:'pane',
+  alias:'applepen',
+  template:
+    '<div class="pane" v-show="show">\
+      <slot></slot>\
+    </div>',
+  props:{
+    name:{type:String},
+    label:{type:String,default:''}
+  },
+  data:function(){return {show:true}},
+  methods:{
+    updateNav:function(){
+      this.$parent.updateNav();
+    }
+  },
+  watch:{},
+  mounted:function(){this.updateNav();}
+});
+var tabscomponent = new Vue({
+  el:'#tabscomponent',
+  data:{activeKey:'second'}
+});
+
+
+
+
+
+</script>
+
+</body>
+</html>

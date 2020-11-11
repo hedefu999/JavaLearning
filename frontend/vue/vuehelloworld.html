@@ -389,13 +389,24 @@ props数据传递、event事件触发、slot内容分发 构成了 Vue组件的3
 </div>
 <p>点击按钮时隐藏的div展示出来 <br>
   Vue在观察到数据变化时并不直接更新DOM，而是开启一个队列，并缓冲在同一事件循环中发生的所有数据改变。在缓冲时会去除重复数据，避免不必要的计算和DOM操作。在下一个事件循环tick中执行实际的工作。
+  Vue会根据当前浏览器环境优先使用原生的Promise.then和MutationObserver，如果都不支持就会采用setTimeout代替。
 </p>
 <div id="nexttick">
   <div id="showorhidediv" v-if="showDiv">这是一段文本</div>
   <button @click="getText">获取div内容</button>
 </div>
-
-
+<p>Vue数据驱动DOM的思想是不推荐主动操作DOM的，但在许多第三方库popper swiper中会有完整的创建更新和销毁的生命周期，与Vue配合使用就要使用好$nextTick</p>
+<h4>避免在js里拼写组件: X-templates</h4>
+<p>定义一个type为text/x-template的script，此script的id在组件注册时使用。这个方式可以避免在js里写html，从而避免换行问题，不过这违背Vue模板和组件隔离的思想，更优雅的做法是使用webpack编译.vue单文件</p>
+<div id="xtemplates">
+  <compo-xtemplates></compo-xtemplates>
+  <script type="text/x-template" id="componentxtemplates">
+    <div>x-templates定义的组件内容</div>
+  </script>
+</div>
+<h4>手动挂载实例</h4>
+<p>通常在开发复杂独立组件时会用到</p>
+<div id="mountinstancemanually"></div>
 
 
 
@@ -683,12 +694,27 @@ var nexttick = new Vue({
   methods:{
     getText:function(){
       this.showDiv = true;
-      var text = $('#showorhidediv').innerHTML;
-      console.log(text);//undefined
+      // this.$nextTick(function(){
+        var text = document.getElementById('showorhidediv').innerHTML;
+        console.log(text);//把$nextTick打开这一行就不会在点击按钮时报错了
+      // });
     }
   }
 });
-
+Vue.component('compo-xtemplates',{
+  template:'#componentxtemplates'
+});
+var xtemplates = new Vue({el:'#xtemplates'});
+var Compomountedmanually = Vue.extend({
+  template:'<div>欢迎：{{name}}</div>',
+  data:function(){return {name:'Aresn'}}
+});
+//以下3中手动挂载组件的方式
+new Compomountedmanually().$mount('#mountinstancemanually');//$mount返回实例自身，可以链式调用
+new Compomountedmanually({el:'#mountinstancemanually'});
+//3 在文档之外渲染并且随后挂载
+var componentmanually = new Compomountedmanually().$mount();
+document.getElementById('mountinstancemanually').appendChild(componentmanually.$el)
 
 // # 第六章
 var oneradiobuttonformbind = new Vue({
