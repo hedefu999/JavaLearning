@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>一些零散的知识点，来自网站博客</title>
+  </head>
+  <body style="background-color:#555; color:#fff;">
+<a href="https://www.cnblogs.com/xiaohuochai/p/7388866.html">教程参考</a>
+<div id="datacheckexample">
+  <compo-datacheck-parent></compo-datacheck-parent>
+</div>
+
+<div id="parentchildexample">
+  <compo-datatransparent></compo-datatransparent>
+</div>
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script type="text/javascript">
+  var compoDatacheckChild = {
+    template: '<div>{{message}}</div>',
+    props:{
+      'message':{type:Number,validator:function(input){
+        return input < 100;//校验不通过vue会发出警告
+      }}
+    },
+    methods:{
+      test:function(param){
+        var param = Number(param);
+        this.message = param;
+      }
+    }
+  }
+  var compoDatacheckParent = {
+    template: `
+    <div class="parent">
+      <child :message="msg"></child>
+    </div>`,
+    components: {
+      'child': compoDatacheckChild
+    },
+    data(){
+      return{
+        msg: 12
+      }
+    }
+  };
+  // 创建根实例
+  new Vue({
+    el: '#datacheckexample',
+    components: {
+      'compo-datacheck-parent': compoDatacheckParent
+    }
+  });
+
+var compoChildNode = {
+  template: `
+  <div class="dataTransChild">
+    <div>
+      <span>子组件数据</span>
+      <input v-model="temp">
+    </div>
+    <p>{{temp}}</p>
+  </div>
+  `,
+  props:['childMsg'],
+  data(){
+    return{
+      temp:this.childMsg
+    }
+  },
+};
+var compoParentNode = {
+  template: `
+  <div class="dataTransParent">
+    <div>
+      <span>父组件数据</span>
+      <input v-model="msg">
+    </div>
+    <p>{{msg}}</p>
+    <compo-datatranschild :child-msg="msg"></compo-datatranschild>
+  </div>
+  `,
+  components: {
+    'compo-datatranschild': compoChildNode
+  },
+  data(){
+    return {
+      'msg':'match'
+    }
+  }
+};
+// 创建根实例
+new Vue({
+  el: '#parentchildexample',
+  components: {
+    'compo-datatransparent': compoParentNode
+  }
+});
+</script>
+  </body>
+</html>
