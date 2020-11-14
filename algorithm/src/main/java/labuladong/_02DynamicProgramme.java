@@ -468,8 +468,11 @@ public class _02DynamicProgramme {
             buildBinaryTree(money,root,0);
             return recursiveSolutionForIIIHelper(root);
         }
-        //先让递归进到树的树叶上，但思考问题还是自上而下
+        //先让递归进到树的树叶上
         //递归返回的结果是一个元组
+        /**
+         * 这其实是一个树的后续遍历
+         */
         static Pair<Integer,Integer> recursiveSolutionForIII2Helper(TreeNode root){
             if (root == null){
                 return Pair.of(0,0);
@@ -509,9 +512,356 @@ public class _02DynamicProgramme {
         }
     }
 
-/*-=-=-=-=-= 系列高楼扔鸡蛋问题 =-=-=-=--=-=*/
+    /**
+     * dp问题解法 - 状态设计增加一维消除后效性
+     * 无后效性：某阶段之后的发展变化仅与当前阶段的状态有关，而与此阶段前的状态无关。
+     * 利用动态规划求解多阶段决策问题时，过程的状态必须具备无后效性
+     * 动态规划通常不关系过程，只关心"阶段结果"，这个阶段结果就是dp问题中设计的状态。回溯算法才会关系过程，因此通常复杂度也较高
+     */
+    static class BackEffectProblem{
+        //打家劫舍问题I如此，偷与不偷是不同的结果，那就使用元组（增加维度）记录这两种情况
 
-//todo 力扣上说的后效性是啥？
+        /*
+         # 152 乘积最大子数组,连续的几个元素
+         类似 #53 最大子序和  #300 最长上升子序列
+         case1 {2,3,-2,4} 6=2*3
+         case2 {-2,0,-1} 0
+         */
+        static class MaxProcuct{
+            public static int maxProductFierceSolution(int[] nums){
+                int length = nums.length;
+                int[][] dp = new int[length][length];
+                int max = Integer.MIN_VALUE;
+                for (int i = 0; i < length; i++) {
+                    for (int j = i; j < length; j++) {
+                        //计算[i,j]个数字的乘积，记录最大值
+                        int temp = 1;
+                        for (int k = i; k <= j; k++) {
+                            temp*=nums[k];
+                        }
+                        max = Math.max(max,temp);
+                    }
+                }
+                return max;
+            }
+
+            //状态：开始i结束j 暴力解法
+        /*
+         负数的存在使得乘积可以在最大值和最小值之间转化，可以增加维度解决这一问题
+         状态：数组长度i+乘还是不乘都保存下来
+
+         状态：数组长度i， <no>最后一个元素永远作为子数组最后一个，最大乘积</no> pre元素上的最大值能和
+         ⬆之前考虑过以数组长度作为dp状态，以nums[i]作为子数组最后一个元素，但最大乘积可能并不包含最后一个元素
+           这种问题的解决办法是，最后一个元素放入子数组，对一整轮的遍历取一次最大值就可以了
+         */
+            public static int maxProductDpSolution(int[] nums){
+                int length = nums.length;
+                //扩展维度同时存储 left-0.最小值 - right-1.最大值，因为最小值负值越小在遇到负数时会变成最大值
+                int[][] dp = new int[length][2];
+                //此i用于遍历nums数组，不是数组长度作为状态
+                //以nums[i]强行作为子数组的最后一个元素时，可能当前子数组的最大乘积就是这一个元素
+                //当nums[i]为正，那么乘以dp[pre]就是最大值，nums[i]为负，乘以dp[pre]的记录的最小值才能转变成最大值，nums[i]为0，dp[i]就 = 0
+                dp[0][0] = nums[0]; dp[0][1] = nums[0];
+                for (int i = 1; i < length; i++) {
+                    int current = nums[i];
+                    int currentMax = 0;
+                    int currentMin = 0;
+                    //是否乘上前面的子数组的乘积，这是一个问题，类似打家劫舍的第三题
+                    if (current > 0){
+                        //难以理解的话可以通过举例改进当前写法得到正确的转移方程
+                        currentMax = Math.max(current, current * dp[i-1][1]);//如果前一个数字是0，right就是0，那么应该取current
+                        currentMin = Math.min(current, current * dp[i-1][0]);// 2 2 2<2,8> 2
+                    }else if (current < 0){
+                        currentMax = Math.max(current, current * dp[i-1][0]);//负值*以前一个元素为最末元素的子数组的乘积的最小值，如果前面都是正数，此时应抛弃前面的子数组
+                        currentMin = Math.min(current, current * dp[i-1][1]);//-2 -2 -2<-8,-2> -2,最后一个-2作为current求解
+                    }else {
+                        currentMax = currentMin = 0;//这个可以省略
+                    }
+                    //无后效性在这个状态转移方程的反映：dp[i] 与 当前num[i]和有限个dp[pre] 有关，也就是更早前的dp[pre]对dp[i]没有影响
+                    dp[i][0] = currentMin; dp[i][1] = currentMax;
+                }
+                int result = Integer.MIN_VALUE;
+                for (int i = 0; i < length; i++) {
+                    result = Math.max(result, dp[i][1]);
+                }
+                return result;
+            }
+            /*
+             使用 滚动数组 或 滚动变量 优化上述算法的空间复杂度
+             */
+            public static int maxProductDpRollVariableSolution(int[] nums){
+                int length = nums.length;
+                int dp_pre_min = nums[0], dp_pre_max = nums[0];
+                int dp_cur_min, dp_cur_max = Integer.MIN_VALUE;
+                int result = Integer.MIN_VALUE;
+                for (int i = 1; i < length; i++) {
+                    int current = nums[i];
+                    if (current > 0){
+                        dp_cur_max = Math.max(current, current * dp_pre_max);
+                        dp_cur_min = Math.min(current, current * dp_pre_min);
+                    }else if (current < 0){
+                        dp_cur_max = Math.max(current, current * dp_pre_min);
+                        dp_cur_min = Math.min(current, current * dp_pre_max);
+                    }else {
+                        dp_cur_max = dp_cur_min = 0;
+                    }
+                    result = Math.max(result, dp_cur_max);
+                    dp_pre_max = dp_cur_max;
+                    dp_pre_min = dp_cur_min;
+                }
+                return result;
+            }
+
+
+            public static void main(String[] args) {
+                int[] case1 = {2,3,-2,4};//6
+                int[] case2 = {-2,0,-1};//0
+                int[] case3 = {2,3,-2,4,-1,0,-2};//48
+                log.info(""+maxProductFierceSolution(case1) + " = " + maxProductDpRollVariableSolution(case1));
+                log.info(""+maxProductFierceSolution(case2) + " = " + maxProductDpRollVariableSolution(case2));
+                log.info(""+maxProductFierceSolution(case3) + " = " + maxProductDpRollVariableSolution(case3));
+            }
+        }
+
+        /*
+         # 面试题 17.16 按摩师  就是 打家劫舍 I
+         按摩师不断收到预约，但每个预约的时长不同，收益也就不同，按摩师需要休息，所以不会接连续的预约
+         */
+        static class LazyMassage{
+            static int dpSolution(int[] nums){
+                int length = nums.length;
+                if (length == 0) return 0;
+                if (length == 1) return nums[0];
+                int[] dp = new int[length];
+                dp[0] = nums[0];dp[1] = Math.max(nums[0],nums[1]);
+                for (int i = 2; i < length; i++) {
+                    dp[i] = Math.max(nums[i]+dp[i-2], dp[i-1]);
+                }
+                return dp[length-1];
+            }
+            public static void main(String[] args) {
+                int[] case4 = {};
+                int[] case5 = {1};
+                int[] case6 = {1,2};
+                int[] case7 = {3,5,2};
+                int[] case1 = {1,2,3,1};
+                int[] case2 = {2,7,9,3,1};
+            }
+        }
+        //无后效性似乎是dp思想的一个基本特征，状态转移方程就是此特征的具体表现
+    }
+
+
+    /*-=-=-=-=-= 系列高楼扔鸡蛋问题 =-=-=-=--=-=*/
+
+    /**
+      # 887 鸡蛋掉落
+     K个鸡蛋，可以从1到N层的建筑里测试，测试出让鸡蛋恰好摔不碎的最高楼层F
+     case1: K=1,N=2  2
+        鸡蛋从1楼掉落，如果碎了，F = 0，如果没碎再从2楼掉落，如果此时碎了，则F = 1,如果没碎F = 2
+        所以至少要移动2次确定F的值
+     case:  K=1,N=7  7
+     case2: K=2,N=6  3
+     case3: K=3,N=14  4
+
+     ## 分析
+     在不考虑鸡蛋个数限制的情况下，对于N层楼，寻找F层
+     最坏的情况就是从1楼试到N层才碎（线性扫描），则F=N
+     最好的情况就是第一层楼就碎了，则F=1
+     对上述做法进行优化，最好的策略是使用二分查找法，在N/2层进行一次尝试，如果碎了就向下尝试，如果没碎就向上尝试，这种策略的最坏情形就是在1楼就碎和在N楼也不碎，需要尝试的次数：至少是log(2,N)
+
+     但现在鸡蛋的数量限制了，就不能贸然使用二分法尝试高楼层了，需要结合二分法和逐层扫描法
+
+     题目最终就是要去求 最优策略在最坏情况下试验的次数
+     这个次数是有极限的，如100层2个鸡蛋最优策略最坏也要试验14次，而且这个最优策略也不是唯一的
+     这个14怎么求？
+
+     ## 动态规划解法
+     【状态】：当前拥有的鸡蛋数K 和 需要测试的楼层数N
+     【选择】选择去哪层楼扔鸡蛋
+     【状态转移】在第i层楼扔了鸡蛋之后，可能出现两种情形：蛋碎了/蛋没碎
+        如果鸡蛋碎了：K-1，搜索楼层从 [1..N] 变为 [1..i-1] 共i-1层
+        如果鸡蛋没碎：K不变，搜索的楼层从 [1..N] 变为 [i+1..N] 共N-i层  （这里第二轮没有包含第i层，在试验1-N层时，F可以取0，这样i+1 - N对应F取零的就是第i层）
+     fori 1~N
+        int res = 0;
+        res = min(res, max(dp(K-1,i-1), dp(K,N-1))+1 )
+        return res
+     【base case】楼层N=0时 返回0; 鸡蛋数K=1时，返回总楼层数N
+     */
+    static class EggDropProblem{
+
+        static int recursiveSolution(int K, int N){
+            int[][] dp = new int[K+1][N+1];
+            return recursiveHelper(K,N,dp);
+        }
+        /*
+        递归的思路就是 可以回到过去，鸡蛋可以复原，每个楼层都试一次，找到所有楼层的result的最小值
+        一次计算就是 蛋碎了和蛋不碎情况下的递归结果的较大值 + 这次试验消耗的试验次数:1
+        蛋碎了如何递归：K-1,去试验低楼层1~i-1
+            递归入参楼层数为i-1,相当于忽略掉i以上的楼层
+        蛋没碎如何递归：K不变，继续拿着这颗蛋去试验高楼层
+            递归入参楼层变为N-i,相当于上一步的低楼层埋掉重新给楼层编号(可见楼层的高低并不是算法的考虑)
+        递归自动处理了楼层号为 i-j 的情况。。。
+         */
+        static int recursiveHelper(int K, int N, int[][] dp){
+            if (K == 1) return N;//递归的一个重点在于base case，而base case直接反映K N的值
+            if (N == 0) return 0;
+            if (dp[K][N] != 0) return dp[K][N];
+            int result = Integer.MAX_VALUE;
+            //2个鸡蛋试验100层楼先去哪个楼层比较合适呢？干脆就都试一遍比较下大小了
+            for (int i = 1; i < N + 1; i++) {
+                result = Math.min(result,
+                        Math.max(recursiveHelper(K,N-i, dp), recursiveHelper(K-1,i-1,dp)) + 1
+                        //由递归的传参表明：N表示剩余楼层的数量，而这剩余50层楼是高处50层还是低处50层，算法是不考虑的，因为对于鸡蛋不同楼层都只有一个特性，让鸡蛋碎还是不碎，楼层高低只是一个编号而已
+                        //此N随着递归的进行一直在变化，似乎研究的楼层在变化，N-i总是可以得到后部分的楼层数
+                        //楼层高低又对算法有影响，鸡蛋碎了要去后部编号尝试，没碎要去前部编号尝试
+                        );//好神奇
+            }
+            dp[K][N] = result;
+            return result;
+        }//TC = O(N*max(K,N)) = O(KN) ????
+
+        /*
+           上述递归解法是下述状态转移方程的一个应用：
+           dp(K,N) = min{ max{dp(K-1,i-1), dp(K,N-i)} + 1}
+           固定K N，则dp(K-1,i-1)随i单调递增，dp(K,N-i)随i单调递减，两者max的min在dp(K-1,i-1) = dp(K,N-i)时取得，这样dp(K,N)就是最小值
+            关键思路：二分查找法在找一个mid，似乎是在让 broken = survive，这就是上面两个dp一个递增一个递减求两者较大值的最小情况的一个关键思路
+         */
+        static int binarySearchSolution(int K, int N){
+            int[][] dp = new int[K+1][N+1];
+            return binSearchHelper(K,N,dp);
+        }
+        static int binSearchHelper(int K, int N, int[][] dp){
+            if (K == 1) return N;
+            if (N == 0) return 0;
+            if (dp[K][N] != 0) return dp[K][N];
+            int result = Integer.MAX_VALUE;
+            //使用二分搜索替代线性搜索
+            int low = 1, high = N;
+            while (low <= high){
+                int mid = (low + high)/2;
+                //mid层上扔鸡蛋会不会碎,注意调用的是helper，写成binarySearchSolution也能得出结果，但很慢
+                int broken = binSearchHelper(K-1,mid - 1,dp);//如果碎了，低层需要的试验次数
+                int survive = binSearchHelper(K,N - mid,dp);//如果没有碎，高层需要的试验次数
+                //到这里可以看出二分搜索与线性搜索的区别：线性搜索相当于是把这里的mid从1到N都尝试了一遍得到最小值
+                if (broken > survive){ //当前试验楼层，鸡蛋碎了情况下剩余试验次数 如果大于 鸡蛋完好情况下剩余试验次数，说明楼层挑地太高了，鸡蛋容易损失掉，导致后面要逐层尝试了，所以楼层选矮点
+                    high = mid - 1;
+                }else {
+                    low = mid + 1;
+                }
+                result = Math.min(result, Math.max(broken,survive) + 1);//因为求的是至少要试验多少次，所以按最坏情况考虑，应取broken survice的最大值
+            }
+            dp[K][N] = result;
+            return result;
+        }/*求解 K=2,N=100 时二分查找算法性能很差，while在遇到1~较大N时无谓计算太多*/
+        //TC = O(KNlogN)
+
+        /*
+        # 反转状态转移
+        dp[k][n] 当前状态为k个鸡蛋、面对n层楼，这个状态下最少的扔鸡蛋次数为m
+        反向思考原问题，求楼层F。那如果已知F求N呢？
+        dp[k][m] 当前状态为k个鸡蛋，可以尝试扔m次鸡蛋，最坏情况下能确切测试出的最高楼层n
+            dp[1][7]=7 表示有1个鸡蛋，允许扔7次，这个状态下最多可以给7层楼使得测试人员确定楼层F（恰好不碎的楼层）
+
+        上述反向思路对应的代码结构应该是这样的：
+        while(dp[K][m] < N){
+           m++; //如果dp[K][m]小于N就让m++，啥时候达到N，m就停下，这样就找到答案了
+        }
+        反向思路的一些分析结论：
+        1. 无论你在哪层楼扔鸡蛋，鸡蛋只可能摔碎或者没摔碎，碎了的话就测楼下，没碎就测楼上
+        2. 无论上楼测试还是下楼测试，总的楼层数 = 楼上的层数（N-i） + 楼下的层数(i-1) + 1（i这一层）
+        对第二条结论进行转化
+        k个鸡蛋m次测试可以确定F的最小N = 鸡蛋没碎时依然有k个鸡蛋，但剩下m-1次测试次数最坏所能测试出的楼层数 + 鸡蛋碎了少了一个剩下k-1个鸡蛋同时剩下m-1次测试次数所能测试出的楼层数 + 1（中间刚刚测过的一个楼层）
+        dp[k][m] = dp[k][m-1] + dp[k-1][m-1] + 1
+        这样可以考虑填写dp数组了
+        case: K=2 N=4
+            0   1   2   3   4   <--m是试验的次数
+        0   -   -   -   -   -
+        1   0   1   2   3   4
+        2   0   1   3   6   10
+        K=2,变化的是i
+        填充dp数组时，dp[k][m] = 左侧一个 + 左上角一个元素 + 1
+        这样问题就变得极度简单了
+         */
+        static int classicDpSolution(int K, int N){
+            if (K == 1) return N;
+            if (N == 0) return 0;
+            int[][] dp = new int[K+1][N+1];//m再大也不超过N
+            for (int i = 0; i <= N; i++) {
+                dp[1][i] = i;
+            }
+            for (int i = 0; i <= K; i++) {
+                dp[i][0] = 0;
+            }
+            for (int k = 2; k <= K; k++) {
+                for (int m = 1; m <= N; m++) {
+                    dp[k][m] = dp[k][m-1] + dp[k-1][m-1] + 1;
+                }
+            }
+            int result = 0;
+            for (int i = 0; i <= N; i++) {
+                if (dp[K][i] >= N){
+                    result = i;
+                    break;
+                }
+            }
+            return result;
+        }
+        //可以进一步压缩dp数组
+        /*
+        附加问题：
+        如果有不限鸡蛋数量，K=+infinity, N=100, 则至少要试验多少次？
+        如果有两个鸡蛋，最坏的情况需要扔多少次一定能把F找出（算法给出的答案是14，那这种策略具体是怎么扔的？）
+            第一次在n层测试，第二次在n+(n-1)层测试，第三次在n+(n-1)+(n-2)层测试，，，以此类推，n>= 13.65 取n=14
+            这样第一次测试的楼层列表是 [14,27,39,50,60,69,77,...]共12次
+            第二次+第一次发现总是14次
+
+         */
+
+
+
+        public static void main(String[] args) {
+            int K = 1, N = 2;
+            int K1 = 1, N1 = 7;
+            int K2 = 2, N2 = 6;//3
+            int K3 = 3, N3 = 14;//4
+            int K4 = 2, N4 = 100;//14
+            int K5 = 5, N5 = 100;//7
+            //log.info(""+ binarySearchSolution(K,N));
+            //log.info(""+ binarySearchSolution(K1,N1));
+            //log.info(""+ binarySearchSolution(K2,N2));
+            //log.info(""+ binarySearchSolution(K3,N3));
+            //log.info(""+ recursiveSolution(K4,N4));
+            //log.info(""+ binarySearchSolution(K5,N5));
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

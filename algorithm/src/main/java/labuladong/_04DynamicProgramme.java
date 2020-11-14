@@ -1,10 +1,11 @@
 package labuladong;
 
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class _04DynamicProgramme {
@@ -150,6 +151,157 @@ public class _04DynamicProgramme {
     }
 
 
+    /**
+        贪心算法可视作动态规划的一个特例（满足贪心选择性质），效率更高
+     贪心选择性质：每一步都做出一个局部最优的选择，最终的结果就是全局最优，仅一部分dp问题才具备此性质
+     */
+    static class GeedAlgorithm{
+        /*
+        #435 贪心算法之区间冲突判断问题
+         经典贪心算法 - 区间调度
+         给定许多[start, end]区间，计算出这些区间中最多有几个互不相交的区间
+         如日程安排中的不冲突活动筛选，求最大不相交区间子集
+         */
+        static class IntervalSchedule{
+            /*
+                递归解法,返回需要移除区间的最小数量
+             */
+            static int intervalCollisionRecursiveSolution(int[][] intvs){
+                Arrays.sort(intvs, new Comparator<int[]>() {
+                    @Override
+                    public int compare(int[] o1, int[] o2) {
+                        return o1[0] - o2[0];
+                    }
+                });
+                return intervalCollisionHelper(-1,0,intvs);
+            }
+            //pre上一区间 cur当前区间（试图不移除）返回从当前下标开始需要移除的区间个数
+            //检测当前区间是否与上一区间重叠，若不重叠就检测curr和curr+1
+            //移除当前区间可能会带来更少的区间移除，所以不论当前区间是否与上一个重叠，都要移除再调用递归，此时数字要+1
+            //返回较小值
+            static int intervalCollisionHelper(int prev, int curr, int[][] intvs){
+                if (curr == intvs.length) return 0;
+                int keep = Integer.MAX_VALUE, remove;
+                if (prev == -1 || intvs[prev][1] <= intvs[curr][0]){
+                    keep = intervalCollisionHelper(curr, curr+1, intvs);
+                }
+                //这里的remove的计算之所以没有放到else里，是因为即使第二个区间跟上一个没有重叠，但它可能本身与后面的多个重叠，而后面的多个区间可能是不重叠的，所以还要移除参与一下计算
+                remove = intervalCollisionHelper(prev, curr+1, intvs) + 1;
+                return Math.min(keep, remove);
+            }//递归解法反而难以看懂，并且性能也弱
+
+
+            //从起点入手的动态规划解法，类似递增子序列的求解
+            static int intervalScheduleDpSolution(int[][] intvs){
+                int length = intvs.length;
+                if (length == 0) return 0;
+                //对起点排序
+                Arrays.sort(intvs, new Comparator<int[]>() {
+                    @Override
+                    public int compare(int[] o1, int[] o2) {
+                        return o1[0] - o2[0];
+                    }
+                });
+                int[] dp = new int[length];
+                //判断当前区间与前面所有的不重叠区间，取其计数+1
+                for (int i = 0; i < length; i++) {
+                    int[] curr = intvs[i];
+                    int max = 0;
+                    for (int j = i-1; j >= 0; j--) {
+                        int[] comp = intvs[j];
+                        //已经按start排序，重叠就是comp.end > curr.start,comp在curr前面
+                        boolean overlap = comp[1] > curr[0];
+                        if (overlap){
+                            continue;
+                        }else {
+                            max = Math.max(max, dp[j]);
+                        }
+                    }
+                    dp[i] = max + 1;
+                }
+                return dp[length-1];
+            }
+
+            //从终点入手的贪心算法,比上面的动态规划效率要高很多
+            static int intervalScheduleExtremeSolution(int[][] intvs){
+                int length = intvs.length, result = length;
+                if (length == 0) return 0;
+                //先按照区间end进行排序
+                Arrays.sort(intvs, new Comparator<int[]>() {
+                    @Override
+                    public int compare(int[] o1, int[] o2) {
+                        //return o1[1] - o2[1]; 在 (-2147483646) - (2147483646) 的情况下会溢出，导致排序出错
+                        return o1[1] > o2[1]?1:o1[1] == o2[1]?0:-1;//改进
+                        //return Integer.compare(o1[1],o2[1]);// Integer的封装果然是经过实践检验的
+                    }
+                });
+                int[] curr = intvs[0];//在此收集不重叠子集
+                for (int i = 1; i < length; i++) {
+                    int[] comp = intvs[i];
+                    //boolean intersect = (comp[0]>curr[0] && comp[0]<curr[1]) || (comp[1]>curr[0] && comp[1]<curr[1]);
+                    //后部end排序过后判断两区间是否相交就比较简单了
+                    boolean intersect = comp[0] < curr[1];
+                    if (intersect){
+                        result--;
+                    }else {
+                        curr = intvs[i];//在此收集不重叠子集
+                    }
+                }
+                return result;
+            }
+            //此解法的贪心选择性质体现在curr的选择，curr的遍历顺序取决于区间的end排序
+
+            public static void main(String[] args) {
+                int[][] case1 = {{1,3},{2,4},{3,6}};//2
+                System.out.println(intervalScheduleDpSolution(case1));
+            }
+        }
+
+        /*
+          #452 用最少的箭头射爆气球
+          给出气球的直径区间，弓箭沿y轴方向，求戳爆所有气球所需的最小弓箭数量
+         */
+        static class BreakBalloon{
+            static int findMinArrowShots(int[][] points) {
+                if(points.length==0){
+                    return 0;
+                }
+                Arrays.sort(points,(a,b)->Integer.compare(a[1],b[1]));
+                int count = 1;
+                int x_end = points[0][1];
+                for(int[] num:points){
+                    if(num[0]>x_end){//发现不重叠
+                        count++;
+                        x_end = num[1];
+                    }
+                }
+                return count;
+            }
+
+            public static void main(String[] args) {
+                int[][] case1 = {{10,16},{2,8},{1,6},{7,12}}; //2
+                int[][] case2 = {{1,2},{3,4},{5,6},{7,8}};//4
+                int[][] case3 = {{1,2},{2,3},{3,4},{4,5}};//2 注意区间相连也可以被箭射爆
+                int[][] case4 = {{1,2}};//1
+                int[][] case5 = {{2,3},{2,3}};//1
+                int[][] case6 = {{-2147483646,-2147483645},{2147483646,2147483647}};
+                //System.out.println(IntervalSchedule.intervalScheduleExtremeSolution(case1));
+                //System.out.println(IntervalSchedule.intervalScheduleExtremeSolution(case2));
+                //System.out.println(findMinArrowShots(case3));
+                //System.out.println(IntervalSchedule.intervalScheduleExtremeSolution(case4));
+                //System.out.println(IntervalSchedule.intervalScheduleExtremeSolution(case5));
+                System.out.println(IntervalSchedule.intervalScheduleExtremeSolution(case6));
+            }
+        }
+
+        /**
+         从戳气球问题看贪心算法
+         让气球上下平移对end进行排序，达到将接近的气球尽量放在一起的效果
+         贪心算法一般用来解决需要"找到要做某事的最小数量" 或 "找到在某些情况下适合的最大物品数量"，且提供的是无序的输入
+         通常需要对输入数据进行排序
+         */
+    }
+
 
     /**
      # 494 目标和
@@ -157,4 +309,6 @@ public class _04DynamicProgramme {
     static class TargetSumWays{
 
     }
+
+
 }

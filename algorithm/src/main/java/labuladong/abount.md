@@ -55,10 +55,23 @@ gitbook链接   [labuladong的算法小抄](https://labuladong.gitbook.io/algo/)
 [动态规划之四键键盘](https://labuladong.gitbook.io/algo/dong-tai-gui-hua-xi-lie/dong-tai-gui-hua-zhi-si-jian-jian-pan)
 
 [打家劫舍问题](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247484800&idx=1&sn=1016975b9e8df0b8f6df996a5fded0af&chksm=9bd7fb88aca0729eb2d450cca8111abd8f861236b04125ce556171cb520e298ddec4d90823b3&scene=21#wechat_redirect)
-[贪心算法之区间调度问题](https://mp.weixin.qq.com/s?src=11&timestamp=1602919821&ver=2649&signature=KCHFkvySbAJjuSyHEvkuRRS62dI5Bb8IYAdDSZokAPG0eIrt1Yj-*yHrsN8PURXBSjWGMBSF7*HXvxXGfqymdmOAwLAUxDbi7Hwz4O0FMysaXNzz6ABdHkZ2dqelf1v1&new=1)
+
+
+- 特殊动态规划：贪心算法
+[贪心算法之区间调度问题](https://labuladong.gitbook.io/algo/dong-tai-gui-hua-xi-lie/tan-xin-suan-fa-zhi-qu-jian-tiao-du-wen-ti)
+[经典动态规划之最小数量的箭射气球问题](https://mp.weixin.qq.com/s?src=11&timestamp=1602920369&ver=2649&signature=NPL-Jl6Qt1e3P702UFwLsruBlGV36G98dlfhsAY3XDgC9zO2RShjaiqgzY6uW*nuiBaZOiRMZWu5vh9uijlKkq3puXs8fgOBoAPwt3uZIQphGV1fWsER8v3UJgx7ATYi&new=1)
+
+- 复杂动态规划
 [高楼扔鸡蛋](https://mp.weixin.qq.com/s?src=11&timestamp=1602920440&ver=2649&signature=NPL-Jl6Qt1e3P702UFwLsruBlGV36G98dlfhsAY3XDiZnpWohskQ-72M5Hu7npaKZaWGi6Pw3Novh*SFrz4aYToeUcstSxu8Smez5KD5eGkCAFREtFJSATyvnK7VhOaV&new=1)
 [经典动态规划之高楼扔鸡蛋进阶版](https://mp.weixin.qq.com/s?src=11&timestamp=1602920440&ver=2649&signature=NPL-Jl6Qt1e3P702UFwLsruBlGV36G98dlfhsAY3XDiAanOnNIpwb*A2O74UrcND-rOjiANZI68K1I5ZJezh9pwoZTn0uyjl4ya-JFJqE3Nj4pv-cGqGV7ju67*4S1br&new=1)
-[经典动态规划之戳气球问题](https://mp.weixin.qq.com/s?src=11&timestamp=1602920369&ver=2649&signature=NPL-Jl6Qt1e3P702UFwLsruBlGV36G98dlfhsAY3XDgC9zO2RShjaiqgzY6uW*nuiBaZOiRMZWu5vh9uijlKkq3puXs8fgOBoAPwt3uZIQphGV1fWsER8v3UJgx7ATYi&new=1)
+[戳气球问题]()
 
 [我作了首诗，保你闭着眼睛也能写对二分查找](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247485044&idx=1&sn=e6b95782141c17abe206bfe2323a4226&chksm=9bd7f87caca0716aa5add0ddddce0bfe06f1f878aafb35113644ebf0cf0bfe51659da1c1b733&scene=21#wechat_redirect)
 
+东哥吃葡萄时竟然吃出一道算法题！
+回溯算法最佳实践：括号生成
+FloodFill算法详解及应用
+如何调度考生的座位
+二分搜索只能用来查找元素吗？
+如何用算法高效寻找素数？
+《动态规划详解（修订版）》和《回溯算法详解（修订版）》
