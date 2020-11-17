@@ -1,6 +1,5 @@
 package com.changingedu.elasticsearch;
 
-import com.qingqing.api.proto.v1.app.AppCommon.HighlightTag;
 import org.apache.http.HttpHost;
 import org.apache.lucene.search.SortField;
 import org.elasticsearch.action.search.SearchRequest;
@@ -14,13 +13,13 @@ import org.elasticsearch.common.lucene.search.function.CombineFunction;
 import org.elasticsearch.common.lucene.search.function.FunctionScoreQuery.ScoreMode;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.common.xcontent.XContentHelper;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.index.query.functionscore.ScriptScoreFunctionBuilder;
 import org.elasticsearch.script.Script;
@@ -50,7 +49,7 @@ import java.util.stream.Collectors;
 
 public class SearchServiceDemo {
     private static final Logger logger = LoggerFactory.getLogger(SearchServiceDemo.class);
-    public static final String HOST = "http://api.es.idc.cedu.cn";
+    public static final String HOST = "172.22.12.3";//"http://api.es.idc.cedu.cn";
     public static final Integer PORT = 9201;
     public static final String TEACHER_INDEX = "apptest-teacher_index_9-4-0-0";
     static RestHighLevelClient client = buildClient();
@@ -69,106 +68,183 @@ public class SearchServiceDemo {
         return client;
     }
 
+    static class MasterSearchBuilder{
+        static void first(){
+            SearchSourceBuilder srchSrcBuilder = new SearchSourceBuilder();
+            TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("teacher_id", 5762);
+            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            boolQueryBuilder.must(termQueryBuilder);
+            srchSrcBuilder.query(termQueryBuilder);
+            Boolean explain = srchSrcBuilder.explain();
+            System.out.println(srchSrcBuilder.toString());
+        }
+
+        public static void main(String[] args) {
+            first();
+        }
+    }
+
     static class Primary{
-        //查询参数构建
+        //查询参数构建基本查询入参的构建，如分页参数、设置超时
         static SearchSourceBuilder searchSourceBuilder(){
             SearchSourceBuilder srchSrcBuilder = new SearchSourceBuilder();
-            srchSrcBuilder.from(2).size(10);
-            //复杂的查询条件，查询API测试
-            searchSourceBuilder(srchSrcBuilder);
+            srchSrcBuilder.from(0).size(10);
+            //调用方法生成查询条件，这里可以写地很复杂
+            //基本查询
+            BoolQueryBuilder baseQueryBuilder = baseQuery(srchSrcBuilder);
+            //添加FunctionScore计算分值用于结果排序
+            functionScoreBuilder(srchSrcBuilder,baseQueryBuilder);
+            fieldSortAndHighlight(srchSrcBuilder);
+            //使用painless处理字段
+            addIntelligentScoreScript(srchSrcBuilder);
+            //聚合操作
+            aggregateOperation(srchSrcBuilder);
+            //_source里目前有123个字段，都显示太长了
+            specifyFields(srchSrcBuilder);
             srchSrcBuilder.trackScores(true);
             srchSrcBuilder.fetchSource(true);
             srchSrcBuilder.trackTotalHits(true);
             srchSrcBuilder.timeout(new TimeValue(5000, TimeUnit.MILLISECONDS));
+            System.out.println(srchSrcBuilder.toString());
             return srchSrcBuilder;
         }
-        //基本查询，SQL的 where and and 在ES中怎么写，这里进行了演示
-        //这里以teacher_attribute_tag为例进行演示
-        //第一个：是海风老师
-        static void baseQuery(SearchSourceBuilder srchBuilder){
-            BoolQueryBuilder builder = QueryBuilders.boolQuery();
 
+        static void teacherIdQuery(SearchSourceBuilder srchBuilder){
+            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            long[] teacherIds = {5762,5763};
+            QueryBuilder teacherIdsCon = QueryBuilders.termsQuery("teacher_id", teacherIds);
+
+            boolQueryBuilder.must(teacherIdsCon);
+            srchBuilder.query(boolQueryBuilder);
+            System.out.println(srchBuilder.toString());
+        }
+
+        //SQL的 where and and 在ES中怎么写，这里进行了演示，注意 and or的嵌套容易出错
+        //这里以teacher_attribute_tag为例进行演示 分别是：海风老师、老师专供城市、老师ID
+        static BoolQueryBuilder baseQuery(SearchSourceBuilder srchBuilder){
+            BoolQueryBuilder baseQueryBuilder = QueryBuilders.boolQuery();
             //基础查询：海风老师筛选
             String path = "teacher_attr_tags";
             String isHfParttimeFieldName = "teacher_attr_tags.is_hf_part_time_teacher";
-            builder.must(QueryBuilders.nestedQuery(path, QueryBuilders.termQuery(isHfParttimeFieldName, true), org.apache.lucene.search.join.ScoreMode.None)).boost(0.0f);//boost干啥用的
+            // baseQueryBuilder.must(QueryBuilders.nestedQuery(path, QueryBuilders.termQuery(isHfParttimeFieldName, true), org.apache.lucene.search.join.ScoreMode.None)).boost(0.0f);//boost干啥用的
             String isHfFieldName = "teacher_attr_tags.is_hf_teacher";
-            builder.must(QueryBuilders.nestedQuery(path, QueryBuilders.termQuery(isHfFieldName, true), org.apache.lucene.search.join.ScoreMode.None)).boost(0.0f);
+            // baseQueryBuilder.must(QueryBuilders.nestedQuery(path, QueryBuilders.termQuery(isHfFieldName, false), org.apache.lucene.search.join.ScoreMode.None)).boost(0.0f);
 
-            //过滤器：
-            BoolQueryBuilder builder2 = QueryBuilders.boolQuery();
-            BoolQueryBuilder builder3 = QueryBuilders.boolQuery();
-            builder3.should(QueryBuilders.termQuery("teacher_city_orientation",12));
+            //要想使用highlight功能，需要将这里的match匹配打开
+            MatchQueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("address", "徐汇区");
+            baseQueryBuilder.should(matchQueryBuilder);
+
+            //老师专供城市
+            BoolQueryBuilder boolFilter = QueryBuilders.boolQuery();
+            // boolFilter.must(QueryBuilders.termQuery("teacher_city_orientation",12));
             //老师ID过滤
+            Long[] teacherIds = {5764L,5763L,3362L,3856L,43113L,10001L};
+            QueryBuilder teacherIdCon = QueryBuilders.termsQuery("teacher_id", teacherIds);
+            // boolFilter.must(teacherIdCon);
 
-            builder2.must(builder3).must();
-
-
-            builder.filter(builder2.boost(0.0f));
-
-            //这个query可以传进去 BoolQueryBuilder FilterFunctionBuilder
-            srchBuilder.query(builder);
+            ExistsQueryBuilder kabcExist = QueryBuilders.existsQuery("kabc");
+            boolFilter.must(kabcExist);
+            //上面的查询条件当作Filter用
+            baseQueryBuilder.filter(boolFilter.boost(0.0f));
+            srchBuilder.query(baseQueryBuilder);
+            return baseQueryBuilder;
         }
-        //对搜索内容进行复杂排序,可以读取配置决定哪些字段的分值占据更高的比重，以便让某些老师前置
-        static void FunctionScoreBuilder(SearchSourceBuilder srchBuilder,QueryBuilder queryBuilder){
-            String path = "doc[\"intelligent_score\"]";
-            String scriptTemplate = "if(%s.size() > 0){return %s.value;} else {return 0;}";
-            String script = String.format(scriptTemplate, path, path);
+
+        //使用脚本依据字段值进行分数计算，计算结果放在_score里
+        static void functionScoreBuilder(SearchSourceBuilder srchBuilder, QueryBuilder queryBuilder){
+            String path = "doc[\"kabc\"]";
+            String scriptTemplate = "if(%s.size() > 0){if(%s.value == 1){return 3;}else{return 2;}} else {return -8;}";
+            String script = String.format(scriptTemplate, path, path, path);
             Script scriptEntity = new Script(ScriptType.INLINE, "painless", script, Collections.emptyMap());
             ScriptScoreFunctionBuilder funcBuilder = ScoreFunctionBuilders.scriptFunction(scriptEntity);
             //此处脚本的执行与排序类型有关，如搜索老师按距离学生远近排序时就要来个距离得分权重搜索，显然painless脚本就是拿来计算某个字段的得分的
             //FunctionScoreQueryBuilder可以用于权重赋分搜索 老师最低价、老师等级等信息通过painless脚本处理可以得到计算结果
-            funcBuilder.setWeight(1+2+3+14);//??? 可以根据业务需要不断增加totalweight,每个weight配置在某个field维度上,这样totalWeight越来越大，不知啥用途？？？
-            FilterFunctionBuilder[] filterFunctionBuilders = {new FilterFunctionBuilder(funcBuilder)};
-            FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders.functionScoreQuery(queryBuilder, filterFunctionBuilders);
-            functionScoreQueryBuilder.scoreMode(ScoreMode.SUM)//？？
-                    .boostMode(CombineFunction.REPLACE);//??
-            srchBuilder.query(queryBuilder);
-        }
+            funcBuilder.setWeight(2+3);//这个weight会乘以5
+            //functionScoreQuery可以传入多个ScriptScoreFunctionBuilder
+            FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders.functionScoreQuery(queryBuilder, funcBuilder);
+            functionScoreQueryBuilder.scoreMode(ScoreMode.SUM).boostMode(CombineFunction.SUM);//??
+            srchBuilder.query(functionScoreQueryBuilder);
+        }//更复杂的多函数分值计算见 https://my.oschina.net/u/3734816/blog/3105125
+
         //复杂的查询条件，查询API测试
-        static void searchSourceBuilder(SearchSourceBuilder srchBuilder){
+        static void fieldSortAndHighlight(SearchSourceBuilder srchSrcBuilder){
             //简单排序（多个字段进行排序，类似SQL的order by teacher_id, kabc）
             FieldSortBuilder teacherIdAscSort = SortBuilders.fieldSort("teacher_id").order(SortOrder.ASC);
             FieldSortBuilder kabcDescSort = SortBuilders.fieldSort("kabc").order(SortOrder.DESC);
-            srchBuilder.sort(kabcDescSort).sort(teacherIdAscSort);
-            //聚合操作？？也可以多个,甚至是嵌套
-            AggregationBuilder aggBuilder = AggregationBuilders.terms("term_city_id_agg").field("city_id").size(100);
-            AggregationBuilder nestedBuilder = AggregationBuilders.nested("nest_course_comment_agg", "teacher_phrases");//老师评论标签
-            AggregationBuilder innerBulder = AggregationBuilders.terms("course_comment_phrase_agg").field("teacher_phrases.phrase_name.raw").size(100);
-            nestedBuilder.subAggregation(innerBulder);
-            srchBuilder.aggregation(aggBuilder).aggregation(nestedBuilder);
+            //使用FunctionScore的计算结果进行排序
+            FieldSortBuilder scoreDescSort = SortBuilders.fieldSort("_score").order(SortOrder.DESC);
+            srchSrcBuilder.sort(scoreDescSort).sort(teacherIdAscSort);
             //highlight字段
+            //需要确保有QueryBuilder将address match匹配进来，实际结果就是会将address中出现的"徐汇区"三个字使用highlight中提供的前后缀进行包裹，放在与_source同级的highlight字段中
+            //highlight{address:"<strong>徐汇区</strong>xxx"}
             HighlightBuilder hlbuilder = new HighlightBuilder();
+            hlbuilder.field("address");
             hlbuilder.preTags("<strong>").postTags("</strong>");
-            srchBuilder.highlighter(hlbuilder);
+            srchSrcBuilder.highlighter(hlbuilder);
+        }
+
+        /*
+         聚合操作，相当于SQL里的 group by
+         这里以 group by kabc,sex为例
+         会在_source同级生成一个aggregations,其中下一级是AggregationBuilders指定的名称，也就是分组名称，
+         每个分组下依据数据差异情况分为多个bucket，每个bucket的key提示这一小组的相同取值，在doc_count里是小组内成员数量
+         聚合可以嵌套
+         */
+        static void aggregateOperation(SearchSourceBuilder srchSrcBuilder){
+            AggregationBuilder kabcAgg = AggregationBuilders.terms("field_kabc").field("kabc").size(100);
+            //如果_source下的field含有子field，才使用nested，如teacher_attribute_tag.is_hf_teacher
+            AggregationBuilder schoolAgeAgg = AggregationBuilders.terms("field_schoolage").field("school_age");//老师性别
+            kabcAgg.subAggregation(schoolAgeAgg);
+            srchSrcBuilder.aggregation(kabcAgg);//.aggregation(nestedBuilder);
         }
         //对某些字段应用painless脚本进行计算得到的结果作为单独的字段返回
-        static void addPainlessScript2SrchSrcBuilder(SearchSourceBuilder srchBuilder){
+        static void addPainlessScript2SrchSrcBuilder(SearchSourceBuilder srchSrcBuilder){
             Map<String, Object> params = new HashMap<>();
-            params.put("lon",new Double(12.3));
-            params.put("lat",new Double(12.3));
+            params.put("lon",12.3);
+            params.put("lat",12.3);
             String path = "doc[\"address_geo\"]";
             String scriptTemplate = "if(%s.size() > 0){return %s.arcDistance(params.%s, params.%s)*0.001;} else {return -1;}";
             String painlessScriptContent = String.format(scriptTemplate, path, path, "lat", "lon");
             Script painlessScript = new Script(ScriptType.INLINE, "painless", painlessScriptContent, params);
-            srchBuilder.scriptField("distanceX", painlessScript);
+            srchSrcBuilder.scriptField("distanceX", painlessScript);
         }
+        //测试painless脚本，对intelligent_score进行实时计算，结果放在fields中
+        static void addIntelligentScoreScript(SearchSourceBuilder srchSrcBuilder){
+            String scriptStr = "if(doc['intelligent_score'].size() > 0){  return doc['intelligent_score'].value + 5;}else {return -12;}";
+            Script script = new Script(ScriptType.INLINE,"painless",scriptStr, new HashMap<>());
+            srchSrcBuilder.scriptField("intelligent_score",script);
+        }
+        //你想返回哪些字段
+        static void specifyFields(SearchSourceBuilder srchSrcBuilder){
+            String[] includeFields = new String[]{"teacher_id","assistant_id","assistant_name","encrypt_assistant_phone","address","teacher_status","sex","real_name","nick","address_geo","register_time","school_age","teacher_attr_tags","course_id","student_count","total_teach_time","teacher_source","kabc","intelligent_score"};
+            String[] excludeFields = {};
+            srchSrcBuilder.fetchSource(includeFields, excludeFields);
+        }
+
         //解析搜索结果中的主体内容
         static void parseSearchResult(SearchHits searchHits){
             float maxScore = searchHits.getMaxScore();
-            logger.info("搜索结果: maxScore = {}", maxScore);
+            logger.info("maxScore = {}, 命中总数 totalCount = {}", maxScore, searchHits.getTotalHits() == null ? 0 : searchHits.getTotalHits().value);
+            SearchHit[] pageItems = searchHits.getHits();
+            logger.info("当前分页命中记录数量 currentPageSize = {}", pageItems.length);
             SortField[] sortFields = searchHits.getSortFields();
-            for (SortField sortField : sortFields){
-                logger.info("sortField = {}", sortField.getField());
+            if (sortFields != null){
+                for (SortField sortField : sortFields){
+                    logger.info("sortField = {}", sortField.getField());
+                }
             }
-            for (SearchHit hit : searchHits.getHits()){
+            //hit位于返回结果的_source字段中
+            for (SearchHit hit : pageItems){
                 Map<String, DocumentField> fields = hit.getFields();
-                logger.info("hit中包含的field：{}", fields);
+                logger.info("hit中包含的field数量：{}", fields.size());
+                fields.entrySet().stream().forEach(item -> {//被painless处理的field会放在这里
+                    logger.info("hit中处理好的field：name = {}, value = {}", item.getKey(), item.getValue());
+                });
                 Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-                String distanceX = "distanceX";
-                DocumentField distanceXField = hit.field(distanceX);
+                String encryptPhone = "encrypt_phone_number";
+                DocumentField distanceXField = hit.field(encryptPhone);
                 if (distanceXField != null){
-                    logger.info("hit.field()与hit.getResourceAsMap().get()是否同效果：{} - {}", distanceXField.getValue(), sourceAsMap.get(distanceX));
+                    logger.info("hit.field()与hit.getResourceAsMap().get()是否同效果：{} - {}", distanceXField.getValue(), sourceAsMap.get(encryptPhone));
                 }
                 String strMainBody = hit.getSourceAsString();
                 logger.info("搜索结果的主体内容是：{}", strMainBody);
@@ -176,7 +252,7 @@ public class SearchServiceDemo {
         }
 
         //解析搜索结果中的Highlighted字段
-        static void researchHighlightedFields(SearchHits searchHits){
+        static void parseHighlightedFields(SearchHits searchHits){
             for (SearchHit hit : searchHits.getHits()){
                 Map<String, HighlightField> highlightFields = hit.getHighlightFields();
                 highlightFields.entrySet().stream().forEach(entry -> {
@@ -189,8 +265,9 @@ public class SearchServiceDemo {
 
         }
 
-        static void pageQuery() throws IOException {
-            SearchRequest schRequest = new SearchRequest(TEACHER_INDEX);
+        //搜索总入口
+        static void searchMainEntrance() throws IOException {
+            SearchRequest srchRequest = new SearchRequest(TEACHER_INDEX);
             /*
              关于SearchType （ref https://blog.csdn.net/wangyunpeng0319/article/details/78218332）
              在数据分片的情况下，获取全部数据某种排名某个数量的记录数目
@@ -204,16 +281,14 @@ public class SearchServiceDemo {
                 > DFS是一个怎样的过程
                 DFS就是在真正查询之前，先把各个分片的词频率和文档频率收集下来，然后在词搜索的时候，各分片依据全局的词频和文档频率进行搜索和排名。
              */
-            schRequest.searchType(SearchType.DFS_QUERY_THEN_FETCH);
-            schRequest.source(searchSourceBuilder());
+            srchRequest.searchType(SearchType.DFS_QUERY_THEN_FETCH);
+            srchRequest.source(searchSourceBuilder());
+
             //调client去搜索
-            SearchResponse searchResponse = client.search(schRequest, RequestOptions.DEFAULT);
+            SearchResponse searchResponse = client.search(srchRequest, RequestOptions.DEFAULT);
             SearchHits hits = searchResponse.getHits();
-            SearchHit[] searchHits = hits.getHits();
-            logger.info("搜索命中数量 = {}", searchHits.length);
-            logger.info("命中数量 = {}", hits.getTotalHits() == null ? 0 : hits.getTotalHits().value);
-            logger.info("尝试取totalHits: {}", hits.getTotalHits());
             parseSearchResult(hits);
+            parseHighlightedFields(hits);
         }
 
 
@@ -222,11 +297,15 @@ public class SearchServiceDemo {
 
     public static void main(String[] args) {
         try {
-            Primary.pageQuery();
+            Primary.searchMainEntrance();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-
+            try {
+                client.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
