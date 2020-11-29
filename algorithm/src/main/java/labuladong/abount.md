@@ -59,6 +59,15 @@ gitbook链接   [labuladong的算法小抄](https://labuladong.gitbook.io/algo/)
 
 ## 数据结构
 
+[水塘抽样算法](https://labuladong.gitbook.io/algo/gao-pin-mian-shi-xi-lie/shui-tang-chou-yang)
+
+### 数组
+
+[去除重复字母]()
+[单调栈的使用]()
+[有序数组去重]()
+
+
 手把手实现LRU算法
 手把手实现LFU算法
 
@@ -72,6 +81,7 @@ FloodFill算法详解及应用
 二分搜索只能用来查找元素吗？
 如何用算法高效寻找素数？
 《动态规划详解（修订版）》和《回溯算法详解（修订版）》
-[水塘抽样算法](https://labuladong.gitbook.io/algo/gao-pin-mian-shi-xi-lie/shui-tang-chou-yang)
+
+https://leetcode-cn.com/problems/remove-duplicate-letters/solution/yi-zhao-chi-bian-li-kou-si-dao-ti-ma-ma-zai-ye-b-4/
 
 ## 待定
