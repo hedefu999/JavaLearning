@@ -1,6 +1,7 @@
 package labuladong;
 
 import common.ListNode;
+import common.PrintUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1258,6 +1259,218 @@ public class _05DataStructure {
                     }
                 }
                 return left - 1;
+            }
+        }
+    }
+
+    /**
+      训练递归思维 - 反转链表系列
+     */
+    static class RecursionInRevertingLinkedList{
+        static class RevertEntireLinkedList{
+            /**
+              方法1: 就地反转单链表  ⓶ ① ③ ④ ⑤
+
+             head -> 3 -> 2 -> 1 -> 4 -> 5
+             就是不断扫描后面的结点放到top处，同时注意1这个最开始的结点
+
+             */
+            static void revertLocally(ListNode head){
+                ListNode oldTop = head.next;
+                ListNode scan = oldTop.next;
+                oldTop.next = null;
+                while (scan != null){
+                    ListNode newTop = scan;
+                    scan = scan.next;
+                    ListNode preTop = head.next;
+                    head.next = newTop;newTop.next = preTop;
+                    //oldTop.next = scan;
+                }
+            }
+            static void revertLocally2(ListNode head){
+                if (head == null) return;
+                //需要跳过第一个结点进行就地插入，并且第一个结点的next还要断开防止造成死循环
+                ListNode scan = head.next == null?null:head.next.next;
+                ListNode scanNext = scan == null?null:scan.next;
+                if (head.next != null){
+                    head.next.next = null;
+                }
+                while (scan != null){
+                    //在头部插入结点
+                    scan.next = head.next;
+                    head.next = scan;
+                    //双指针后移
+                    scan = scanNext;
+                    scanNext = scanNext == null?null:scanNext.next;
+                }
+            }
+            /**
+              方法2: 递归
+             反转链表的递归写法比上面的指针扫描操作细节上更简单
+             */
+            //原地反转的递归，这样需要保持head不被丢掉
+            static ListNode revertRecursively(ListNode head, ListNode current){
+                if (current == null){
+                    return head;
+                }
+                //if (current.next == null){
+                //    head.next = current;
+                //    return current;
+                //}
+                //递归就是不断缩小问题规模，找到最后一个结点用于连接current
+                ListNode tail = revertRecursively(head, current.next);
+                current.next = null;
+                tail.next = current;
+                return current;
+            }
+            //尝试只传一个参数
+            static ListNode revertRecursively(ListNode current){
+                if (current.next == null) return current;//找到了最后一个结点，但由于没有外部变量持有这个最终的top结点，会导致最后变成两根链表 head -> 1; 8->7->6...->2->1
+                ListNode tail = revertRecursively(current.next);
+                //tail表示当前递归子链表的最后一个结点，current作为当前扫描到的结点显然是要放在tail后面的
+                tail.next = current;
+                current.next = null;
+                return current;
+            }
+            //上面递归写法还可以再精简，不过会难看懂
+            static ListNode revertListRecursively(ListNode current){
+                if (current.next == null) return current;//终末结点
+                ListNode tail = revertListRecursively(current.next);
+                current.next.next = current;//这段逻辑可以用1~8的结点，current=7来思考
+                current.next = null;
+                /*
+                 上面两行过于巧妙，通过此案例可理解：current = 7->8 只含有两个结点的链表如何反转
+                 因为递归返回时总是会出现这种两个结点反转的情况
+                 */
+                return tail;//这个终末结点tail就是最终得到的head
+                /*
+                上述解法最后返回的是current，而这里是tail
+                返回current会导致新的top结点无人引用
+                 */
+            }
+            //第二种递归写法会把dummy结点也给revert到末尾去,所以其使用方式还有不同：head.next = revertListRecursively(head.next);
+            public static void main(String[] args) {
+                int nodeCount = 8;//控制结点数量可以检查代码的健壮性
+                ListNode node = new ListNode(-1);
+                ListNode head = node;
+                for (int i = 1; i <= nodeCount; i++) {
+                    ListNode newNode = new ListNode(i);
+                    node.next = newNode;
+                    node = newNode;
+                }
+                PrintUtils.printListNodes(head);
+                head.next = revertListRecursively(head.next);
+                PrintUtils.printListNodes(head);
+            }
+        }
+
+        static class ReverseTopNLinkedList{
+            /**
+              反转链表前N个结点,不带dummy结点的链表
+             1. 链表分成两段处理,前半部分使用整体反转的方法 【略】
+             2. 直接递归反转
+             */
+            /*
+            对于 1->2->3->4->5->6 这样的链表反转前3个结点
+             结果是: 3->2->1 ->4->5->6
+             */
+            static ListNode reverseTopN2(ListNode head, int n){
+                if (n == 1){
+                    //即将到达后半部不反转的结点
+                    return head;//返回反转部分的最后一个结点作为head
+                }
+                ListNode tail = reverseTopN2(head.next, n - 1);//tail=4,head=3,n=1 //tail=3,head=2,n=2 //tail=3,head=1,n=3 还可以，本人脑子里可以压三个栈，写代码就舒服点
+                //head.next = tail; return head; n=1
+                //n=2
+                ListNode tmpHead = tail;
+                while (n-- > 2){
+                    tmpHead = tmpHead.next;
+                }
+                head.next = tmpHead.next;
+                tmpHead.next = head;
+                //递归结果应返回最终能作为head使用的结点
+                return tail;
+            }
+            /*
+             上述解法里用了一个while向下找结点插入的位置，这种插入的思路完全是沿袭了非递归解法的思路，显然要对整体反转的递归算法有所理解
+             //head.next == null || n <= 1 是在n超过链表长度的情况下加上的，通常n<链表长度时判断 n==1 就可以了
+             */
+            public static ListNode reverseTopN3(ListNode head, int n, ListNode back){
+                if (head.next == null || n <= 1){//不可以将4返回来，即便返回来也没法进行任何操作，还会让代码臃肿
+                    back.next = head.next;//找到后面不反转的head,back仅用于标记（在递归结束时才能赋上值），不做运算
+                    //由于Java引用传递的问题，对于4的引用要放在back对象的字段里引用起来，比较费劲
+                    return head;
+                }
+                ListNode tail = reverseTopN3(head.next, n-1, back);//逐步缩小问题，返回的自然是要反转部分的后面结点
+                //返回情况 tail=3,head=2,n=2; tail=3,head=1,n=3
+                head.next.next = head;//3指向2,第二轮就发现这种head.next.next的妙处了，此时head=1跟tail=3都指向2,只要将1->2反转就可以
+                head.next = back.next;//2指向3的断开，2应该指向后半部分不反转的
+                return tail;//3成为真正的头结点，返回
+            }
+
+            public static void main(String[] args) {
+                int nodeCount = 3;//控制结点数量可以检查代码的健壮性
+                ListNode head = new ListNode(1);
+                ListNode tail = head;
+                for (int i = 2; i <= nodeCount; i++) {
+                    tail.next = new ListNode(i);
+                    tail = tail.next;
+                }
+                PrintUtils.printListNodes(head);
+                ListNode newHead = reverseTopN3(head, 2, new ListNode(-1));
+                PrintUtils.printListNodes(newHead);
+
+                ListNode second = new ListNode(1);second.next = new ListNode(2);
+                second = reverseTopN3(second, 2, new ListNode(-1));
+                PrintUtils.printListNodes(second);
+            }
+        }
+        //进入最复杂的场景，返回的部门不限定开始结束位置
+        static class ReversePartialLinkedList{
+            //反转head链表中第 [start,end] 个元素，从1开始计数
+            static ListNode reverseBetween(ListNode head, int start, int end){
+                if (start <= 1){//到达要反转的部分的起始结点
+                    //反转此时head开始恰好end个结点
+                    return ReverseTopNLinkedList.reverseTopN3(head, end, new ListNode(-1));
+                }
+                ListNode tail = reverseBetween(head.next, start - 1, end - 1);
+                //返回结点不需要反转的咋写？前面写了反转的
+                head.next = tail;//这一行只在start-1处对head进行操作了，其他情况原本就是head -> tail
+                return head;
+            }
+            //上面的写法显然是递归过火了,这里使用遍历/迭代，但是在应对特殊测试用例的极难调
+            static ListNode reverseBetween2(ListNode head, int start, int end){
+                ListNode lastLeftNode = start > 1?head:null;
+                ListNode middleHead = head;
+                int count = end - start + 1;
+                int startcopy = start;
+                while (startcopy-- > 2){
+                    lastLeftNode = lastLeftNode.next;
+                }
+                if (start >= 2){
+                    middleHead = lastLeftNode.next;
+                }
+                if (count > 1){
+                    middleHead = ReverseTopNLinkedList.reverseTopN3(middleHead, count, new ListNode(-1));
+                    if (start == 1){
+                        return middleHead;
+                    }
+                    lastLeftNode.next = middleHead;
+                }
+
+                return head;
+            }
+            //上述是将链表分成两段处理，但一些链表只有一个元素或者对全部结点反转时代码兼容很难，可以针对head.next=null和start=1处理，总之没有递归简洁
+            //[5],1,1; [1,2],1,2; [1,2,3,4,5,6],3,5
+            public static void main(String[] args) {
+                //就是这两个测试用例搞的reverseBetween2乱
+                ListNode first = new ListNode(5);
+                first = reverseBetween(first,1,1);
+                PrintUtils.printListNodes(first);
+
+                ListNode second = new ListNode(1);second.next = new ListNode(2);
+                second = reverseBetween(second,1,2);
+                PrintUtils.printListNodes(second);
             }
         }
     }
