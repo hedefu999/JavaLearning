@@ -10,7 +10,6 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Address;
 import javax.mail.BodyPart;
-import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
@@ -18,6 +17,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMessage.RecipientType;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
@@ -52,7 +52,7 @@ public class JavaMailSenderDemos {
                 properties.getProperty("mailsend.from"),
                 properties.getProperty("mailsend.from.username"),
                 properties.getProperty("mailsend.from.password"));
-        content = INSTANCE.new Content("测试邮件标题","<h2>测试邮件内容</h2>", null, "附件名字", null);
+        content = INSTANCE.new Content("测试邮件标题222","<h2>测试邮件内容</h2>", null, "附件名字", null);
         content.setTos(properties.getProperty("mailsend.tos").split(","));
         content.setAttachmentFile(new File(properties.getProperty("mailsend.file.pdf.path")));
     }
@@ -88,7 +88,7 @@ public class JavaMailSenderDemos {
     }
 
     /**
-     *
+     原生的使用javax进行邮件发送
      */
     static class JavaxMailSender{
         public static void main(String[] args) throws Exception {
@@ -112,13 +112,15 @@ public class JavaMailSenderDemos {
             // mailMessage.setHeader("Message-ID","12113");
 
             Address from = new InternetAddress(account.getFrom());
-            // InternetAddress[] froms = InternetAddress.parse(account.getFrom());
             mailMessage.setFrom(from);
             String[] toAddrs = content.getTos();
-            Address[] toAddresses = new Address[toAddrs.length];
+            Address[] toAddresses = new InternetAddress[toAddrs.length];
             for (int i = 0; i < toAddrs.length; i++) {
                 toAddresses[i] = new InternetAddress(toAddrs[i]);
             }
+            // InternetAddress[] froms = InternetAddress.parse(content.getTos());
+            // InternetAddress raw = froms[0];
+            // InternetAddress internetAddress = new InternetAddress(raw.getAddress(), raw.getPersonal(), "UTF-8");
             //RecipientType 有TO CC BCC
             mailMessage.setRecipients(RecipientType.TO, toAddresses);
             mailMessage.setSubject(content.getTitle());
