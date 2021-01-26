@@ -13,3 +13,4 @@ novc/
 *.ico
 temp*/
 *DailyTest.java
+/changingedu/src/main/resources/changingedu.properties
