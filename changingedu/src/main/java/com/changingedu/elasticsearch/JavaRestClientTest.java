@@ -1,6 +1,5 @@
 package com.changingedu.elasticsearch;
 
-import com.mysql.cj.xdevapi.UpdateResult;
 import org.apache.http.HttpHost;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ActionListener;

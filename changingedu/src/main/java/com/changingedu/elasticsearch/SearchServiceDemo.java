@@ -34,6 +34,9 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +44,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,11 +83,36 @@ public class SearchServiceDemo {
             System.out.println(srchSrcBuilder.toString());
         }
 
+        /**
+         * 需求 (teacher_id = 5762 AND student_id = 5763) OR (teacher_id = 5764 AND student_id = 5765)
+         */
+        static void second(){
+            SearchSourceBuilder srchSrcBuilder = new SearchSourceBuilder();
+            BoolQueryBuilder boolQueryBuilderOut = QueryBuilders.boolQuery();
+
+            TermQueryBuilder termQueryBuilder1 = QueryBuilders.termQuery("teacher_id", 5762);
+            TermQueryBuilder termQueryBuilder2 = QueryBuilders.termQuery("student_id", 5763);
+            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            boolQueryBuilder.must(termQueryBuilder1);
+            boolQueryBuilder.must(termQueryBuilder2);
+
+            TermQueryBuilder termQueryBuilder3 = QueryBuilders.termQuery("teacher_id", 5764);
+            TermQueryBuilder termQueryBuilder4 = QueryBuilders.termQuery("student_id", 5765);
+            BoolQueryBuilder boolQueryBuilder2 = QueryBuilders.boolQuery();
+            boolQueryBuilder2.must(termQueryBuilder3);
+            boolQueryBuilder2.must(termQueryBuilder4);
+
+            boolQueryBuilderOut.should(boolQueryBuilder);
+            boolQueryBuilderOut.should(boolQueryBuilder2);
+            srchSrcBuilder.query(boolQueryBuilderOut);
+            System.out.println(srchSrcBuilder.toString());
+        }
+
         public static void main(String[] args) {
-            first();
+            second();
         }
     }
-
+    //由teacher_index引出的搜索API
     static class Primary{
         //查询参数构建基本查询入参的构建，如分页参数、设置超时
         static SearchSourceBuilder searchSourceBuilder(){
@@ -292,6 +321,36 @@ public class SearchServiceDemo {
         }
 
 
+
+    }
+
+    static class SuggestionCompletion{
+        static void buildKeywordsSuggestionQuery() {
+    //		CompletionSuggestionBuilder compBuilder = new CompletionSuggestionBuilder(PHRASE_NAME);  todo 两者区别
+            CompletionSuggestionBuilder compBuilder = SuggestBuilders.completionSuggestion("phrase_name_suggestion");
+            compBuilder.text("你好");
+            compBuilder.size(12);
+    //		compBuilder.field(PHRASE_NAME_SUGGESTION);
+
+            SuggestBuilder suggestBuilder = new SuggestBuilder();
+            suggestBuilder.addSuggestion("phrase_name",compBuilder);
+            SearchRequest searchRequest = new SearchRequest("indexName");
+            searchRequest.searchType(SearchType.DFS_QUERY_THEN_FETCH);
+
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            searchSourceBuilder.suggest(suggestBuilder);
+            searchSourceBuilder.trackTotalHits(true);
+            searchSourceBuilder.timeout(new TimeValue(30000, TimeUnit.MILLISECONDS));
+            searchRequest.source(searchSourceBuilder);
+
+            System.out.println(searchRequest.toString());
+        }
+
+        public static void main(String[] args) {
+            String dateWithTimeDistrict = "2020-12-02T11:48:01.475+08:00";
+            Date date = new Date(dateWithTimeDistrict);
+
+        }
 
     }
 
