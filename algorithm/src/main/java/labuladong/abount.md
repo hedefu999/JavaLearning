@@ -57,9 +57,8 @@ gitbook链接   [labuladong的算法小抄](https://labuladong.gitbook.io/algo/)
 [经典动态规划之高楼扔鸡蛋进阶版](https://mp.weixin.qq.com/s?src=11&timestamp=1602920440&ver=2649&signature=NPL-Jl6Qt1e3P702UFwLsruBlGV36G98dlfhsAY3XDiAanOnNIpwb*A2O74UrcND-rOjiANZI68K1I5ZJezh9pwoZTn0uyjl4ya-JFJqE3Nj4pv-cGqGV7ju67*4S1br&new=1)
 [戳气球问题]()
 
-## 数据结构
 
-[水塘抽样算法](https://labuladong.gitbook.io/algo/gao-pin-mian-shi-xi-lie/shui-tang-chou-yang)
+[我作了首诗，保你闭着眼睛也能写对二分查找](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247485044&idx=1&sn=e6b95782141c17abe206bfe2323a4226&chksm=9bd7f87caca0716aa5add0ddddce0bfe06f1f878aafb35113644ebf0cf0bfe51659da1c1b733&scene=21#wechat_redirect)
 
 ### 数组
 
@@ -67,12 +66,33 @@ gitbook链接   [labuladong的算法小抄](https://labuladong.gitbook.io/algo/)
 [单调栈的使用]()
 [有序数组去重]()
 
+## 数据结构
+
+[水塘抽样算法](https://labuladong.gitbook.io/algo/gao-pin-mian-shi-xi-lie/shui-tang-chou-yang)
+[递归反转链表的一部分]()
+[如何k个一组反转链表]()
+[如何判断回文链表]()
+[双指针技巧汇总]()
+
+[二叉树最近公共祖先]()
+[手把手带你刷二叉树（第一期）]()
+[手把手带你手刷二叉树（第二期）]()
+[手把手带你手刷二叉树（第三期）]()
+刷二叉搜索树（第一期）
+[]()
+[]()
+[]()
+[]()
+[]()
+[]()
+
 
 手把手实现LRU算法
 手把手实现LFU算法
+DFS与BFS
+如何高效解决接雨水问题
 
 
-[我作了首诗，保你闭着眼睛也能写对二分查找](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247485044&idx=1&sn=e6b95782141c17abe206bfe2323a4226&chksm=9bd7f87caca0716aa5add0ddddce0bfe06f1f878aafb35113644ebf0cf0bfe51659da1c1b733&scene=21#wechat_redirect)
 
 东哥吃葡萄时竟然吃出一道算法题！
 回溯算法最佳实践：括号生成

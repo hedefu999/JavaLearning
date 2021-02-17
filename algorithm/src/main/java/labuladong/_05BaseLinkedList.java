@@ -2,13 +2,14 @@ package labuladong;
 
 import common.ListNode;
 import common.PrintUtils;
+import common.TreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class _05DataStructure {
-    private static final Logger log = LoggerFactory.getLogger(_05DataStructure.class);
+public class _05BaseLinkedList {
+    private static final Logger log = LoggerFactory.getLogger(_05BaseLinkedList.class);
 
     /**
      # 380 常数时间插入、删除和获取随机元素
@@ -1265,11 +1266,12 @@ public class _05DataStructure {
 
     /**
       训练递归思维 - 反转链表系列
+     # 92. 反转链表的部分结点
      */
     static class RecursionInRevertingLinkedList{
         static class RevertEntireLinkedList{
             /**
-              方法1: 就地反转单链表  ⓶ ① ③ ④ ⑤
+              方法1: 头结点插入法  ⓶ ① ③ ④ ⑤
 
              head -> 3 -> 2 -> 1 -> 4 -> 5
              就是不断扫描后面的结点放到top处，同时注意1这个最开始的结点
@@ -1305,7 +1307,27 @@ public class _05DataStructure {
                 }
             }
             /**
-              方法2: 递归
+              方法2: 原地反转法
+             直接把指针依次反向，缺点是要保存很多临时变量，这里用了3个。需要知道tail在哪，用于部分反转/K组反转的子方法
+             思路类似 leetcode 25题的官解的迭代解法
+             只要给出[start,end]区间就能给出这部分的反转结果-新的头结点，居然要用三个指针扫描
+             */
+            static ListNode reverseKNodes(ListNode head, ListNode tail){
+                //三指针原地反转的方式
+                ListNode prev = head;
+                ListNode scan = prev.next;
+                ListNode next = scan.next;
+                while (prev != tail && scan != null){
+                    scan.next = prev;
+                    prev = scan;
+                    scan = next;
+                    next = next == null ? null : next.next;
+                }
+                head.next = null;
+                return tail;
+            }
+            /**
+              方法3: 递归
              反转链表的递归写法比上面的指针扫描操作细节上更简单
              */
             //原地反转的递归，这样需要保持head不被丢掉
@@ -1394,6 +1416,7 @@ public class _05DataStructure {
             /*
              上述解法里用了一个while向下找结点插入的位置，这种插入的思路完全是沿袭了非递归解法的思路，显然要对整体反转的递归算法有所理解
              //head.next == null || n <= 1 是在n超过链表长度的情况下加上的，通常n<链表长度时判断 n==1 就可以了
+             ListNode back 可以拿出来作为全局变量
              */
             public static ListNode reverseTopN3(ListNode head, int n, ListNode back){
                 if (head.next == null || n <= 1){//不可以将4返回来，即便返回来也没法进行任何操作，还会让代码臃肿
@@ -1425,7 +1448,8 @@ public class _05DataStructure {
                 PrintUtils.printListNodes(second);
             }
         }
-        //进入最复杂的场景，返回的部门不限定开始结束位置
+
+        //进入最复杂的场景，反转的部分不限定开始结束位置
         static class ReversePartialLinkedList{
             //反转head链表中第 [start,end] 个元素，从1开始计数
             static ListNode reverseBetween(ListNode head, int start, int end){
@@ -1438,7 +1462,7 @@ public class _05DataStructure {
                 head.next = tail;//这一行只在start-1处对head进行操作了，其他情况原本就是head -> tail
                 return head;
             }
-            //上面的写法显然是递归过火了,这里使用遍历/迭代，但是在应对特殊测试用例的极难调
+            //使用遍历/迭代，测试用例 [5],1,1; [1,2],1,2; 比较难处理
             static ListNode reverseBetween2(ListNode head, int start, int end){
                 ListNode lastLeftNode = start > 1?head:null;
                 ListNode middleHead = head;
@@ -1473,6 +1497,362 @@ public class _05DataStructure {
                 PrintUtils.printListNodes(second);
             }
         }
+
+        //上述思路借用了reverseTopN的方法，如果直接处理部分反转会有新的思路
+        static class RevertPartialLinkedList{
+            /*
+            字符串的反转可以使用双指针交换数组元素达到
+            链表的反转也可以采用此思路，只不过链表的left指针不能反向遍历，所以要借助递归返回实现反向遍历，并与left指针交换数据
+            方法的递归前半部分的代码的操作是让left指向第start个结点，right指向第end个结点
+            1->2->3->4->5->6(start=3,end=5)
+             */
+            static boolean stop;
+            static ListNode left;
+            static void recurseAndReverse(ListNode right, int start, int end){
+                if (end == 1){
+                    return;
+                }
+                right = right.next;
+                if (start > 1) left = left.next;
+                recurseAndReverse(right, start-1, end-1);
+                //回溯终止条件是left与right碰头，[left,right]之间有奇数个结点时终止条件是left==right, 有偶数个结点时right会在与left相邻后变成right.next = left
+                if (left == right || right.next == left){
+                    stop = true;
+                }
+                if (!stop){
+                    //回溯时交换结点的值，同时left前进，与right相向运动
+                    int t = left.val;
+                    left.val = right.val;
+                    right.val = t;
+                    left = left.next;
+                }
+            }
+            //交换结点值head就可以不变了 TC = O(N)
+            static void reverseBetween(ListNode head, int start, int end){
+                left = head;
+                stop = false;
+                recurseAndReverse(head, start, end);
+            }
+            /*
+            非递归的纯迭代算法
+            算法思路：
+            1->2->3->4->5->6
+            1->2<->3 4->5->6
+            1->2<->3<-4 5->6
+            1->2<->3<-4<-5 6
+               .------->
+            1->2<-3<-4<-5 6
+               .------->
+            1->2  3<-4<-5 6
+                  .------->
+            需要使用大量临时指针保存结点，细节难
+             */
+            static ListNode reverseBetween2(ListNode head, int start, int end){
+                if (head == null) return null;
+                ListNode curr = head;
+                ListNode prev = null;
+                //prev指向start的前一个结点
+                while (start > 1){
+                    prev = curr;
+                    curr = curr.next;
+                    start--;end--;
+                }
+                ListNode con = prev;
+                ListNode tail = curr;
+                ListNode third = null;
+                //curr继续前进将后续结点的next直接反向
+                while (end > 0){
+                    third = curr.next;
+                    curr.next = prev;//start结点会临时连到前一个结点上，后面会重新指向end的下一个结点 A
+                    prev = curr;
+                    curr = third;
+                    end--;
+                }
+                if (con != null){
+                    con.next = prev;//start结点的前一个元素指向反转部分的新head
+                }else {
+                    head = prev;
+                }
+                tail.next = curr;//A处说明的情况
+                return head;
+            }
+
+            /* 使用堆栈反转链表（略） */
+
+            public static void main(String[] args) {
+                ListNode first = new ListNode(5);
+                first = reverseBetween2(first,1,1);
+                PrintUtils.printListNodes(first);
+
+                ListNode second = new ListNode(1);second.next = new ListNode(2);
+                second = reverseBetween2(second,1,2);
+                PrintUtils.printListNodes(second);
+
+                int nodeCount = 6;//控制结点数量可以检查代码的健壮性
+                ListNode head = new ListNode(1);
+                ListNode tail = head;
+                for (int i = 2; i <= nodeCount; i++) {
+                    tail.next = new ListNode(i);
+                    tail = tail.next;
+                }
+                head = reverseBetween2(head,3,5);
+                PrintUtils.printListNodes(head);
+            }
+
+
+        }
     }
+
+    /**
+      # 25. k个一组反转链表
+     一个链表的k个结点为一组进行反转，正整数 k <= 链表的长度
+     最后剩余不足k个的结点不反转
+     1->2->3->4->5->6->7
+
+     */
+    static class ReverseLinkedList{
+        //完全递归解法(未测试)
+        static ListNode reverseKGroup2(ListNode head, int k){
+            if (head == null) return null;
+            //区间[a,b)包含k个待反转元素
+            ListNode a,b;
+            a = b = head;
+            for (int i = 0; i < k; i++) {
+                //不足k个不需要反转 base case
+                if (b == null) return head;
+                b = b.next;
+            }
+            //反转前k个元素,前k个元素反转也使用递归
+            ListNode newHead = null; //recurseAndReverse(head, a, b);
+            //递归反转后续链表并连接起来
+            a.next = reverseKGroup2(b,k);
+            return newHead;
+        }
+
+        //我的解法：综合使用递归+迭代 - 外层KGroup用递归+Group内部用迭代
+        static ListNode reverseKGroup(ListNode head, int k){
+            if(head == null || k == 1) return head;
+            ListNode curr = head;
+            int kcopy = k;
+            //前进k个结点到达kGroup最后一个结点
+            while (curr != null && kcopy > 1){
+                curr = curr.next;
+                kcopy--;
+            }
+            //寻找到一个kGroup(至少两个结点)
+            if (kcopy <= 1 && curr != null){
+                //先反转剩下的结点
+                ListNode newHead = reverseKGroup(curr.next, k);
+
+                //head与curr指出一个kGroup的起始和结尾  head -> n1 -> n2 -> ... -> curr
+                //                                     prev  scan  next
+                //三指针原地反转的方式
+                ListNode prev = head;
+                ListNode scan = prev.next;
+                ListNode next = scan.next;
+                while (prev != curr && scan != null){
+                    scan.next = prev;
+                    prev = scan;
+                    scan = next;
+                    next = next == null ? null : next.next;
+                }
+                head.next = newHead;
+                return curr;
+            }else {
+                //当前head到curr(null)不足4个结点，直接返回head
+                return head;
+            }
+        }
+
+        public static void main(String[] args) {
+            ListNode head = ListNode.getNodeList(4);
+            PrintUtils.printListNodes(head);
+            head = reverseKGroup(head, 3);
+            PrintUtils.printListNodes(head);
+        }
+
+    }
+
+    /**
+      # 回文单链表的判断
+     */
+    static class PanlidromeInLinkedList{
+        /**
+         回顾回文子串的寻找
+         核心思想是从中心向两端扩展
+         因为回文串的长度可能是奇数也可能是偶数，中心点可能是1个，也可能是2个，所以需要使用两个指针left right
+
+         而一个字符串是否是回文串的判断比较简单
+         */
+        String panlidrome(char[] str, int left, int right){
+            //防止索引越界
+            while (left >= 0 && right < str.length && str[left] == str[right]){
+                //向两边展开
+                left --; right ++;
+            }
+            return new String(str,left + 1, right - left - 1);
+        }
+        /**
+          使用递归解法判断整个单链表是否是回文的
+         */
+        static ListNode assistant = null;
+        static boolean isPanlidromeLinkedList(ListNode curr){
+            if (curr == null || curr.next == null){//curr==null用于处理只有一个结点的情况
+                return curr == null || curr.val == assistant.val;
+            }
+            boolean match = isPanlidromeLinkedList( curr.next);
+            if (match){
+                assistant = assistant.next;
+                return assistant.val == curr.val;
+            }
+            return false;
+        }
+
+        /**
+         方案：反转单链表后比较
+         */
+        /**
+         方案：借助二叉树的后续遍历实现倒序遍历链表
+         但如果仅仅是将遍历方法定义为isPanlidromeLinkedList(head,curr)是不能实现的，head应定义为全局变量，方便在后序遍历时不断指向下一个元素
+         */
+        //对于一个二叉树的遍历处理可以使用下面的代码模板
+        void traverse(TreeNode root){
+            //仅在这里添加处理代码就是前序遍历（中 左 右）
+            traverse(root.left);
+            //仅在这里添加处理代码就是中序遍历（左 中 右）
+            traverse(root.right);
+            //仅在这里添加处理代码就是后序遍历（左 右 中）
+        }
+        //对于一个链表同样可以有类似的前序遍历和后序遍历
+        void traverse(ListNode head){
+            //前序遍历
+            traverse(head.next);
+            //后序遍历，链表倒过来处理，head指向元素从后向前
+            //链表后序遍历的解法就是上面的递归解法
+        }
+        /**
+          链表的后续遍历实际上借助了栈，递归本质上就是栈操作，栈操作下链表元素实现了反序
+         */
+
+        /**-=-=-=-=-= 上述解法 SC = O(N),TC = O(N), 应考虑优化SC-=-=-=-=-=-*/
+        /**
+          上面的递归加法比较了N次，实际上比较N/2次就可以了，递归不能在发现head与curr指向同一个结点（奇数长度）或指向相邻结点（偶数长度）时停止
+          要优化空间复杂度，自然的想法就是只将一半链表入栈进行倒序遍历
+          链表的取半技巧就是快慢指针
+
+         在进一步优化sc，把递归干掉，就是把后半部分的链表反转了
+         */
+        static ListNode realHead = null;
+        static boolean halfCompare(ListNode head){
+            realHead = head;
+            ListNode fast = head, slow = head;
+            while (fast != null && fast.next != null){
+                slow = slow.next;
+                fast = fast.next.next;
+            }
+            //1-2-3-4 偶数时slow停留在后半部分第一个结点上，fast指向null
+            //1-2-3-4-5 奇数个结点时slow停留在中间结点，fast指向最后一个结点
+            if (fast != null) slow = slow.next; //slow应该表示后半部分需要反转部分的起始结点
+
+            //1. 递归方案
+            //此时的递归栈只有一半深度，优化了SC
+            //return halfCompareHelper(slow);
+
+            //2. 原地反转方案（改变原链表总是不好的，可以再反转回来。。。）                                               null
+            ListNode last = reverseLocally(slow), lastcopy = last;                                             //   ↑
+            while (last != null && last.val == head.val){//last!=null这个条件的原因是：1->2->3->4->5 反转后是 1->2->3->4<-5<-last
+                last = last.next;
+                head = head.next;
+            }
+            reverseLocally(lastcopy); //还原掉反转操作
+            return last == null;
+        }
+        //一个单链表反转需要使用3个指针！
+        static ListNode reverseLocally(ListNode head){
+            if (head == null) return null;
+            //1-2-3-4-5-6
+            ListNode pre = head,
+                    curr = head.next,
+                    next = curr == null?null:curr.next;
+            pre.next = null;
+            while (curr != null){
+                curr.next = pre;
+                pre = curr;
+                curr = next;
+                next = next == null?null:next.next;
+            }
+            return pre;
+        }
+
+        static boolean halfCompareHelper(ListNode halfBackHead){
+            if (halfBackHead.next == null){
+                return halfBackHead.val == realHead.val;
+            }
+            boolean match = halfCompareHelper(halfBackHead.next);
+            if (match){
+                realHead = realHead.next;
+                return realHead.val == halfBackHead.val;
+            }
+            return false;
+        }
+
+
+        public static void main(String[] args) {
+            ListNode head = ListNode.generatePanlidromeLinkist();
+            assistant = head;
+            //System.out.println(isPanlidromeLinkedList(head));
+            //System.out.println(halfCompare(head));
+            boolean b = halfCompare(head);
+            System.out.println(b);
+        }
+        /**
+         回文串的寻找是从中间向两端扩展，判断回文串是从两端向中间收缩
+         单链表判断回文串就只好从中间结点后续遍历了
+         另外还可以把后半部分反转了进行比较，但要注意链表结点数目的奇偶性
+         */
+    }
+
+    /**
+      上面链表处理中提到了双指针技巧，这里进行总结
+     快慢指针：解决链表问题，如链表中是否有环、链表的中间结点
+     左右指针：解决数组问题，如二分查找、字符串回文串
+     一、快慢指针
+     1. 链表中的环的处理
+     含有环的链表中寻找环的起始点（环与链表的切点）：快慢指针走到相遇，slow回到head两个指针再一步一个结点前进
+                        |----- k-m -----|---m---|-------- k-m ------|
+     这个脑筋急转弯的证明：* > * > * > * > * > * > * > * > * > * > * > *
+                                        ^___________________________|
+     第一次相遇时，慢指针走了k，块指针走了2k，在交点的m处相遇
+
+     2. 寻找倒数第k个结点
+     让快指针先前进k个结点，此后两个指针一次前进一步知道块指针为null,慢指针就是倒数第k个结点
+
+     二、左右指针
+     1. 二分查找法
+     2. 反转数组
+     3. 滑动窗口算法，参见子串匹配问题
+     */
+
+    /**
+      二叉树系列问题 - 重要，回溯、动归、分治算法的基础。。。虽然先学了动归
+     快速排序 - 二叉树前序遍历；归并排序 - 二叉树后续遍历；
+
+     //快速排序代码框架
+     void sort(int[] nums, int lo, int hi){
+        //构建分界点
+        int p = partion(nums, lo, hi);
+        sort(nums, lo, p - 1);
+        sort(nums, p + 1, hi);
+     }
+     //归并排序
+     void sort(int[] nums, int lo, int hi){
+        int mid = (lo + hi) / 2;
+        sort(nums, lo, mid);
+        sort(nums, mid+1, hi);
+        //合并两个排序好的数组
+        merge(nums, lo, mid, hi);
+     }
+     */
+
 
 }

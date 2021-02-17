@@ -1,5 +1,6 @@
 package labuladong;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -10,7 +11,25 @@ import org.junit.Test;
  */
 public class _01DPRecite {
     //fibonacci
-
+    int fibonacci(int k){
+        if (k == 1 || k == 2) return 1;
+        int f1 = 1,f2 = 1;
+        int result = 0;
+        for (int i = 3; i <= k; i++) {
+            result = f1 + f2;
+            f1 = f2; f2 = result;
+        }
+        return result;
+    }
+    int fibonacciWithArray(int k){
+        if (k == 1 || k == 2) return 1;
+        int[] result = new int[k];
+        result[0] = result[1] = 1;
+        for (int i = 2; i <= k-1; i++) {
+            result[i] = result[i-1] + result[i-2];
+        }
+        return result[k-1];
+    }
     /**
      * index      1 2 3 4 5 6  7
      * fibonacci  1 1 2 3 5 8 13
@@ -49,7 +68,12 @@ public class _01DPRecite {
     }
     @Test
     public void test5(){
-        System.out.println(fibnacci3(7));
+        Assert.assertEquals(fibonacciWithArray(2), fibnacci3(2));
+        Assert.assertEquals(fibonacciWithArray(3), fibnacci3(3));
+        Assert.assertEquals(fibonacciWithArray(4), fibnacci3(4));
+        Assert.assertEquals(fibonacciWithArray(5), fibnacci3(5));
+        Assert.assertEquals(fibonacciWithArray(6), fibnacci3(6));
+        Assert.assertEquals(fibonacciWithArray(7), fibnacci3(7));
     }
 
     /**
