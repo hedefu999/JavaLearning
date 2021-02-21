@@ -20,6 +20,7 @@
     <module>algorithm</module>
     <module>distribution</module>
     <module>changingedu</module>
+      <module>netty</module>
   </modules>
   <properties>
   </properties>

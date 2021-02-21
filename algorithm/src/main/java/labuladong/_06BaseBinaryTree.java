@@ -8,6 +8,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
+/**
+  此处二叉树问题的求解需要明确二叉树的每个结点需要做什么，才能写出代码
+ */
 public class _06BaseBinaryTree {
     static class BinaryTreePractice1{
         /**

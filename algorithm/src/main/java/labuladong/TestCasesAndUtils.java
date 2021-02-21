@@ -41,7 +41,58 @@ public class TestCasesAndUtils {
         nodePre1.left = new TreeNode(11);
         nodePre2.left = new TreeNode(1);
     }
-    static {}
+    public static TreeNode binSearchTreeKthSmall;
+    public static TreeNode convertBSTTree;
+    public static TreeNode validBSTree;
+    public static TreeNode insertIntoBSTree;
+    public static TreeNode deleteFromBSTree;
+    static {
+        binSearchTreeKthSmall = new TreeNode(5);
+        TreeNode node21 = binSearchTreeKthSmall.left = new TreeNode(3);
+        binSearchTreeKthSmall.right = new TreeNode(6);
+        TreeNode node31 = node21.left = new TreeNode(2);
+        node21.right = new TreeNode(4);
+        node31.left = new TreeNode(1);
+
+        convertBSTTree = new TreeNode(4);
+        TreeNode nodecb21 = convertBSTTree.left = new TreeNode(1);
+        TreeNode nodecb22 = convertBSTTree.right = new TreeNode(6);
+        nodecb21.left = new TreeNode(0);
+        TreeNode nodecb32 = nodecb21.right = new TreeNode(2);
+        nodecb32.right = new TreeNode(3);
+        nodecb22.left = new TreeNode(5);
+        TreeNode nodecb34 = nodecb22.right = new TreeNode(7);
+        nodecb34.right = new TreeNode(8);
+
+        validBSTree = new TreeNode(10);
+        validBSTree.left = new TreeNode(5);
+        TreeNode nodev22 = validBSTree.right = new TreeNode(15);
+        nodev22.left = new TreeNode(6);
+        nodev22.right = new TreeNode(20);
+        /*
+            61
+          46  66
+        43
+      39
+        */
+        insertIntoBSTree = new TreeNode(61);
+        TreeNode insertInto11 = insertIntoBSTree.left = new TreeNode(46);
+        insertIntoBSTree.right = new TreeNode(66);
+        TreeNode insertInto21 = insertInto11.left = new TreeNode(43);
+        insertInto21.left = new TreeNode(39);
+
+        /*   5
+           3    7
+            4  6 8
+         */
+        TreeNode det11 = deleteFromBSTree = new TreeNode(5);
+        TreeNode det21 = det11.left = new TreeNode(3);
+        det21.right = new TreeNode(4);
+        TreeNode det22 = det11.right = new TreeNode(7);
+        det22.left = new TreeNode(6);
+        det22.right = new TreeNode(8);
+    }
+
 
     static void printMatrix(int[][] input){}
 
@@ -74,6 +125,18 @@ public class TestCasesAndUtils {
             }
             System.out.println();
         }
+    }
+
+    public static void inorderPrintTree(TreeNode root){
+        inorderPrintTreeHelper(root);
+        System.out.println();
+    }
+    static TreeNode inorderPrintTreeHelper(TreeNode root){
+        if (root == null) return null;
+        inorderPrintTreeHelper(root.left);
+        System.out.print(root.val + "-");
+        inorderPrintTreeHelper(root.right);
+        return root;
     }
 
     public static void main(String[] args) {
