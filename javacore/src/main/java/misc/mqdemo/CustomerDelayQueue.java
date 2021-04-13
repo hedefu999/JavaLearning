@@ -6,8 +6,13 @@ import lombok.Setter;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Queue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -80,26 +85,73 @@ public class CustomerDelayQueue {
      * DelayQueue如何使用
      */
     static class AboutDelayQueue{
-        public static void main(String[] args) throws InterruptedException {
+        public static void main(String[] args) throws InterruptedException, ExecutionException {
             DelayQueue queue = new DelayQueue();
+            long startTime = System.currentTimeMillis();
             queue.put(new Delayed() {
                 @Override
                 public String toString() {
                     return "test";
                 }
-
                 @Override
                 public long getDelay(TimeUnit unit) {
-                    return 2;
+                    long convert = unit.convert(startTime + 6000 - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+                    return convert;
+                    //直接return 2000 以为能2秒后take到元素的还是新手
                 }
-
                 @Override
                 public int compareTo(Delayed o) {
-                    return 0;
+                    return 1;
                 }
             });
-            Delayed take = queue.take();
-            System.out.println(take);
+            // queue.put(new MyDelay(2000,"你好，世界"));
+            System.out.println("start taking"+System.currentTimeMillis());
+            Callable<String> callable = new Callable<String>() {
+                @Override
+                public String call() {
+                    Delayed take = null;
+                    try {
+                        take = queue.take();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("end taking" + System.currentTimeMillis());
+                    System.out.println(take);
+                    return "success" + take;
+                }
+            };
+            FutureTask<String> futureTask = new FutureTask<>(callable);
+            // test(futureTask);
+            test2(futureTask);
+        }
+
+        private static void test2(FutureTask<String> futureTask) throws InterruptedException {
+            Thread thread = new Thread(){
+                @Override
+                public void run() {
+                    futureTask.run();
+                }
+            };
+            thread.start();
+            Thread.sleep(2000);
+            thread.interrupt();//take方法可以响应中断
+            try {
+                futureTask.get();
+            } catch (ExecutionException e) {
+                System.out.println("拿到独立线程里的异常信息："+e.getMessage());//2秒后就得到异常信息
+            }
+        }
+
+        private static void test(FutureTask<String> futureTask) throws ExecutionException, InterruptedException {
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            try {
+                executorService.submit(futureTask);
+                String result = futureTask.get();
+                System.out.println(result);
+                // futureTask.cancel(false);
+            }finally {
+                executorService.shutdown();
+            }
         }
     }
 }
